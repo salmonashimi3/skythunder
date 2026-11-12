@@ -7626,6 +7626,12 @@ function updNavy(dt){for(const g of GTS){if(!g.alive||!g.sam2)continue;g.mslCd-=
       const m=launchMissile(fake,type,T);if(m){m.dir.copy(_wv.copy(T.pos).sub(g.pos).normalize().add(_wv2.set(0,1.2,0))).normalize()}smoke.emit(fake.pos,_wv.set(0,10,0),6,26,4,.85,.85,.85,.6,.4,1);if(T===player)feed(`${g.name} ${MSL[type].name} 발사! 회피!`,'#ff4a3d')}}}
 {const _w2u=w2Update;w2Update=function(dt){_w2u(dt);try{updNavy(dt)}catch(e){console.warn('navy',e)}}}
 
+/* ================= MiG-31K + Kh-47M2 킨잘 극초음속 공대지 미사일 ================= */
+GEAR_DIR.mig31={n:'f',m:'f'};WPN_RUS.add('r33');WPN_RUS.add('kh47');
+WPN_DIM.r33=[4.15*.72,.19*.72,'rad'];WPN_DIM.kh47=[7.2*.72,.5*.72,'gbu'];
+for(const k of['r33','kh47']){const s=MSL[k];const burnD=(250+s.spd)/2*s.burn;s.life=Math.max(s.life,Math.min(260,s.range/(s.spd*.5)+s.burn));const ct=s.life-s.burn,need=Math.max(Math.min(s.range,600000)*1.05-burnD,500);
+  let lo=1e-8,hi=2e-3;for(let i=0;i<60;i++){const kd=Math.sqrt(lo*hi),d=Math.log(1+kd*s.spd*ct)/kd;if(d>need)lo=kd;else hi=kd}s.kd=Math.sqrt(lo*hi)}
+if(window.__dbg)window.__dbg.missiles=missiles;
 resize();applyClouds();toHangar();setTimeout(()=>logoBam(null,''),300);if(!S.device){$('devOv').hidden=false;$('devMobile').classList.toggle('primary',matchMedia('(pointer:coarse)').matches);$('devPC').classList.toggle('primary',!matchMedia('(pointer:coarse)').matches)}else applyDevice();
 $('btnDev').onclick=()=>{$('devOv').hidden=false};
 $('btnWaves').onclick=()=>startOp('waves');$('btnSead').onclick=()=>startOp('sead');$('btnConvoy').onclick=()=>startOp('convoy');$('btnRank').onclick=()=>showRank();$('rankClose').onclick=()=>{$('rankOv').hidden=true};
