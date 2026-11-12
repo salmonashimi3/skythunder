@@ -1613,6 +1613,7 @@ function nukeDetonate(){const N=st.nuke;N.phase='boom';N.t=0;nukeBomb.visible=fa
   sfx.nuke();
   for(const u of units){if(!u.alive)continue;if(u.netRemote){u.alive=false;u.grp.visible=false;continue}
     explosion(u.pos,1.2,u.vel);u.alive=false;u.dead=0;u.grp.visible=false;u.ground=null;releaseRunway(u);if(u===player)u.deaths++}
+  {let k=0;for(const g of GTS){if(!g.alive)continue;const fx=k++<40;g.hp=0;g.alive=false;g.burn=fx?30:8;if(fx)explosion(g.pos,1.2);g.mesh.traverse(o=>{if(o.isMesh)o.material=gtMat.burnt})}}   // nothing on the ground survives either
   for(const m of missiles)scene.remove(m.mesh);missiles.length=0;bullets.length=0;if(st.tanker)dismissTanker()}
 function nukeUpdate(dt){const N=st.nuke;N.t+=dt;const c=N.c;
   if(N.phase==='fall'){const k=Math.min(N.t/NUKE_FALL,1),y=c.y+NUKE_H*(1-k*k);nukeBomb.position.set(c.x+Math.sin(N.t*1.3)*6,y,c.z);nukeBomb.rotation.set(Math.sin(N.t*2)*.06,N.t*.8,Math.cos(N.t*1.7)*.06);
@@ -1633,6 +1634,7 @@ function restartAll(){st.nuke=null;nukeBomb.visible=false;st.burst=0;
     if(st.mode==='tutorial'&&u!==player)continue;
     const s=st.mode==='tutorial'?{p:new V3(0,2600,9000),yaw:Math.PI}:spawnPoint(u.team);u.place(s.p,s.yaw);if(u.ai)u.ai=newAI()}
   if(st.mode==='tutorial'&&st.tut&&st.tut.drone){scene.remove(st.tut.drone.grp);units=units.filter(x=>x!==st.tut.drone);st.tut.drone=null}
+  if(st.war)try{warSetup()}catch(e){console.warn('war restart',e)}
   aimToNose();st.lockT=0;feed('모든 게 다시 시작됩니다','#7dffa0')}
 
 function explosion(pos,big=1,vel=null){pos=pos.clone();
@@ -3707,7 +3709,7 @@ function nukeShader(sh,wv){sh.uniforms.uNuk=NUKU.c;sh.uniforms.uNukN=NUKU.n;sh.u
   diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.055,.048,.042),nukA*.92);`)
   .replace('#include <fog_fragment>','gl_FragColor.rgb+=vec3(.05,.3,.035)*nukG*(.6+.4*sin(uNukT*1.7+length('+wv+'.xz)*.003))*(1.-nukA*.7)*.32;\n#include <fog_fragment>')}
 setTimeout(()=>{try{if(waterMat){const ob=waterMat.onBeforeCompile;waterMat.onBeforeCompile=sh=>{ob(sh);nukeShader(sh,'vWw')};waterMat.needsUpdate=true}}catch(e){console.warn('nukeWater',e)}},0);
-const NUKE_R=6000,NUKE_WING=10000;
+const NUKE_R=6000,NUKE_WING=10000,NUKE_GT=8000;
 function nukeGround(N){const p=N.p,out=[],M=new THREE.Matrix4(),q=new V3();
   for(const im of[...foliage,townMesh].filter(Boolean)){const n=im.count;for(let i=0;i<n;i++){im.getMatrixAt(i,M);q.setFromMatrixPosition(M);const d=Math.hypot(q.x-p.x,q.z-p.z);if(d<NUKE_R)out.push({im,i,d,house:im===townMesh})}}
   out.sort((a,b)=>a.d-b.d);N.gr=out;N.gi=0;
@@ -3736,7 +3738,7 @@ function updNukes(dt){NUKU.t.value+=dt;for(let i=NUKES.length-1;i>=0;i--){const 
   const R=t*850;N.ring.scale.setScalar(R);N.ring.material.opacity=clamp(.75-t/5,0,.75);
   if(R<NUKE_R+900)try{nukeGroundStep(N,R)}catch(e){console.warn('nukeStep',e)}
   if(R<NUKE_WING+900){for(const u of units)if(u.alive&&!N.wing.has(u)&&!u.ground&&u.pos.distanceTo(p)<Math.min(R,NUKE_WING)){N.wing.add(u);if(u.pos.distanceTo(p)>=800)nukeWings(u,N)}
-    for(const g of GTS)if(g.alive&&!N.hit.has(g)&&g.pos.distanceTo(p)<Math.min(R,NUKE_R)){N.hit.add(g);gtDamage(g,99999,N.owner)}}
+    for(const g of GTS)if(g.alive&&!N.hit.has(g)&&g.pos.distanceTo(p)<Math.min(R,NUKE_GT)){N.hit.add(g);gtDamage(g,99999,N.owner)}}
   N.e+=dt;if(t<14&&N.e>.06){N.e=0;const H=top-p.y;   // stem and churning cap
     for(let j=0;j<3;j++){const a=rnd(0,6.283),s=rnd(.15,.35)*r;smoke.emit(_v.set(p.x+Math.cos(a)*s,p.y+rnd(0,1)*H,p.z+Math.sin(a)*s),_v2.set(rnd(-4,4),rnd(12,30),rnd(-4,4)),rnd(70,110),rnd(180,260),rnd(9,14),.42,.36,.31,.75,1,.4)}
     for(let j=0;j<3;j++){const a=rnd(0,6.283),s=rnd(.7,1.3)*r;const h=t<3;smoke.emit(_v.set(p.x+Math.cos(a)*s,top+rnd(-.2,.35)*r,p.z+Math.sin(a)*s),_v2.set(Math.cos(a)*18,rnd(6,16),Math.sin(a)*18),rnd(150,220),rnd(380,560),rnd(10,16),h?.75:.5,h?.45:.44,h?.3:.4,.8,1,.3)}
@@ -7315,6 +7317,12 @@ addEventListener('keydown',e=>{if(WAR.on&&e.code==='Tab'){e.preventDefault()}});
 {const ref=document.getElementById('btnSurv')||document.getElementById('btnBossA');if(ref){const b=document.createElement('button');b.className='tile';b.id='btnWar';b.innerHTML='<b>🪖 지상전</b><small>전선 점령 · 방공망 · 보급 · 기지 파괴</small>';b.onclick=()=>{sfx.init();sfx.resume();startWar().catch(loadFail)};ref.after(b)}}
 if(window.__dbg)Object.assign(window.__dbg,{WAR,startWar,warSetup,warUpdate,get GTS(){return GTS},update:dt=>update(dt),gtDmg:(g,d,s)=>gtDamage(g,d,s),renderTV:()=>renderTV(),drawHUD:()=>drawHUD()});
 
+
+// a jet shot down (or crashing) with a nuclear bomb still on the pylon: the bomb goes off where it dies
+{const _k=kill;kill=function(u,src,quiet){const was=u&&u.alive;const r=_k(u,src,quiet);
+  try{if(was&&u&&!u.alive&&!u.netRemote&&u.msl&&u.msl.some(m=>m.n>0&&MSL[m.type]&&MSL[m.type].nuke)){for(const m of u.msl)if(MSL[m.type]&&MSL[m.type].nuke)m.n=0;const p=u.pos.clone();if(p.y<ground(p.x,p.z)+5)p.y=Math.max(ground(p.x,p.z),0)+5;
+    feed(`☢ ${u===player?'내 기체':u.name||'기체'}에 실린 핵폭탄 유폭!`,'#ffd84a');setTimeout(()=>nukeBlast(p,null),350)}}catch(e){console.warn('nuke cookoff',e)}
+  return r}}
 resize();applyClouds();toHangar();setTimeout(()=>logoBam(null,''),300);if(!S.device){$('devOv').hidden=false;$('devMobile').classList.toggle('primary',matchMedia('(pointer:coarse)').matches);$('devPC').classList.toggle('primary',!matchMedia('(pointer:coarse)').matches)}else applyDevice();
 $('btnDev').onclick=()=>{$('devOv').hidden=false};
 $('btnWaves').onclick=()=>startOp('waves');$('btnSead').onclick=()=>startOp('sead');$('btnConvoy').onclick=()=>startOp('convoy');$('btnRank').onclick=()=>showRank();$('rankClose').onclick=()=>{$('rankOv').hidden=true};
