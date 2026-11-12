@@ -3526,7 +3526,7 @@ function updGT(dt){for(const g of GTS){gtDrive(g,dt);if(g.delay>0)continue;if(g.
       const tof=bd/900,lead=_v2.copy(T.pos).addScaledVector(T.vel,tof).add(_v3.set(rnd(-25,25),rnd(-20,30)+G*tof*tof*.5,rnd(-25,25)));const dir=lead.sub(g.pos).normalize();
       if(bullets.length<MAXB)bullets.push({p:g.pos.clone().add(_v.set(0,2,0)),o:g.pos.clone(),v:dir.clone().multiplyScalar(900),life:3.2,owner:g.team===0?gtOwnerB:gtOwner,dmg:5,big:true,vis:false})}
     if((g.kind==='sam'||g.kind==='ship')&&bd<9000&&radOk(MSL.sam,T,bd)){g.lockT+=dt;if(T===player&&!T.P.prop)st.rwr=Math.max(st.rwr,g.lockT/3);
-      if(g.lockT>3&&g.mslCd<=0||g.lockT>3&&g.mslCd===undefined){g.lockT=0;g.mslCd=rnd(14,22);const fake={...(g.team===0?gtOwnerB:gtOwner),pos:g.pos.clone().add(_v.set(0,4,0)),q:g.q,vel:new V3(0,40,0),speed:60,mslOffsets:g.mslOffsets,mslSide:0,st:{rangeMul:1},fwd:v=>v.set(0,1,0)};
+      if(g.lockT>3&&g.mslCd<=0||g.lockT>3&&g.mslCd===undefined){g.lockT=0;g.mslCd=rnd(14,22);const fake={...(g.team===0?gtOwnerB:gtOwner),gtref:g,pos:g.pos.clone().add(_v.set(0,4,0)),q:g.q,vel:new V3(0,40,0),speed:60,mslOffsets:g.mslOffsets,mslSide:0,st:{rangeMul:1},fwd:v=>v.set(0,1,0)};
         const m=launchMissile(fake,'sam',T);m.dir.copy(_v.copy(T.pos).sub(g.pos).normalize().add(_v2.set(0,.8,0))).normalize();if(T===player)feed(`${g.name} 미사일 발사! 회피!`,'#ff4a3d');smoke.emit(g.pos,_v.set(0,8,0),5,20,4,.8,.8,.8,.6,.4,1)}}
     else g.lockT=Math.max(0,g.lockT-dt);if(g.mslCd>0)g.mslCd-=dt}
   updBombs(dt)}
@@ -4731,7 +4731,7 @@ function update(dt){
     for(const t of units){if(b.vis||!t.alive||t.team===b.owner.team||safeAt(t))continue;const seg=_v.subVectors(b.p,b.o),to=_v2.subVectors(t.pos,b.o),L2=seg.lengthSq(),k=clamp(to.dot(seg)/L2,0,1);
       const cl=_v3.copy(b.o).addScaledVector(seg,k);if(cl.distanceToSquared(t.pos)<t.radius*t.radius){hit=true;HRAY.o.copy(b.v).sub(t.vel).normalize();HRAY.d.copy(HRAY.o);HRAY.o.multiplyScalar(-Math.max(t.M.len,t.M.span,8)).add(cl);HRAY.u=t;HRAY.t=st.time;damage(t,b.dmg,b.owner,cl);
         fire.emit(cl,t.vel,b.big?2.5:1.5,b.big?6:4,.15,1,.8,.4,1,0);smoke.emit(cl,_v2.copy(t.vel).multiplyScalar(.9),1,6,1,.25,.25,.25,.5,1);if(b.owner===player){st.hitT=.15;sfx.hit()}break}}
-    if(!hit&&(b.owner.team!==1||b.owner===player||st.war))for(const g of GTS){if(!g.alive||g.team===b.owner.team)continue;if(segD2(b.o,b.p,g.pos)<(g.radius+2)**2){hit=true;gtDamage(g,b.dmg*.8,b.owner);break}}
+    if(!hit&&!b.vis&&(b.owner.team!==1||b.owner===player||st.war))for(const g of GTS){if(!g.alive||g.team===b.owner.team)continue;if(segD2(b.o,b.p,g.pos)<(g.radius+2)**2){hit=true;gtDamage(g,b.dmg*.8,b.owner);break}}
     if(!hit&&CITY.on&&Math.min(b.p.y,b.o.y)<600){const r=citySeg(b.o,b.p);if(r){hit=true;cityHit(r.b,b.dmg*(b.big?2:1),b.vis?null:b.owner,r.p)}}
     if(!hit&&BLK.cells.size){const k=blkSeg(b.o,b.p);if(k){hit=true;blkHitCell(k,b.dmg,b.vis?null:b.owner);fire.emit(_bB,_v.set(0,0,0),1.2,3,.12,1,.8,.4,1,0);if(Math.random()<.35)smoke.emit(_bB,_v.set(0,2,0),1.5,5,.9,.6,.58,.55,.5,1)}}
     const gy=ground(b.p.x,b.p.z);if(b.shell&&(hit||b.p.y<gy+1))try{shellBoom(b)}catch(e){}if(hit||b.life<=0||b.p.y<gy){if(!hit&&b.p.y<gy+1&&Math.random()<.3)smoke.emit(b.p,_v.set(0,4,0),2,9,1.5,.5,.45,.35,.6,1);bullets.splice(i,1)}}
@@ -4750,7 +4750,7 @@ function update(dt){
       // relative path of the missile this frame (target moved too): closest point decides the proximity fuze
       const a0=_v2.copy(m.p0).sub(t.pos).addScaledVector(t.vel,dt),a1=_v3.copy(m.p).sub(t.pos),seg=_v.copy(a1).sub(a0),L2=seg.lengthSq(),k=L2>1e-6?clamp(-a0.dot(seg)/L2,0,1):1;const d=a0.addScaledVector(seg,k).length();
       if(d<t.radius+9&&m.t>.6){boom=true;if(!m.vis){damage(t,s.dmg*clamp(1.4-d/22,.3,1),m.owner,m.p,'msl');if(m.owner===player&&t.alive)callout('HIT','#ffffff',1.1)}break}}
-    if(!boom)for(const g of GTS){if(!g.alive||g.team===m.owner.team)continue;if(g.pos.distanceTo(m.p)<g.radius+8&&m.t>.6){boom=true;gtDamage(g,s.dmg*1.1,m.owner);break}}
+    if(!boom)for(const g of GTS){if(!g.alive||g.team===m.owner.team)continue;if(g.pos.distanceTo(m.p)<g.radius+8&&m.t>.6){boom=true;if(!m.vis)gtDamage(g,s.dmg*1.1,m.owner);break}}
     if(m.p.y<ground(m.p.x,m.p.z))boom=true;if(!boom&&m.t>.3&&BLK.cells.size&&blkSeg(m.p0,m.p))boom=true;if(!boom&&m.t>.3&&CITY.on&&m.p.y<600){const r=citySeg(m.p0,m.p);if(r){boom=true;m.p.copy(r.p)}}
     if(boom||m.t>s.life||m.t*m.spd>m.range*1.3){if(boom){explosion(m.p,.6);blkBlast(m.p,9,m.vis?null:m.owner);cityBlast(m.p,22,s.dmg*1.4,m.vis?null:m.owner)}m.dead=true;scene.remove(m.mesh);missiles.splice(i,1)}}
   if(st.chaffCd>0)st.chaffCd-=dt;for(let i=chaffs.length-1;i>=0;i--){const c=chaffs[i];c.life-=dt;c.v.multiplyScalar(Math.exp(-dt*2.5));c.v.y-=1.5*dt;c.p.addScaledVector(c.v,dt);if(Math.random()<.8)smoke.emit(_v2.copy(c.p).add(_v3.set(rnd(-4,4),rnd(-4,4),rnd(-4,4))),_v.set(0,-.5,0),2.5,4+(5-c.life)*2,1.5,.8,.82,.86,.35,.4);if(c.life<=0)chaffs.splice(i,1)}
@@ -7446,8 +7446,8 @@ function w2Update(dt){if(!WAR.on||st.nuke)return;W2.artyCd-=dt;W2.dropCd-=dt;upd
 {const _wc=warClear;warClear=function(){for(const s of W2.paras)scene.remove(s.mesh);W2.paras.length=0;W2.helis.length=0;W2.drops.length=0;W2.arty.length=0;W2.storm=false;return _wc()}}
 // tank/infantry target lists include helicopters? no: armour can't hit them; but our markers and the map should show them
 addEventListener('keydown',e=>{if(!WAR.on||st.paused||e.repeat||e.target.tagName==='INPUT')return;
-  if(e.code==='KeyH'){if(W2.artyCd>0){feed(`포병 재장전 중 · ${Math.ceil(W2.artyCd)}초`,'#8c9aa6');return}const p=aimGround();if(!p){feed('포병: 조준점이 땅에 닿지 않아요','#8c9aa6');return}if(p.distanceTo(_wv.set(WAR.rear[0].x,p.y,WAR.rear[0].z))>30000){feed('포병 사거리 밖 (30km)','#8c9aa6');return}W2.artyCd=40;callArty(0,p,12,70,player)}
-  if(e.code==='KeyI'){if(W2.dropCd>0){feed(`공수부대 준비 중 · ${Math.ceil(W2.dropCd)}초`,'#8c9aa6');return}const p=aimGround()||player.pos;let Z=null,bd=1e9;for(const z of WAR.zones){const d=Math.hypot(z.x-p.x,z.z-p.z);if(d<bd){bd=d;Z=z}}if(Z){W2.dropCd=120;sendTransport(0,Z,player)}}});
+  if(e.code==='KeyH'){if(W2.artyCd>0){feed(`포병 재장전 중 · ${Math.ceil(W2.artyCd)}초`,'#8c9aa6');return}const p=aimGround();if(!p){feed('포병: 조준점이 땅에 닿지 않아요','#8c9aa6');return}if(p.distanceTo(_wv.set(WAR.rear[0].x,p.y,WAR.rear[0].z))>30000){feed('포병 사거리 밖 (30km)','#8c9aa6');return}W2.artyCd=40;callArty(player.team,p,12,70,player)}
+  if(e.code==='KeyI'){if(W2.dropCd>0){feed(`공수부대 준비 중 · ${Math.ceil(W2.dropCd)}초`,'#8c9aa6');return}const p=aimGround()||player.pos;let Z=null,bd=1e9;for(const z of WAR.zones){const d=Math.hypot(z.x-p.x,z.z-p.z);if(d<bd){bd=d;Z=z}}if(Z){W2.dropCd=120;sendTransport(player.team,Z,player)}}});
 addEventListener('keydown',e=>{if(e.code==='Digit8'&&!e.repeat&&st.mode!=='hangar'&&!st.paused&&e.target.tagName!=='INPUT'){W2.nvg=!W2.nvg;callout(W2.nvg?'야간 투시경 켬':'야간 투시경 끔','#7dffa0',1);sfx.shot(W2.nvg?1800:900,.06,.08,'sine');try{gFilter()}catch(e){}}});
 // lightning flash over the HUD
 {const _dh3=drawHUD;drawHUD=function(){_dh3();if(W2.flash>0&&st.mode!=='hangar'){hx.fillStyle=`rgba(235,240,255,${W2.flash*.55})`;hx.fillRect(0,0,W,Hh)}if(WAR.on&&st.mode!=='hangar'){const a=Math.max(0,W2.artyCd),b=Math.max(0,W2.dropCd);txt(`H 포병 ${a>0?Math.ceil(a)+'초':'준비'} · I 공수 ${b>0?Math.ceil(b)+'초':'준비'}${W2.nvg?' · NVG':''}`,W/2,Hh-18,12,'#c9d3dc','center',600)}}}
@@ -7524,6 +7524,84 @@ function campMenu(){let ov=document.getElementById('campOv');if(!ov){ov=document
   ov.hidden=false;ov.style.display='flex';ov.querySelector('#campX').onclick=()=>{ov.style.display='none'};ov.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{ov.style.display='none';sfx.init();sfx.resume();campStart(+b.dataset.op)})}
 {const ref=document.getElementById('btnWar');if(ref){const b=document.createElement('button');b.className='tile';b.id='btnCamp';b.innerHTML='<b>🎖 캠페인</b><small>작전 5개 · 방어선부터 최종 공세까지</small>';b.onclick=()=>campMenu();ref.after(b)}}
 if(window.__dbg)Object.assign(window.__dbg,{CAMP,campStart});
+
+/* ================= 멀티플레이 지상전: 방장이 전쟁을 돌리고 (전차·헬기·보급·점령), 참가자는 같은 전장을 받아서 같이 싸운다 ================= */
+// every ground target gets a network id
+WAR.wid=0;{const _ag=addGT;addGT=function(...a){const g=_ag(...a);g.wid=++WAR.wid;return g}}
+{const _wg=warGT;warGT=function(kind,mk,...r){const g=_wg(kind,mk,...r);g.mk=mk||'';return g}}
+const MPW={chunk:3400,sendT:0,layoutSent:false,got:new Map(),zoneMade:false};
+const r1=v=>Math.round(v*10)/10,r2=v=>Math.round(v*100)/100;
+function mpwChunks(arr){const out=[];let cur=[],len=2;for(const e of arr){const s=JSON.stringify(e);if(len+s.length+1>MPW.chunk&&cur.length){out.push('['+cur.join(',')+']');cur=[];len=2}cur.push(s);len+=s.length+1}if(cur.length)out.push('['+cur.join(',')+']');return out}
+const MOVERS=new Set(['tank','apc','truck','titan','heli','transport','inf']);
+// ---- host: full layout once, then the moving pieces and what has died, about three times a second ----
+function warHostLayout(){const L=[];for(const g of GTS){if(!g.war&&!g.rw&&g.kind!=='ship')continue;if(g.kind==='parked'||!g.wid)continue;const c0=g.mesh.children[0];
+    L.push([g.wid,g.kind,g.team,g.mk||'',r1(g.pos.x),r1(g.mesh.position.y),r1(g.pos.z),r2(g.mesh.rotation.y),(g.chain?1:0)|(g.factory?2:0)|(g.rw?4:0),c0?r2(c0.rotation.y):0,g.alive?1:0])}
+  const Z=WAR.zones.map(z=>[r1(z.x),r1(z.y),r1(z.z),r2(z.c)]);return{z:JSON.stringify(Z),p:mpwChunks(L)}}
+function warHostSnap(){const M=[],D=[];for(const g of GTS){if(!g.wid||g.kind==='parked')continue;if(MOVERS.has(g.kind)||g.air){M.push([g.wid,g.kind,g.team,g.mk||'',r1(g.pos.x),r1(g.pos.y),r1(g.pos.z),r2(g.mesh.rotation.y),g.alive?1:0,g.men||0])}else if(!g.alive)D.push(g.wid)}
+  const head={z:WAR.zones.map(z=>r2(z.c)),n:WAR.zones.map(z=>z.cnt||[0,0]),a:WAR.air,c:WAR.closed,t:Math.round(st.time),r:WAR.res||'',d:D};return{h:JSON.stringify(head),m:mpwChunks(M)}}
+function warHostTick(dt){if(!NET.on||!NET.host||!NET.room)return;MPW.sendT-=dt;
+  // the room carries about 4 KB a message: every part goes out on its own
+  if(!MPW.layoutSent){MPW.layoutSent=true;const L=warHostLayout();NET.room.child('wl/z').set(L.z);L.p.forEach((c,i)=>setTimeout(()=>NET.room&&NET.room.child('wl/p'+i).set(c),40*(i+1)));setTimeout(()=>NET.room&&NET.room.child('wl/n').set(L.p.length),40*(L.p.length+2));MPW.sendT=1.2;return}
+  if(MPW.sendT>0)return;MPW.sendT=.4;const S2=warHostSnap();S2.m.forEach((c,i)=>NET.room.child('ws/p'+i).set(c));NET.room.child('ws/n').set(S2.m.length);NET.room.child('ws/h').set(S2.h)}
+// SAM launches show up for everybody
+{const _lm=launchMissile;launchMissile=function(ac,type,target){const m=_lm(ac,type,target);try{if(NET.on&&NET.host&&WAR.on&&ac&&ac.gtref&&ac.gtref.wid)NET.ev({k:'gtm',g:ac.gtref.wid,to:target&&target.nid,mt:type})}catch(e){}return m}}
+// ---- client: build the same battlefield from the host's layout, then follow the snapshots ----
+function clientMake(e){const[wid,kind,team,mk,x,y,z,yaw,fl,r2y,alive]=e;let g;
+  if(kind==='runway'){let best=null,bd=1e9;for(const rw of WAR.runways[team]||[])for(const s of rw.segs){if(s.wid&&MPW.got.has(s.wid)&&MPW.got.get(s.wid)===s)continue;const d=Math.hypot(s.pos.x-x,s.pos.z-z);if(d<bd){bd=d;best=s}}if(best){best.wid=wid;MPW.got.set(wid,best);if(!alive)clientKill(best);return best}}
+  if(kind==='heli'){const tpl=HELI.tpls&&HELI.tpls[team===0?'ah64':'mh60'];g=addGT('heli',x,z,team,yaw);for(const c of [...g.mesh.children])g.mesh.remove(c);if(tpl){const h=tpl.clone(true);g.mesh.add(h);g.parts=heliParts(h)}g.air=true}
+  else if(kind==='transport'){g=addGT('transport',x,z,team,yaw);for(const c of [...g.mesh.children])g.mesh.remove(c);g.air=true;g.radius=16;getModel('ac130').then(M=>{if(g.mesh.parent)g.mesh.add(M.root.clone(true))}).catch(()=>{})}
+  else if(kind==='inf'){g=addGT('inf',x,z,team,yaw);for(const c of [...g.mesh.children])g.mesh.remove(c);g.mesh.add(squadMesh(team))}
+  else if(kind==='factory'){g=addGT('factory',x,z,team,yaw);for(const c of [...g.mesh.children])g.mesh.remove(c);g.mesh.add(factoryMesh());g.factory=true}
+  else if(kind==='ammo'){g=addGT('ammo',x,z,team,yaw);for(const c of [...g.mesh.children])g.mesh.remove(c);g.mesh.add(ammoMesh());g.chain='ammo'}
+  else if(mk)g=warGT(kind,mk,x,z,team,yaw);else g=addGT(kind,x,z,team,yaw);
+  g.wid=wid;g.war=true;g.net=true;g.mesh.position.set(x,y,z);g.mesh.rotation.y=yaw;if(kind==='bunker'&&g.mesh.children[0])g.mesh.children[0].rotation.y=r2y;if(fl&1)g.chain=g.chain||'fuel';
+  g.pos.set(x,kind==='factory'?y+10:MOVERS.has(kind)?y:y+1.5,z);g.tp=g.pos.clone();g.tyaw=yaw;MPW.got.set(wid,g);if(!alive)clientKill(g);return g}
+function clientKill(g){if(!g.alive)return;g.alive=false;g.hp=0;const big=g.chain?2.2:g.kind==='factory'||g.kind==='hangar'?2.2:g.kind==='ship'?2.4:1.1;if(g.mesh.visible)explosion(g.pos,big);g.burn=g.chain?60:20;
+  if(g.kind==='runway'){craters(g);return}g.mesh.traverse(o=>{if(o.isMesh)o.material=gtMat.burnt});if(g.air){g.fall=true;g.vy=0}}
+async function warClientStart(){WAR.client=true;WAR.on=true;st.war=true;st.goal=99999;st.timeLimit=1e9;clearGT();warClear();WAR.on=true;st.war=true;WAR.client=true;MPW.got.clear();MPW.zoneMade=false;WAR.res=null;WAR.air=[32,32];WAR.closed=[false,false];
+  try{await w2LoadHelis()}catch(e){}warRunways();for(const t of[0,1])for(const rw of WAR.runways[t])for(const s of rw.segs)s.wid=0;
+  NET.room.child('wl').on('value',s=>{const L=s.val();if(!L||!L.n||MPW.layoutDone)return;const parts=[];for(let i=0;i<L.n;i++){if(typeof L['p'+i]!=='string')return;parts.push(L['p'+i])}MPW.layoutDone=true;clientLayout(L.z,parts)});
+  NET.room.child('ws').on('value',s=>{const v=s.val();if(!v||!v.h||!MPW.layoutDone)return;const parts=[];for(let i=0;i<v.n;i++)if(typeof v['p'+i]==='string')parts.push(v['p'+i]);clientSnap(v.h,parts)});
+  feed('지상전 멀티 · 방장 전장 받는 중…','#9fd3ff')}
+function clientLayout(zs,parts){const Zs=JSON.parse(zs);WAR.zones.length=0;Zs.forEach(([x,y,z,c],i)=>{const own=c>.6?1:c<-.6?-1:0;const pole=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,26,8),warMat.pole);pole.position.set(x,y+13,z);scene.add(pole);
+    const flag=new THREE.Mesh(new THREE.PlaneGeometry(12,7),own>0?warMat.flagB:own<0?warMat.flagR:warMat.flagN);flag.position.set(x+6,y+22,z);scene.add(flag);const ring=new THREE.Mesh(new THREE.RingGeometry(690,700,96).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.18,depthWrite:false}));ring.position.set(x,y+3,z);scene.add(ring);WAR.objs.push(pole,flag,ring);
+    WAR.zones.push({i,n:ZN[i],x,z,y,c,own,flag,ring,cnt:[0,0]})});
+  WAR.rear=[{x:0,z:12600},{x:0,z:-12600}];for(const p of parts)for(const e of JSON.parse(p))clientMake(e);feed('전장 동기화 완료 · 같이 싸우자!','#7dffa0')}
+function clientSnap(h,parts){const H2=JSON.parse(h);H2.z.forEach((c,i)=>{const Z=WAR.zones[i];if(!Z)return;const o0=zOwn(Z);Z.c=c;Z.cnt=H2.n[i]||[0,0];const o1=zOwn(Z);if(o1!==o0){Z.flag.material=o1===0?warMat.flagB:o1===1?warMat.flagR:warMat.flagN;feed(`${Z.n} 구역 ${o1===0?'블루 점령':o1===1?'레드 점령':'중립'}`,o1===0?'#4aa8ff':o1===1?'#ff4a3d':'#c9c9c9')}});
+  WAR.air=H2.a;for(const t of[0,1])if(H2.c[t]&&!WAR.closed[t]){WAR.closed[t]=true;feed(t===1?'레드 활주로 폐쇄':'블루 활주로 폐쇄','#ffb547')}
+  for(const w of H2.d){const g=MPW.got.get(w);if(g&&g.alive)clientKill(g)}
+  const seen=new Set();for(const p of parts)for(const e of JSON.parse(p)){const[w,kind,team,mk,x,y,z,yaw,alive,men]=e;seen.add(w);let g=MPW.got.get(w);if(!g){g=clientMake([w,kind,team,mk,x,y,z,yaw,0,0,1]);g.pos.set(x,y,z)}
+    g.tp=g.tp||new V3();g.tp.set(x,y,z);g.tyaw=yaw;if(!alive&&g.alive)clientKill(g)}
+  for(const[w,g]of MPW.got)if(MOVERS.has(g.kind)&&g.alive&&!seen.has(w)){g.alive=false;g.mesh.visible=false}   // arrived convoys, transports gone home
+  if(H2.r&&!WAR.res&&!st.over){WAR.res=H2.r;setTimeout(()=>{if(st.war&&!st.over)endMatch(H2.r)},2500)}}
+function warClientTick(dt){for(const g of MPW.got.values()){if(!g.tp)continue;if(g.alive){g.pos.lerp(g.tp,1-Math.exp(-dt*5));const gy=g.air?g.pos.y:Math.max(ground(g.pos.x,g.pos.z),0);g.mesh.position.set(g.pos.x,g.air?g.pos.y:gy,g.pos.z);
+      g.mesh.rotation.y+=(((g.tyaw-g.mesh.rotation.y+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI)*Math.min(1,dt*4);if(g.parts)spinRotor(g.parts,1,dt,st.time)}
+    else if(g.fall&&g.air){g.vy-=9.8*dt;g.pos.y+=g.vy*dt;g.mesh.position.copy(g.pos);if(g.pos.y<Math.max(ground(g.pos.x,g.pos.z),0)+1){g.fall=false;g.mesh.visible=false;explosion(g.pos,1)}}}
+  if(WAR.tv){WAR.tv.t+=dt;if(WAR.tv.t>4.2)WAR.tv=null}}
+// client hits are reported to the host, who owns the war
+{const _gd3=gtDamage;gtDamage=function(g,d,src){if(WAR.client&&g&&g.wid&&g.net){if(!g.alive)return;if(src===player){NET.ev({k:'gtd',w:g.wid,d:Math.round(d)});st.hitT=.15;sfx.hit();if(d>=40)WAR.tv={p:g.pos.clone(),t:0,name:g.name,kill:false,id:g}}return}return _gd3(g,d,src)}}
+// host side of the events, and missiles the host's SAMs fire
+{const _oe=NET.onEvent;NET.onEvent=function(e){if(e&&e.s!==this.uid&&!(e.ts&&e.ts<this.evStart)){
+    if(e.k==='gtd'&&NET.host&&WAR.on){const g=GTS.find(x=>x.wid===e.w);const src=units.find(u=>u.nid===e.s)||null;if(g&&g.alive)gtDamage(g,e.d,src);return}
+    if(e.k==='gtm'&&!NET.host&&WAR.client){const g=MPW.got.get(e.g);const T=units.find(u=>u.nid===e.to);if(g&&T){const fake={...(g.team===0?gtOwnerB:gtOwner),pos:g.pos.clone().add(new V3(0,4,0)),q:g.q,vel:new V3(0,40,0),speed:60,mslOffsets:g.mslOffsets,mslSide:0,st:{rangeMul:1},fwd:v=>v.set(0,1,0)};const m=_lm0(fake,e.mt||'sam',T);if(m)m.vis=true}return}
+    if(e.k==='wcall'&&NET.host&&WAR.on){const src=units.find(u=>u.nid===e.s)||null;const t=src?src.team:0;if(e.t==='arty')callArty(t,new V3(e.x,0,e.z),12,70,null);else if(e.t==='drop'){const Z=WAR.zones[e.zi];if(Z)sendTransport(t,Z,null)}feed(`${src?src.name:'아군'} 요청 · ${e.t==='arty'?'포병 사격':'공수부대'}`,'#4aa8ff');return}}
+  return _oe.call(this,e)}}
+const _lm0=(...a)=>{const f=launchMissile;return f(...a)};
+// support calls from a client go to the host
+{const _ca=callArty;callArty=function(team,p,n,spread,src){if(WAR.client&&src===player){NET.ev({k:'wcall',t:'arty',x:Math.round(p.x),z:Math.round(p.z)});feed('포병 사격 요청 전송 · 6초 뒤 착탄','#ffb547');explosionLater(p);return}return _ca(team,p,n,spread,src)}}
+function explosionLater(p){for(let k=0;k<12;k++)setTimeout(()=>{if(!WAR.on)return;const q=p.clone().add(new V3(rnd(-70,70),0,rnd(-70,70)));q.y=Math.max(ground(q.x,q.z),0)+1;explosion(q,.75)},6000+k*420)}
+{const _st=sendTransport;sendTransport=function(team,Z,src){if(WAR.client){if(src===player){NET.ev({k:'wcall',t:'drop',zi:WAR.zones.indexOf(Z)});feed(`공수부대 요청 전송 → ${Z.n} 구역`,'#4aa8ff')}return Promise.resolve()}return _st(team,Z,src)}}
+// war logic runs only on the host; clients follow
+{const _wu3=warUpdate;warUpdate=function(dt){if(WAR.client){try{warClientTick(dt)}catch(e){console.warn('wclient',e)}return}_wu3(dt);try{warHostTick(dt)}catch(e){console.warn('whost',e)}}}
+{const _wc3=warClear;warClear=function(){WAR.client=false;MPW.layoutSent=false;MPW.layoutDone=false;MPW.got.clear();try{if(NET.room){NET.room.child('wl').off();NET.room.child('ws').off()}}catch(e){}return _wc3()}}
+// a red-team pilot sees the result from red's side
+{const _em=endMatch;endMatch=function(res){if(st.war&&player&&player.team===1&&(res==='win'||res==='lose'))res=res==='win'?'lose':'win';return _em(res)}}
+// lobby: new mode
+{const sel=document.getElementById('mpModeSel');if(sel){const o=document.createElement('option');o.value='war';o.textContent='지상전 (5대5 · 전선 점령 · 같이 싸우기)';sel.appendChild(o)}}
+{const _rl=renderLobby;renderLobby=function(){_rl();try{const r=NET.lobby;if(r&&r.mode==='war'){$('mpModeSel').value='war';$('mpSwap').hidden=false}}catch(e){}}}
+{const _smp=startMP;startMP=async function(r){const war=r&&r.mode==='war';if(war){try{$('loading').hidden=false;await warLoadModels()}finally{$('loading').hidden=true}}const res=await _smp(r);
+  if(war){if(NET.host){warSetup();MPW.layoutSent=false}else await warClientStart();st.goal=99999}return res}}
+if(window.__dbg)Object.assign(window.__dbg,{MPW,warHostLayout,warHostSnap,clientLayout,clientSnap,warClientStart});
 
 resize();applyClouds();toHangar();setTimeout(()=>logoBam(null,''),300);if(!S.device){$('devOv').hidden=false;$('devMobile').classList.toggle('primary',matchMedia('(pointer:coarse)').matches);$('devPC').classList.toggle('primary',!matchMedia('(pointer:coarse)').matches)}else applyDevice();
 $('btnDev').onclick=()=>{$('devOv').hidden=false};
