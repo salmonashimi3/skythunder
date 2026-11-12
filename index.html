@@ -7110,10 +7110,10 @@ const WAR_FILES={tankB:['w_milset.glb',10.2,-90],tankR:['w_tiger.glb',8.0,0],apc
   samB:['w_patriot.glb',14.5,-90],ram:['w_ram.glb',3.6,0],fuel:['w_fuel.glb',8.5,0],hangar:['w_hangar.glb',62,0],shelter:['w_rwhangar.glb',44,0],bunker:['w_bunker.glb',30,0],titan:['w_titan.glb',12.5,0]};
 // [file, length in metres along its longest ground axis, yaw (deg) that turns the model's nose to +z]
 async function warLoadModels(){const todo=Object.entries(WAR_FILES).filter(([k])=>!WAR.M[k]);
-  await Promise.all(todo.map(async([k,[f,len,yaw]])=>{try{const buf=await fetchBin(['models/'+f]);const g=await loader.parseAsync(buf,'');const r=g.scene;
+  await Promise.all(todo.map(async([k,[f,len,yaw,o]])=>{try{const buf=await fetchBin(['models/'+f]);const g=await loader.parseAsync(buf,'');const r=g.scene;
     r.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){if(m&&m.metalness>.6)m.metalness=.35;if(m&&m.map)m.map.anisotropy=4}}});
     const w=new THREE.Group();r.rotation.y=yaw*Math.PI/180;w.add(r);w.updateMatrixWorld(true);let b=new THREE.Box3().setFromObject(w,true);const s=b.getSize(new V3());
-    r.scale.multiplyScalar(len/Math.max(s.x,s.z));w.updateMatrixWorld(true);b=new THREE.Box3().setFromObject(w,true);const c=b.getCenter(new V3());r.position.x-=c.x;r.position.z-=c.z;r.position.y-=b.min.y;
+    r.scale.multiplyScalar(len/Math.max(s.x,s.z));w.updateMatrixWorld(true);b=new THREE.Box3().setFromObject(w,true);const c=b.getCenter(new V3());r.position.x-=c.x;r.position.z-=c.z;if(o&&o.wl!=null)r.position.y=-o.wl*r.scale.y;else r.position.y-=b.min.y;
     w.updateMatrixWorld(true);WAR.M[k]=w}catch(e){console.warn('war model',k,e)}}))}
 function warInst(k){const t=WAR.M[k];if(!t)return null;return t.clone(true)}
 // put a model into a ground target's group (falls back to the old procedural mesh when the file is missing)
@@ -7602,6 +7602,29 @@ function explosionLater(p){for(let k=0;k<12;k++)setTimeout(()=>{if(!WAR.on)retur
 {const _smp=startMP;startMP=async function(r){const war=r&&r.mode==='war';if(war){try{$('loading').hidden=false;await warLoadModels()}finally{$('loading').hidden=true}}const res=await _smp(r);
   if(war){if(NET.host){warSetup();MPW.layoutSent=false}else await warClientStart();st.goal=99999}return res}}
 if(window.__dbg)Object.assign(window.__dbg,{MPW,warHostLayout,warHostSnap,clientLayout,clientSnap,warClientStart});
+
+/* ================= 바다: 항모 전단과 순양함·구축함, 함대공 미사일이 진짜로 전투기를 노린다 · AGM-183 ARRW 극초음속 미사일 ================= */
+Object.assign(WAR_FILES,{zumwalt:['w_zumwalt.glb',186,0,{wl:0}],nakhimov:['w_nakhimov.glb',252,0,{wl:0}],carrier:['carrier.glb',333,0,{wl:-188}],kiev:['w_kiev.glb',273,0,{wl:0}]});
+Object.assign(MSL,{sm2:{name:'SM-2 함대공',ir:false,spd:1100,turn:.7,burn:6,life:30,range:120000,cone:.6,lock:2,dmg:150},s300f:{name:'S-300F 함대공',ir:false,spd:1400,turn:.62,burn:8,life:30,range:90000,cone:.6,lock:2,dmg:170},
+  agm183:{name:'AGM-183 ARRW 극초음속',ag:true,ir:false,spd:3400,turn:.35,burn:12,life:60,range:1600000,cone:.4,lock:1.6,dmg:950}});
+WPN_DIM.agm183=[6.4*.72,.33*.72,'gbu'];WPN_DIM.sm2=[4.7*.72,.17*.72,'rad'];WPN_DIM.s300f=[7*.72,.25*.72,'rad'];
+for(const k of['sm2','s300f','agm183']){const s=MSL[k];const burnD=(250+s.spd)/2*s.burn;s.life=Math.max(s.life,Math.min(260,s.range/(s.spd*.5)+s.burn));const ct=s.life-s.burn,need=Math.max(Math.min(s.range,600000)*1.05-burnD,500);
+  let lo=1e-8,hi=2e-3;for(let i=0;i<60;i++){const kd=Math.sqrt(lo*hi),d=Math.log(1+kd*s.spd*ct)/kd;if(d>need)lo=kd;else hi=kd}s.kd=Math.sqrt(lo*hi)}
+for(const id of['b52','f15e']){const b=BOMBS[id]||[['mk82',6]];BOMBS[id]=[...b.filter(x=>x[0]!=='agm183'),['agm183',id==='b52'?4:1]]}
+// a fleet per side: one carrier, a big surface combatant (Zumwalt for us, Admiral Nakhimov for them), a second destroyer and two frigates
+const NAVY={carrier:{hp:2600,r:150,name:'니미츠급 항공모함'},kiev:{hp:2200,r:125,name:'키예프급 항공모함'},zumwalt:{hp:1300,r:85,name:'줌월트 구축함'},nakhimov:{hp:1700,r:110,name:'나히모프 순양함'},frigate:{hp:520,r:30,name:'프리깃'}};
+function seaSpot(cx,cz,minR,maxR,len,avoid){for(let r=minR;r<maxR;r+=600)for(let a=0;a<360;a+=9){const x=cx+Math.sin(a/57.3)*r,z=cz+Math.cos(a/57.3)*r;let ok=true;
+    for(const d of[-len/2,-len/4,0,len/4,len/2])for(const s of[-40,40]){if(H(x+s,z+d)>-30){ok=false;break}}if(!ok)continue;if(avoid.some(p=>Math.hypot(p.x-x,p.z-z)<Math.max(1600,len*4)))continue;return{x,z}}return null}
+spawnFleet=function(){for(const team of[0,1]){const b=baseOf(team),used=[];const list=[team===0?'carrier':'kiev',team===0?'zumwalt':'nakhimov',team===0?'zumwalt':'nakhimov','frigate','frigate'];
+    for(const kind of list){const L=kind==='carrier'||kind==='kiev'?340:kind==='frigate'?100:250;const p=seaSpot(b.x,b.z,5000,30000,L,used);if(!p)continue;used.push(p);const mk=kind==='frigate'?null:kind;
+      const g=mk&&WAR.M[mk]?warGT('ship',mk,p.x,p.z,team,0):addGT('ship',p.x,p.z,team,0);const N=NAVY[kind];Object.assign(g,{war:true,navy:kind,hp:N.hp,maxHp:N.hp,radius:N.r,name:N.name,mslCd:rnd(4,10),nlock:0,sam2:kind!=='frigate'});g.st.hp=N.hp;g.mesh.position.y=0}}}
+// fleet air defence: long-range SAMs that really try to kill fighters (stealth rules apply), plus the gun/CIWS fire every ship already has
+function updNavy(dt){for(const g of GTS){if(!g.alive||!g.sam2)continue;g.mslCd-=dt;let T=null,bd=g.navy==='carrier'||g.navy==='kiev'?30000:45000;const type=g.team===0?'sm2':'s300f';
+    for(const u of units){if(!u.alive||u.team===g.team||safeAt(u))continue;const d=u.pos.distanceTo(g.pos);if(d<bd&&radOk(MSL[type],u,d)){bd=d;T=u}}
+    if(!T){g.nlock=Math.max(0,g.nlock-dt);continue}g.nlock+=dt;if(T===player&&!T.P.prop)st.rwr=Math.max(st.rwr,g.nlock/2.5);
+    if(g.nlock>2.5&&g.mslCd<=0){g.nlock=1.2;g.mslCd=g.navy==='carrier'||g.navy==='kiev'?rnd(9,13):rnd(5,8);const fake={...(g.team===0?gtOwnerB:gtOwner),gtref:g,pos:g.pos.clone().add(_wv.set(rnd(-20,20),22,rnd(-30,30))),q:g.q,vel:new V3(0,60,0),speed:80,mslOffsets:g.mslOffsets,mslSide:0,st:{rangeMul:1},fwd:v=>v.set(0,1,0)};
+      const m=launchMissile(fake,type,T);if(m){m.dir.copy(_wv.copy(T.pos).sub(g.pos).normalize().add(_wv2.set(0,1.2,0))).normalize()}smoke.emit(fake.pos,_wv.set(0,10,0),6,26,4,.85,.85,.85,.6,.4,1);if(T===player)feed(`${g.name} ${MSL[type].name} 발사! 회피!`,'#ff4a3d')}}}
+{const _w2u=w2Update;w2Update=function(dt){_w2u(dt);try{updNavy(dt)}catch(e){console.warn('navy',e)}}}
 
 resize();applyClouds();toHangar();setTimeout(()=>logoBam(null,''),300);if(!S.device){$('devOv').hidden=false;$('devMobile').classList.toggle('primary',matchMedia('(pointer:coarse)').matches);$('devPC').classList.toggle('primary',!matchMedia('(pointer:coarse)').matches)}else applyDevice();
 $('btnDev').onclick=()=>{$('devOv').hidden=false};
