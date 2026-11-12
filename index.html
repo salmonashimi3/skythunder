@@ -2451,7 +2451,7 @@ function launchMissile(ac,type,target){if(NET.on&&!ac.netRemote)NET.ev({k:'msl',
   const s=MSL[type];const off=ac.mslOffsets[ac.mslSide=(ac.mslSide+1)%2];const rel=wpnRelease(ac,type),bay=!rel&&ac.M&&WPN_BAY.has(ac.M.id);
   const m={type,s,owner:ac,target,p:rel||(bay?_v.set(0,-1.1,.5):off).clone().applyQuaternion(ac.q).add(ac.pos),v:ac.vel.clone(),dir:ac.fwd(new V3()),spd:ac.speed,t:0,
     range:s.range*(ac.st.rangeMul||1),mesh:wpnFly(ac,type)};wpnFlame(m.mesh,type,ac._rel&&ac._rel.baked);
-  m.vis=!!ac.netRemote;m.mesh.position.copy(m.p);scene.add(m.mesh);missiles.push(m);if(ac===player)betty(s.ir?'Fox two.':s.turn<.3?'Rifle.':'Fox three.',.8);else if(target===player)betty('Missile launch. Missile launch.',2,1);if(ac===player)chatter('썬더 1',s.ir?'폭스 투!':'폭스 쓰리!',.7);else if(player&&ac.team===player.team&&!ac.isGT&&ac.pos&&ac.pos.distanceTo(player.pos)<9000)chatter(ac.name||'윙맨',s.ir?'폭스 투!':'폭스 쓰리!',.35);
+  m.vis=!!ac.netRemote;m.mesh.position.copy(m.p);scene.add(m.mesh);missiles.push(m);if(ac===player)betty(s.arm?'Magnum.':s.ag?'Rifle.':s.ir?'Fox two.':s.turn<.3?'Rifle.':'Fox three.',.8);else if(target===player)betty('Missile launch. Missile launch.',2,1);if(ac===player)chatter('썬더 1',s.ir?'폭스 투!':'폭스 쓰리!',.7);else if(player&&ac.team===player.team&&!ac.isGT&&ac.pos&&ac.pos.distanceTo(player.pos)<9000)chatter(ac.name||'윙맨',s.ir?'폭스 투!':'폭스 쓰리!',.35);
   if(ac===player||target===player)sfx.whoosh();return m}
 const mslGeo=new THREE.CylinderGeometry(.09,.09,3,8).rotateX(Math.PI/2),mslMat=new THREE.MeshStandardMaterial({color:'#dfe3e6',roughness:.5});
 
@@ -3524,7 +3524,7 @@ function updGT(dt){for(const g of GTS){gtDrive(g,dt);if(g.delay>0)continue;if(g.
       g.fireT=g.kind==='ship'?.12:.09;g.burst=(g.burst||0)+1;if(g.burst>18){g.burst=0;g.fireT=rnd(1.5,3)}
       const tof=bd/900,lead=_v2.copy(T.pos).addScaledVector(T.vel,tof).add(_v3.set(rnd(-25,25),rnd(-20,30)+G*tof*tof*.5,rnd(-25,25)));const dir=lead.sub(g.pos).normalize();
       if(bullets.length<MAXB)bullets.push({p:g.pos.clone().add(_v.set(0,2,0)),o:g.pos.clone(),v:dir.clone().multiplyScalar(900),life:3.2,owner:g.team===0?gtOwnerB:gtOwner,dmg:5,big:true,vis:false})}
-    if((g.kind==='sam'||g.kind==='ship')&&bd<9000){g.lockT+=dt;if(T===player&&!T.P.prop)st.rwr=Math.max(st.rwr,g.lockT/3);
+    if((g.kind==='sam'||g.kind==='ship')&&bd<9000&&radOk(MSL.sam,T,bd)){g.lockT+=dt;if(T===player&&!T.P.prop)st.rwr=Math.max(st.rwr,g.lockT/3);
       if(g.lockT>3&&g.mslCd<=0||g.lockT>3&&g.mslCd===undefined){g.lockT=0;g.mslCd=rnd(14,22);const fake={...(g.team===0?gtOwnerB:gtOwner),pos:g.pos.clone().add(_v.set(0,4,0)),q:g.q,vel:new V3(0,40,0),speed:60,mslOffsets:g.mslOffsets,mslSide:0,st:{rangeMul:1},fwd:v=>v.set(0,1,0)};
         const m=launchMissile(fake,'sam',T);m.dir.copy(_v.copy(T.pos).sub(g.pos).normalize().add(_v2.set(0,.8,0))).normalize();if(T===player)feed(`${g.name} 미사일 발사! 회피!`,'#ff4a3d');smoke.emit(g.pos,_v.set(0,8,0),5,20,4,.8,.8,.8,.6,.4,1)}}
     else g.lockT=Math.max(0,g.lockT-dt);if(g.mslCd>0)g.mslCd-=dt}
@@ -3536,7 +3536,7 @@ const bombMat=t=>bombMats[t]||(bombMats[t]=new THREE.MeshStandardMaterial({color
 // [length m, body radius m, kind] — kind: ir (canards + tail fins), rad (mid wings + tail fins), big (AIM-54 style), rkt (rocket), bomb, gbu, nuke
 const WPN_DIM={aim9:[2.87,.064,'ir'],aim9b:[2.83,.064,'ir'],r73:[2.9,.085,'ir'],r60:[2.1,.06,'ir'],r3s:[2.84,.064,'ir'],pl5:[2.9,.064,'ir'],iris:[2.94,.064,'ir'],magic2:[2.75,.078,'ir'],mica_ir:[3.1,.08,'rad'],mica_em:[3.1,.08,'rad'],
   aim7:[3.66,.1,'rad'],r27:[4.08,.115,'rad'],aim120:[3.65,.089,'rad'],r77:[3.6,.1,'rad'],sd10:[3.93,.1,'rad'],meteor:[3.65,.089,'rad'],s530d:[3.8,.13,'rad'],r23r:[4.5,.12,'rad'],r98:[4.2,.14,'rad'],r40:[6.2,.155,'rad'],aim47:[3.8,.17,'big'],aim54:[3.96,.19,'big'],pl8:[2.9,.08,'ir'],
-  harm:[4.17,.127,'rad'],sam:[5.5,.2,'rad'],hvar:[1.73,.064,'rkt'],r4m:[.82,.028,'rkt'],
+  harm:[4.17,.127,'rad'],agm65:[2.49,.152,'rad'],sam:[5.5,.2,'rad'],hvar:[1.73,.064,'rkt'],r4m:[.82,.028,'rkt'],
   mk82:[2.22,.137,'bomb'],mk84:[3.28,.229,'bomb'],cbu87:[2.34,.2,'bomb'],gbu32:[3.0,.18,'gbu'],gbu27:[4.24,.18,'gbu'],fab500:[2.4,.2,'bomb'],odab500:[2.3,.25,'bomb'],rbk500:[2.5,.225,'bomb'],b61:[3.58,.17,'nuke'],an52:[3.8,.2,'nuke'],ls6:[3.2,.18,'gbu']};
 for(const k in WPN_DIM){WPN_DIM[k][0]*=.72;WPN_DIM[k][1]*=.72}   // user: stores read too big on the jets, everything hangs at 72 %
 const WPN_RUS=new Set(['r73','r60','r3s','r27','r77','r23r','r98','r40','fab500','odab500','rbk500','an52','sam']);
@@ -3821,7 +3821,7 @@ function renderXray(){XR.rect=null;const u=player;if(!xrShow(u))return;if(XR.for
     else if(k==='gun')col(m,lv(xrLevel(D,'nose')*.7));
     else{const part=k==='fuelB'?'body':k==='fuelL'?'wL':'wR';const leak=leaks.includes(part)||(k==='fuelB'&&leaks.includes('eng'));
       col(m,u.fuelFire&&k==='fuelB'?(blink?'#ff4010':'#ffb030'):leak?(blink?'#ff9020':'#5a3008'):lv(xrLevel(D,part)));m.visible=!(k==='fuelL'&&xrLevel(D,'wL')>1.5)&&!(k==='fuelR'&&xrLevel(D,'wR')>1.5)}}
-  const w=230,h=150,x=W-w-20,y=Hh-212-22-h;if(y<120)return;XR.rect={x,y,w,h};
+  const w=230,h=150,x=W-w-20,y=Math.max(84,Math.round(Hh*.36)-h-26);if(y<80)return;XR.rect={x,y,w,h};   // user: well above the TV picture
   const c=XR.cam;c.aspect=w/h;const L=Math.max(XR.hl*2,XR.hs*2*.8),dist=L*1.5;
   c.position.set(-dist*.72,dist*.62,-dist*.3);c.lookAt(0,L*.05,L*.02);c.updateProjectionMatrix();
   const ac=renderer.autoClear,au=renderer.shadowMap.autoUpdate;renderer.autoClear=true;renderer.shadowMap.autoUpdate=false;
@@ -4042,6 +4042,10 @@ function drawBoardHUD(){const B=BOARD;const cx=W/2,cy=Hh/2;hx.strokeStyle='rgba(
 async function startOnDeckOrRunway(P){if(PLANES[planeIndex(P.P.id)].carrier){await loadCarrier();if(CV.g&&placeOnCatapult(P)){aimToNose();feed('항공모함 카타펄트 대기 · Shift로 출력 최대 → 사출','#ffb547');return}}
   placeOnRunway(P);aimToNose();feed('활주로 대기 · Shift로 출력 올려 이륙','#ffb547');if(P===player&&S.board!==false)boardStart(P)}
 const zoomK=()=>(st.zoomHold?4:1)*(st.zoomStep||1)>8?8:(st.zoomHold?4:1)*(st.zoomStep||1);   // camera zoom factor
+// radar-guided missiles (semi-active and active) against stealth: true stealth jets can't be tracked at all, low-observable jets only inside 1 km
+const STF=new Set(['f117','b2','f22','f35','f35b','su57','yf23','j20','j31','su75','f47','sr72']),LOB=new Set(['ho229','sr71','mig41','fa18e','rafale','typhoon','kf21','gripen']);
+const radSeek=s=>!!s&&!s.ir&&!s.bomb&&!s.arm&&!s.ag;
+function radOk(s,T,d){if(!radSeek(s)||!T||T.decoy)return true;const id=T.P&&T.P.id;if(STF.has(id))return false;if(LOB.has(id))return d<=1000;return true}
 function aimToNose(){const f=player.fwd(new V3());st.aimYaw=Math.atan2(f.x,f.z);st.aimPitch=Math.asin(clamp(f.y,-1,1))}
 // ---- cockpit: the mouse turns your head 360° (DCS style) and the keyboard flies; jets with a helmet sight (HMS/HMD) lock where you look ----
 const HMS=new Set(['mig29','su27','f16','f16d','fa18c','f15','f18','f15e','fa18e','su33','su34','j15','su30','mig35','j10','gripen','su35','typhoon','rafale','su37','kf21','f2','jf17','f35','f35b','su47','mig144','j31','su75','j20','su57','f47','mig41','f15smtd']);
@@ -4055,7 +4059,7 @@ const seekCone=(sp,P=player)=>hmsOn(P)?Math.max(sp.cone*.35,.09):sp.cone;
 const hmsOk=P=>!hmsOn(P)||P.fwd(new V3()).angleTo(headDir(P,new V3()))<HMS_LIM;
 // N with an IR missile: pick the next enemy inside the lock circle (it stays your target until it leaves the circle)
 function irCycle(){const P=player;if(!P||!P.alive)return;const sl=P.msl[st.slot],sp=sl&&MSL[sl.type];if(!sp||sp.bomb||sp.arm)return;if(!hmsOk(P)){callout('헬멧 조준: 기수에서 60° 넘음','#8c9aa6',1);return}
-  const sd=seekDir(P,new V3()),cone=seekCone(sp)*1.6,list=[];for(const e of enemiesOf(P)){const d=_v.subVectors(e.pos,P.pos),dist=d.length();if(dist>sp.range*P.st.rangeMul)continue;const a=sd.angleTo(d);if(a<cone)list.push([a,e])}
+  const sd=seekDir(P,new V3()),cone=seekCone(sp)*1.6,list=[];for(const e of (sp.ag||sp.arm)?GTS.filter(g=>g.alive&&g.team!==P.team&&g.kind!=='runway'&&(!sp.arm||g.kind==='sam'||g.kind==='radar'||g.kind==='ship')):enemiesOf(P)){const d=_v.subVectors(e.pos,P.pos),dist=d.length();if(dist>sp.range*P.st.rangeMul)continue;const a=sd.angleTo(d);if(a<cone)list.push([a,e])}
   list.sort((a,b)=>a[0]-b[0]);if(!list.length){st.irPin=null;callout('락온 원 안에 적 없음','#8c9aa6',1);return}const es=list.map(x=>x[1]),i=es.indexOf(st.irPin);st.irPin=es[(i+1)%es.length];st.lockT=0;callout(`락온 대상: ${st.irPin.name||'적기'}`,'#ff8a6a',1)}
 function newAI(){return{mode:'attack',t:0,brk:1,fireCd:rnd(0,2),mslCd:rnd(3,9),lockT:0,target:null,retarget:0,skill:clamp(.6+planeIndex(S.sel)*.025,0,.9),burst:0,gunT:0}}
 function enterFlight(){sfx.music(false);setTimeout(()=>{try{sfx.hudBoot();sfx.hum(.035)}catch(e){}},250);$('hangar').hidden=true;st.paused=false;sfx.init();sfx.resume();if(!isMobile())lockPointer();$('touch').hidden=!isMobile();last=performance.now()}
@@ -4678,13 +4682,14 @@ function update(dt){
     if(st.fireHeld&&!g&&!st.noGunMsg){feed('이 기체는 기관포가 없습니다 · 미사일을 쓰세요','#8c9aa6');st.noGunMsg=true}
     // lock
     radarUpdate(P,dt);
-    const slot=P.msl[st.slot],spec=slot?MSL[slot.type]:null;let best=null;const radM=!!spec&&!spec.ir&&!spec.arm&&!spec.bomb&&radKm(P)>0;
+    const slot=P.msl[st.slot],spec=slot?MSL[slot.type]:null;let best=null;const radM=!!spec&&!spec.ir&&!spec.arm&&!spec.ag&&!spec.bomb&&radKm(P)>0;
     if(radM){const L=radarTarget();st.lockTarget=L.t;st.lockT=L.ok?99:0;st.lockNeed=1;st.locked=!!L.t&&L.ok&&slot.n>0&&!P.hudOut&&L.t.pos.distanceTo(P.pos)<spec.range*P.st.rangeMul}
-    else{if(spec&&slot.n>0&&!(P.radarOut&&!spec.ir)&&!P.hudOut){const hOk=hmsOk(P),cone0=seekCone(spec,P);let bestA=hOk?cone0:0;const f=seekDir(P,new V3());if(!spec.arm)for(const e of enemiesOf(P)){const d=_v.subVectors(e.pos,P.pos),dist=d.length();if(dist>spec.range*P.st.rangeMul)continue;const a=f.angleTo(d);if(a<bestA){bestA=a;best=e}}
-      for(const g of GTS){if(!g.alive||g.team===P.team||g.delay>0)continue;if(spec.arm&&!(g.kind==='sam'||g.kind==='radar'||g.kind==='ship'))continue;const d=_v.subVectors(g.pos,P.pos),dist=d.length();if(dist>spec.range*P.st.rangeMul*(spec.arm?1:.8))continue;const a=f.angleTo(d);if(a<bestA*.9){bestA=a;best=g}}
+    else{if(spec&&slot.n>0&&!(P.radarOut&&!spec.ir)&&!P.hudOut){const hOk=hmsOk(P),cone0=seekCone(spec,P);let bestA=hOk?cone0:0;const f=seekDir(P,new V3());if(!spec.arm&&!spec.ag)for(const e of enemiesOf(P)){const d=_v.subVectors(e.pos,P.pos),dist=d.length();if(dist>spec.range*P.st.rangeMul)continue;const a=f.angleTo(d);if(a<bestA){bestA=a;best=e}}
+      for(const g of GTS){if(!g.alive||g.team===P.team||g.delay>0)continue;if(spec.arm&&!(g.kind==='sam'||g.kind==='radar'||g.kind==='ship'))continue;if(spec.ag&&(g.kind==='runway'||g.kind==='parked'&&false))continue;const d=_v.subVectors(g.pos,P.pos),dist=d.length();if(dist>spec.range*P.st.rangeMul*(spec.arm||spec.ag?1:.8))continue;const a=f.angleTo(d);if(a<bestA*.9){bestA=a;best=g}}
       {const pn=st.irPin;if(pn&&(!pn.alive||!hOk||pn.pos.distanceTo(P.pos)>spec.range*P.st.rangeMul||f.angleTo(_v.subVectors(pn.pos,P.pos))>cone0*1.6))st.irPin=null;else if(pn)best=pn}}
     if(best&&best===st.lockTarget)st.lockT+=dt;else{st.lockTarget=best;st.lockT=0}
     st.lockNeed=spec?spec.lock*P.st.lockMul*(1+(best?best.st.stealth:0)):1;st.locked=!!best&&st.lockT>st.lockNeed;}
+    if(spec&&radSeek(spec)&&st.lockTarget&&!radOk(spec,st.lockTarget,st.lockTarget.pos.distanceTo(P.pos))){st.locked=false;st.lockT=0}
     const gh=ground(P.pos.x,P.pos.z);if(st.egg&&P.pos.y<gh+8){P.pos.y=gh+8;if(P.dir.y<0){P.dir.y=Math.abs(P.dir.y)*.5;P.dir.normalize()}}
     if(!P.ground&&P.pos.y<gh+(P.gear?P.M.gearH:3)){if(!groundContact(P)&&!(!P.gear&&bellyLand(P))){P.pos.y=gh+3;P.hp=0;kill(P,null)}}
     // air refuelling
@@ -4727,6 +4732,7 @@ function update(dt){
   // missiles
   for(let i=missiles.length-1;i>=0;i--){const m=missiles[i];m.t+=dt;const s=m.s;
     m.spd+=(m.t<s.burn?260:-m.spd*m.spd*4.8e-5)*dt;m.spd=Math.min(m.spd,s.spd);let tp=null,tv=null;
+    if(m.target&&!m.target.decoy&&m.target.pos&&!radOk(s,m.target,m.target.pos.distanceTo(m.p)))m.target=null;   // a radar seeker loses a stealth jet
     if(m.target&&m.target.decoy){if(m.target.ref&&m.target.ref.life>0){tp=m.target.ref.p;tv=m.target.ref.v}}else if(m.target&&m.target.alive&&!safeAt(m.target)){tp=m.target.pos;tv=m.target.vel}
     if(tp&&m.t>.25){const d=tp.distanceTo(m.p),tgo=d/Math.max(m.spd,100),aim=_v.copy(tp).addScaledVector(tv,tgo*.9).sub(m.p).normalize();const a=m.dir.angleTo(aim),mx=s.turn*dt*(m.spd/700);
       if(a>1.4&&m.t>1)m.target=null;else if(a>1e-5)m.dir.lerp(aim,Math.min(1,mx/a)).normalize()}else if(m.t<.25){m.dir.y-=.4*dt;m.dir.normalize()}
@@ -4816,10 +4822,10 @@ function ai(e,dt){if(e.scripted){e.scripted(e,dt);return}
     // datalink: a wingman tracking a target grabs a free friendly missile instead of firing a new one
     if(player&&e.team===player.team&&T&&T.alive&&dist<12000&&f.angleTo(to)<.7&&(A.dlCd=(A.dlCd||0)-dt)<=0){A.dlCd=1.5;const c=dlCandidates(e.team,T)[0];if(c){dataLink(c,T,e);if(c.owner===player)feed(`데이터링크 · ${e.name}이(가) 내 미사일을 ${T.name}에게 재유도`,'#4aa8ff')}}
     // missiles: lock first, then launch
-    const aam=s=>{const m=MSL[s.type];return s.n>0&&m&&!m.bomb&&!m.arm&&m.turn>=.3};   // only real air-to-air missiles: rockets and bombs are never fired at planes
+    const aam=s=>{const m=MSL[s.type];return s.n>0&&m&&!m.bomb&&!m.arm&&!m.ag&&m.turn>=.3};   // only real air-to-air missiles: rockets and bombs are never fired at planes
     const slot=e.radarOut?e.msl.find(s=>aam(s)&&MSL[s.type].ir):e.msl.find(s=>aam(s)&&(dist>4500?!MSL[s.type].ir:MSL[s.type].ir))||e.msl.find(aam);
     if(slot&&A.mslCd<=0){const sp=MSL[slot.type];const ang=f.angleTo(to);
-      if(dist<sp.range*.85&&dist>700&&ang<sp.cone){A.lockT+=dt;const need=sp.lock*1.3*(1+T.st.stealth);if(T===player&&!sp.ir&&!T.P.prop)st.rwr=Math.max(st.rwr,A.lockT/need);
+      if(dist<sp.range*.85&&dist>700&&ang<sp.cone&&radOk(sp,T,dist)){A.lockT+=dt;const need=sp.lock*1.3*(1+T.st.stealth);if(T===player&&!sp.ir&&!T.P.prop)st.rwr=Math.max(st.rwr,A.lockT/need);
         if(A.lockT>=need&&!safeAt(e)){slot.n--;A.mslCd=rnd(8,15);A.lockT=0;launchMissile(e,slot.type,T);if(T===player)feed(`${e.name} 미사일 발사!`,'#ff4a3d')}}
       else A.lockT=Math.max(0,A.lockT-dt*2)}
     if(T===player&&st.warn&&Math.random()<dt*.0)dropFlares(e);
@@ -5037,7 +5043,7 @@ function drawHUD(){
         if(hm){hx.beginPath();hx.arc(c.x,c.y,13,0,6.283);hx.stroke();hx.beginPath();hx.arc(c.x,c.y,1.8,0,6.283);hx.fillStyle=hx.strokeStyle;hx.fill();txt(ok?'HMD':'HMD · 각도 초과',c.x,c.y-rp-8,12,ok?'#7dffa0':'#9aa6b0','center',700)}hx.lineWidth=1.5}}}
     if(st.lockTarget&&st.lockTarget.alive){const p=proj(st.lockTarget.pos);if(!p.behind){const k=st.locked?1:clamp(st.lockT/st.lockNeed,0,1),r=lerp(46,18,k),ir=MSL[P.msl[st.slot].type].ir;
       hx.strokeStyle=st.locked?red:amber;hx.lineWidth=2;hx.beginPath();if(ir)hx.arc(p.x,p.y,r,0,6.283);else hx.rect(p.x-r,p.y-r,r*2,r*2);hx.stroke();hx.lineWidth=1.5;
-      if(!quiet())txt(st.locked?'LOCK':'락온 중…',p.x,p.y+r+16,13,st.locked?red:amber,'center',700);if(st.lockTarget===st.irPin)txt('고정 · N 다음',p.x,p.y-r-8,11,st.locked?red:amber,'center',700);
+      if(!quiet())txt(st.locked?'LOCK':'락온 중…',p.x,p.y+r+16,13,st.locked?red:amber,'center',700);if(st.lockTarget===st.irPin)txt('고정 · N 다음',p.x,p.y-r-8,11,st.locked?red:amber,'center',700);{const sp2=MSL[P.msl[st.slot].type];if(radSeek(sp2)&&st.lockTarget.P){const id=st.lockTarget.P.id;if(STF.has(id))txt('스텔스 · 레이더 미사일 락 불가',p.x,p.y+r+32,12,amber,'center',700);else if(LOB.has(id)&&st.lockTarget.pos.distanceTo(P.pos)>1000)txt('저피탐 · 1km 안으로 붙어야 락',p.x,p.y+r+32,12,amber,'center',700)}}
       if(st.locked&&!quiet()){const nd=dlCandidates(P.team,st.lockTarget).length;if(nd)txt(`데이터링크 미사일 ${nd}발 · 발사하면 재유도`,p.x,p.y+r+32,12,blue,'center',700)}}}
     if(st.hitT>0){hx.strokeStyle='#fff';hx.lineWidth=2;hx.beginPath();for(const[sx,sy]of[[1,1],[1,-1],[-1,1],[-1,-1]]){hx.moveTo(ap.x+sx*6,ap.y+sy*6);hx.lineTo(ap.x+sx*13,ap.y+sy*13)}hx.stroke();hx.lineWidth=1.5}
     const agl=P.pos.y-ground(P.pos.x,P.pos.z);let wy=Hh*.22;const blink=Math.floor(performance.now()/300)%2;
@@ -5190,7 +5196,7 @@ function renderHangar(){
     h+=`<button class="ac ${s}${viewId===P.id?' sel':''}" data-id="${P.id}"><span class="i br">${brTxt(P)}</span><span class="n">${P.name}</span><span class="s">${lab}</span></button>`});$('list').innerHTML=h||'<div class="hint" style="padding:10px">검색 결과 없음</div>'}
   $('list').querySelectorAll('.ac').forEach(b=>b.onclick=()=>{viewId=b.dataset.id;if((S.owned[viewId]||S.devPass)){S.sel=viewId;save()}renderHangar();showHangarModel()});
   const i=planeIndex(viewId),P=PLANES[i],s=status(i),base=statsFor(P,viewId,false),cur=statsFor(P,viewId,true);
-  const HTs=HTYPES[S.heli]||HTYPES.huey;$('sName').textContent=S.hmode==='heli'?HTs.short:P.name;$('sSub').textContent=S.hmode==='heli'?`${HTs.sub} · 상승한도 ${HTs.ceilFt}ft (${HTs.ceil.toLocaleString()}m)`:`${({COL:'콜롬비아',CHN:'중국',ITA:'이탈리아',CAN:'캐나다',USA:'미국',RUS:'러시아',UKR:'우크라이나',KOR:'대한민국',FRA:'프랑스',GER:'독일',GBR:'영국',JPN:'일본',ARG:'아르헨티나',URS:'소련',PAK:'파키스탄',SWE:'스웨덴'})[P.nation]||P.nation} · 랭크 ${ROMAN[P.tier]} · BR ${brTxt(P)}${P.stealth?' · 스텔스':''}${P.sweep?' · 가변익':''}${P.ceil?` · 상승한도 ${P.ceil.toLocaleString()}m (${(Math.round(P.ceil*3.281/100)*100).toLocaleString()}ft)`:''}`;
+  const HTs=HTYPES[S.heli]||HTYPES.huey;$('sName').textContent=S.hmode==='heli'?HTs.short:P.name;$('sSub').textContent=S.hmode==='heli'?`${HTs.sub} · 상승한도 ${HTs.ceilFt}ft (${HTs.ceil.toLocaleString()}m)`:`${({COL:'콜롬비아',CHN:'중국',ITA:'이탈리아',CAN:'캐나다',USA:'미국',RUS:'러시아',UKR:'우크라이나',KOR:'대한민국',FRA:'프랑스',GER:'독일',GBR:'영국',JPN:'일본',ARG:'아르헨티나',URS:'소련',PAK:'파키스탄',SWE:'스웨덴'})[P.nation]||P.nation} · 랭크 ${ROMAN[P.tier]} · BR ${brTxt(P)}${STF.has(P.id)?' · 스텔스 (레이더 미사일 안 맞음)':LOB.has(P.id)?' · 저피탐 (레이더 미사일 1km 안만)':''}${P.sweep?' · 가변익':''}${P.ceil?` · 상승한도 ${P.ceil.toLocaleString()}m (${(Math.round(P.ceil*3.281/100)*100).toLocaleString()}ft)`:''}`;
   const maxSp=topSpeed({mil:18*1.25,ab:18*1.25});const gunPow=g=>g?g.rate*g.dmg:0;
   const bars=[['체력',base.hp,cur.hp,200,v=>Math.round(v)],['최고속도',topSpeed(base),topSpeed(cur),maxSp,v=>Math.round(v)+''],['기동성',base.turn,cur.turn,1.35,v=>v.toFixed(2)],
     ['기관포',gunPow(base.gun),gunPow(cur.gun),1100,v=>v?Math.round(v):'없음'],['미사일',base.msl.reduce((a,m)=>a+m[1],0),cur.msl.reduce((a,m)=>a+m[1],0),12,v=>v+'발']];
@@ -5285,7 +5291,7 @@ function renderJetShop(){$('shopCoins').textContent=S.devPass?'∞':S.coins.toLo
   $('jshop').innerHTML=h+'</div>';
   $('jshop').querySelectorAll('.nt2').forEach(b=>b.onclick=()=>{treeNat=b.dataset.g;const f=PLANES.find(p=>NGRP(p.nation)===treeNat);if(f&&NGRP((PLANES.find(p=>p.id===treeSel)||f).nation)!==treeNat)treeSel=f.id;renderJetShop()});
   const P=PLANES.find(p=>p.id===treeSel)||PLANES[0],own=!!(S.owned[P.id]||S.devPass),open=planeOpen(P),can=open&&!own&&S.coins>=P.price;
-  $('tinfo').innerHTML=`<div><b>${P.name}</b><div class="hint">랭크 ${ROMAN[P.tier]} · BR ${brTxt(P)} · ${NAT[P.nation]||P.nation}${P.stealth?' · 스텔스':''}${P.carrier?' · 함재기':''}${P.prop?' · 프롭기':''}${P.bomber?' · 폭격기':''} · 최고속도 ${Math.round(topSpeed(P))} km/h</div>${P.gunners?`<div class="hint">🔫 사수: ${P.gunners.map(g=>g.n).join(' · ')}</div>`:''}${P.note?`<div class="hint" style="color:#ffd23a">※ ${P.note}</div>`:''}</div>`+
+  $('tinfo').innerHTML=`<div><b>${P.name}</b><div class="hint">랭크 ${ROMAN[P.tier]} · BR ${brTxt(P)} · ${NAT[P.nation]||P.nation}${STF.has(P.id)?' · 스텔스 (레이더 미사일 안 맞음)':LOB.has(P.id)?' · 저피탐 (레이더 미사일 1km 안만)':''}${P.carrier?' · 함재기':''}${P.prop?' · 프롭기':''}${P.bomber?' · 폭격기':''} · 최고속도 ${Math.round(topSpeed(P))} km/h</div>${P.gunners?`<div class="hint">🔫 사수: ${P.gunners.map(g=>g.n).join(' · ')}</div>`:''}${P.note?`<div class="hint" style="color:#ffd23a">※ ${P.note}</div>`:''}</div>`+
     (own?`<button class="primary" id="tGo">타기</button>`:P.pack?`<span class="row" style="gap:10px;align-items:center"><span class="num">${PACKS[P.pack].price.toLocaleString()} 코인</span><button class="primary" id="tPack">${PACKS[P.pack].name} 구매</button></span>`:`<span class="row" style="gap:10px;align-items:center"><span class="num">${P.price?P.price.toLocaleString()+' 코인':'무료'}</span><button class="${can?'primary':''}" id="tBuy" ${can?'':'disabled'}>${!open?lockText(P):S.coins<P.price?'코인 부족':'구매'}</button></span>`);
   $('jshop').querySelectorAll('.tc').forEach(b=>b.onclick=()=>{treeSel=b.dataset.t;viewId=treeSel;if(S.owned[viewId]||S.devPass){S.sel=viewId;save()}renderJetShop();renderHangar();showHangarModel()});
   const tp=$('tPack');if(tp)tp.onclick=()=>{if(buyPack(P.pack)){S.sel=P.id;viewId=P.id;save();renderJetShop();renderHangar();showHangarModel()}};
@@ -7292,8 +7298,16 @@ function warHUD(){if(!WAR.on||!player)return;const cx=W/2,Z=WAR.zones,blue='#4aa
   txt(`블루 ${bp}%`,cx-bw/2,y0+24,12,blue,'left',700);txt(`${100-bp}% 레드`,cx+bw/2,y0+24,12,red,'right',700);
   Z.forEach((z,i)=>{const x=cx-bw/2+bw*(i+.5)/Z.length,o=zOwn(z);hx.beginPath();hx.arc(x,y0+22,9,0,6.283);hx.fillStyle=o===0?blue:o===1?red:'#9aa3ab';hx.fill();if(z.cnt&&z.cnt[0]&&z.cnt[1]){hx.strokeStyle='#ffb547';hx.lineWidth=2;hx.stroke();hx.lineWidth=1.5}txt(z.n,x,y0+26,10,'#000','center',800)});
   txt(`예비기 블루 ${WAR.air[0]}${WAR.closed[0]?' · 활주로 폐쇄':''}  |  레드 ${WAR.air[1]}${WAR.closed[1]?' · 활주로 폐쇄':''}`,cx,y0+46,11,'#c9d3dc','center',600);
+  // enemy and friendly bases are always on the HUD; up close the enemy runways are drawn strip by strip (cratered segments marked X)
+  for(const b of BASES){const own=b.team===player.team,col=own?'rgba(74,168,255,.85)':'#ff4a3d',bp=_wv.set(b.x,BASE_Y+20,b.z),d=bp.distanceTo(player.pos),p=proj(bp);const open=WAR.runways[b.team].filter(runwayOpen).length;
+    if(!p.behind&&p.x>-50&&p.x<W+50&&p.y>-50&&p.y<Hh+50){hx.strokeStyle=col;hx.lineWidth=2;hx.beginPath();hx.moveTo(p.x,p.y-12);hx.lineTo(p.x+12,p.y);hx.lineTo(p.x,p.y+12);hx.lineTo(p.x-12,p.y);hx.closePath();hx.stroke();hx.lineWidth=1.5;
+      txt(`${own?'아군 기지':'적 기지'} ${(d/1000).toFixed(1)}km · 활주로 ${open}/${WAR.runways[b.team].length}${WAR.closed[b.team]?' 폐쇄':''}`,p.x+16,p.y+4,12,col,'left',700)}
+    else if(!own){const v=_wv2.copy(bp).sub(camera.position).applyQuaternion(_q.copy(camera.quaternion).invert());const a=Math.atan2(-v.y,v.x),r=Math.min(W,Hh)*.42;const ex=W/2+Math.cos(a)*r,ey=Hh/2+Math.sin(a)*r;hx.fillStyle=col;hx.beginPath();hx.moveTo(ex+Math.cos(a)*12,ey+Math.sin(a)*12);hx.lineTo(ex+Math.cos(a+2.5)*9,ey+Math.sin(a+2.5)*9);hx.lineTo(ex+Math.cos(a-2.5)*9,ey+Math.sin(a-2.5)*9);hx.fill();txt(`적 기지 ${(d/1000).toFixed(0)}km`,ex,ey-14,11,col,'center',700)}
+    if(!own&&d<14000)for(const rw of WAR.runways[b.team]){let prev=null;for(const g of rw.segs){const q=proj(g.pos);if(q.behind){prev=null;continue}
+        if(g.alive){if(prev){hx.strokeStyle=runwayOpen(rw)?'rgba(255,74,61,.75)':'rgba(255,181,71,.6)';hx.lineWidth=2;hx.beginPath();hx.moveTo(prev.x,prev.y);hx.lineTo(q.x,q.y);hx.stroke();hx.lineWidth=1.5}prev=q}
+        else{hx.strokeStyle='#ffb547';hx.lineWidth=2;hx.beginPath();hx.moveTo(q.x-6,q.y-6);hx.lineTo(q.x+6,q.y+6);hx.moveTo(q.x+6,q.y-6);hx.lineTo(q.x-6,q.y+6);hx.stroke();hx.lineWidth=1.5;prev=null}}}}
   // ground markers near you
-  const P=player;for(const g of GTS){if(!g.alive||g.kind==='runway'||g.kind==='parked')continue;const d=g.pos.distanceTo(P.pos);if(d>7000)continue;const p=proj(g.pos);if(p.behind||p.x<0||p.x>W||p.y<0||p.y>Hh)continue;
+  const P=player,BIGK={hangar:1,shelter:1,factory:1,fuel:1,ammo:1,bunker:1,parked:1};for(const g of GTS){if(!g.alive||g.kind==='runway')continue;const d=g.pos.distanceTo(P.pos);if(d>(BIGK[g.kind]?14000:7000))continue;const p=proj(g.pos);if(p.behind||p.x<0||p.x>W||p.y<0||p.y>Hh)continue;
     const c=g.team===P.team?'rgba(74,168,255,.8)':'rgba(255,74,61,.9)';hx.strokeStyle=c;hx.lineWidth=1.3;hx.beginPath();hx.moveTo(p.x,p.y-6);hx.lineTo(p.x+6,p.y+5);hx.lineTo(p.x-6,p.y+5);hx.closePath();hx.stroke();
     if(d<3500&&g.team!==P.team)txt(`${g.name}${g.kind==='sam'&&g.blind?' (레이더 없음)':''} ${(d/1000).toFixed(1)}`,p.x+8,p.y+4,10,c,'left',600)}
   // TV
@@ -7323,6 +7337,18 @@ if(window.__dbg)Object.assign(window.__dbg,{WAR,startWar,warSetup,warUpdate,get 
   try{if(was&&u&&!u.alive&&!u.netRemote&&u.msl&&u.msl.some(m=>m.n>0&&MSL[m.type]&&MSL[m.type].nuke)){for(const m of u.msl)if(MSL[m.type]&&MSL[m.type].nuke)m.n=0;const p=u.pos.clone();if(p.y<ground(p.x,p.z)+5)p.y=Math.max(ground(p.x,p.z),0)+5;
     feed(`☢ ${u===player?'내 기체':u.name||'기체'}에 실린 핵폭탄 유폭!`,'#ffd84a');setTimeout(()=>nukeBlast(p,null),350)}}catch(e){console.warn('nuke cookoff',e)}
   return r}}
+
+// air-to-ground missiles on the strike jets: AGM-65 Maverick (any ground target, TV/IR) and AGM-88 HARM (radars and SAMs)
+{const AG={f16:[['agm65',4],['harm',2]],f16d:[['agm65',4],['harm',2]],fa18c:[['agm65',4],['harm',2]],f18:[['agm65',4],['harm',2]],fa18e:[['agm65',4],['harm',4]],f15e:[['agm65',6]],f15smtd:[['agm65',4]],
+  f4:[['agm65',4],['harm',2]],f4e:[['agm65',4],['harm',2]],a10:[['agm65',6]],av8b:[['agm65',4]],tornado:[['harm',4]],f35:[['harm',2]],f35b:[['harm',2]],gripen:[['agm65',2]],f20:[['agm65',2]],f5:[['agm65',2]],a6:[['agm65',2],['harm',2]],kf21:[['agm65',2]]};
+  for(const id in AG){const b=BOMBS[id]||[['mk82',6]];BOMBS[id]=[...b.filter(x=>!AG[id].some(y=>y[0]===x[0])),...AG[id]]}}
+// the TV picture follows your Maverick (or any hit on a ground target) in every mode, not just the ground war
+{const _gd2=gtDamage;gtDamage=function(g,d,src){const was=g&&g.alive;_gd2(g,d,src);if(!WAR.on&&g&&src===player&&(d>=40||(was&&!g.alive)))WAR.tv={p:g.pos.clone(),t:0,name:g.name,kill:was&&!g.alive,id:g}}}
+{const _u2=update;update=function(dt){_u2(dt);if(!WAR.on&&WAR.tv){WAR.tv.t+=dt;if(WAR.tv.t>4.2)WAR.tv=null}}}
+function drawTVFrame(){if(!WAR.tv||isMobile())return;const R=tvRect(),T=WAR.tv,w='#e8ffe8';hx.strokeStyle='rgba(0,0,0,.8)';hx.lineWidth=3;hx.strokeRect(R.x-1,R.y-1,R.w+2,R.h+2);hx.strokeStyle=w;hx.lineWidth=1;hx.strokeRect(R.x,R.y,R.w,R.h);
+  const mx=R.x+R.w/2,my=R.y+R.h/2;hx.beginPath();hx.moveTo(mx-40,my);hx.lineTo(mx-10,my);hx.moveTo(mx+10,my);hx.lineTo(mx+40,my);hx.moveTo(mx,my-30);hx.lineTo(mx,my-10);hx.moveTo(mx,my+10);hx.lineTo(mx,my+30);hx.stroke();
+  txt('TV',R.x+8,R.y+18,13,w,'left',800);txt(T.name,R.x+R.w-8,R.y+18,12,w,'right',700);if(T.kill&&T.t>.25&&Math.floor(T.t*3)%2===0)txt('TGT DESTROYED',mx,R.y+R.h-14,15,'#ff6a5a','center',800);else if(!T.kill)txt('HIT',mx,R.y+R.h-14,15,'#ffd23a','center',800)}
+{const _dh2=drawHUD;drawHUD=function(){_dh2();try{if(!WAR.on&&st.mode!=='hangar')drawTVFrame()}catch(e){}}}
 resize();applyClouds();toHangar();setTimeout(()=>logoBam(null,''),300);if(!S.device){$('devOv').hidden=false;$('devMobile').classList.toggle('primary',matchMedia('(pointer:coarse)').matches);$('devPC').classList.toggle('primary',!matchMedia('(pointer:coarse)').matches)}else applyDevice();
 $('btnDev').onclick=()=>{$('devOv').hidden=false};
 $('btnWaves').onclick=()=>startOp('waves');$('btnSead').onclick=()=>startOp('sead');$('btnConvoy').onclick=()=>startOp('convoy');$('btnRank').onclick=()=>showRank();$('rankClose').onclick=()=>{$('rankOv').hidden=true};

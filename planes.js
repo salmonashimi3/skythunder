@@ -203,6 +203,7 @@ export const MSL={
  rbk500:{name:'RBK-500 집속탄',bomb:true,cluster:true,blast:140,bdmg:110,sz:1.3,col:'#56604c',ir:false,spd:0,turn:0,burn:0,life:60,range:0,cone:0,lock:0,dmg:0},
  b61:   {name:'B61 전술 핵폭탄 ☢',bomb:true,nuke:true,chute:true,sz:1.15,col:'#d8d8d0',ir:false,spd:0,turn:0,burn:0,life:60,range:0,cone:0,lock:0,dmg:0},
  an52:  {name:'AN-52 전술 핵폭탄 ☢',bomb:true,nuke:true,chute:true,sz:1.35,col:'#d0d2c8',ir:false,spd:0,turn:0,burn:0,life:60,range:0,cone:0,lock:0,dmg:0},
+ agm65: {name:'AGM-65 매버릭',ag:true,ir:true,spd:420,turn:.6,burn:3.5,life:42,range:14000,cone:.32,lock:1.1,dmg:260},
  harm:  {name:'AGM-88 HARM 대레이더',arm:true,ir:false,spd:1100,turn:.7,burn:6,life:40,range:25000,cone:.7,lock:1.2,dmg:220},
  meteor:{name:'Meteor',  ir:false,spd:1150,turn:.8,  burn:12, life:34,range:15000,cone:.5, lock:1.5,dmg:150},
  r40:   {name:'R-40RD',  ir:false,spd:1000,turn:.4,  burn:5,  life:30,range:12000,cone:.35,lock:2.0,dmg:180},
