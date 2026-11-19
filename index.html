@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Lock-On War Ace</title>
+<title>창공전선 · Sky Frontline</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
@@ -205,7 +205,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 <div id="hangar" hidden>
   <div class="top">
-    <div class="brand">LOCK-ON WAR ACE<small>락온 워 에이스 · HANGAR</small></div>
+    <div class="brand">SKY FRONTLINE<small>창공전선 · HANGAR</small></div>
     <div class="lvl"><span class="hint">격납고</span><b class="num" id="hLvl">Lv 1</b><div><div class="prog"><i id="hProg"></i></div><div class="hint" id="hProgT">다음 레벨까지 0/10판</div></div></div>
     <div class="modesw" role="tablist" aria-label="게임 모드"><button id="mJet" role="tab">✈ 전투기</button><button id="mHeli" role="tab">🚁 헬기</button></div>
     <div class="tright">
@@ -240,7 +240,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div class="grp jb"><span class="gl">전투</span>
       <button class="tile primary" id="btnGo"><b>출격</b><small>5대5 데스매치</small></button>
       <button class="tile" id="btnTourCup" style="border-color:var(--amber)"><b>🏆 토너먼트 대회</b><small>코드로 참가 · 1:1 최후의 1인</small></button>
-      <button class="tile" id="btnTopGun" style="border-color:#c9a227"><b>🎬 최고의 총 팩</b><small>F-14 · F/A-18 · MiG-28 · SR-72 · 200,000 코인</small></button>
+      <button class="tile" id="btnTopGun" hidden style="display:none"></button>
       <button class="tile" id="btnStory"><b>스토리</b><small>시브의 날개 캠페인</small></button>
       <button class="tile" id="btnMP"><b>멀티플레이</b><small>방 만들기 · 참가 · 협동</small></button>
       <button class="tile" id="btnWaves"><b>웨이브 생존</b><small>점점 센 적 · 랭킹</small></button>
@@ -274,7 +274,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 <div id="cine" hidden><i class="lb t"></i><i class="lb b"></i><div id="cineCard"><b id="cineTitle"></b><small id="cineSub"></small></div><div id="cineCap"></div><small id="cineSkip">Space · 건너뛰기</small></div>
 <div id="fadeOv" hidden><div id="fadeTxt"></div></div>
-<div id="logoBam" hidden><div class="lg"><i class="bolt"></i><b>LOCK-ON WAR <span>ACE</span></b><small id="logoSub"></small></div></div>
+<div id="logoBam" hidden><div class="lg"><i class="bolt"></i><b>SKY <span>FRONTLINE</span></b><small id="logoSub"></small></div></div>
 <div id="credOv" hidden><div id="credRoll"></div><button id="credSkip">건너뛰기</button></div>
 <div class="ov" id="shopOv" hidden><div class="sheet shop">
   <div class="hint">HANGAR SHOP · 기체 트리</div><h2>전투기 상점 · <span id="shopCoins">0</span> 코인</h2>
@@ -319,7 +319,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div class="row"><button id="passOff" hidden>패스 끄기</button><button id="passClose">닫기</button></div>
 </div></div>
 <div class="ov" id="devOv" hidden><div class="sheet">
-  <div class="hint">LOCK-ON WAR ACE</div><h2>어떤 기기로 할까요?</h2>
+  <div class="hint">창공전선 · SKY FRONTLINE</div><h2>어떤 기기로 할까요?</h2>
   <p class="hint" style="margin:0">모바일은 화면에 조이스틱과 버튼이 나오고, PC는 마우스와 키보드로 조종합니다. 나중에 격납고 위쪽 버튼으로 바꿀 수 있어요.</p>
   <div class="row"><button class="primary" id="devMobile">모바일</button><button class="primary" id="devPC">PC</button></div>
 </div></div>
@@ -486,7 +486,7 @@ const ACTIVE=(()=>{try{return localStorage.getItem('st-active')||''}catch(e){ret
 const SAVE_KEY=ACTIVE&&ACCTS[ACTIVE]?ACCTS[ACTIVE]:SAVE_KEY0;
 const S=(()=>{let s=null;try{s=JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){}
   return Object.assign({coins:0,matches:0,tut:false,owned:{p51:true},sel:'p51',paint:{},up:{},sens:5,crates:0,parts:{eng:0,arm:0,gun:0,msl:0},used:[]},s||{})})();
-S.parts=Object.assign({eng:0,arm:0,gun:0,msl:0},S.parts||{});for(const k of['a4','a7']){if(S.owned)delete S.owned[k];if(S.sel===k)S.sel='p51'}S.used=S.used||[];S.crates=S.crates||0;
+S.parts=Object.assign({eng:0,arm:0,gun:0,msl:0},S.parts||{});for(const k of['a4','a7','mig28','sr72']){if(S.owned)delete S.owned[k];if(S.sel===k)S.sel='p51'}if(S.packs&&S.packs.topgun&&!S.tgRefund){S.coins+=200000;S.tgRefund=true}   /* the movie pack is gone: buyers get their 200,000 coins back */S.used=S.used||[];S.crates=S.crates||0;
 function bombsFor(id,def=[['mk82',6]]){const L=BOMBS[id]||def;return S.premium?L.map(([t,n])=>[t,n+(MSL[t]&&MSL[t].nuke?1:0)]):L}   // premium pass: one more nuke on nuclear bombers
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
 const hangarLevel=()=>1+Math.floor(S.matches/10);
@@ -2942,7 +2942,7 @@ function logoBam(done,sub){const ov=$('logoBam');$('logoSub').textContent=sub||'
 // end credits
 const CREDIT_MODELS=[["Fighter Jet Ejection Seat","k.botond431","CC-BY-4.0",false],["UH-1C (#1 Custom Payload) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["AH-64E (#1 Custom Payload) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Mi-24V (War Thunder) Attack Helicopter","KojfDiscord","CC-BY-4.0",false],["Ka-52 (#1 Custom) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["AH-1W (#1 Custom Payload) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["OH-58D (War Thunder) Attack Helicopter","KojfDiscord","CC-BY-4.0",false],["Lynx AH. Mk.1 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["AH-129D Mangusta (#1 Custom) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["EC-665 Tiger HAD (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Z-10 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["M1 Abrams (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Leopard 2 PSO (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Challenger 2E (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Leclerc S2 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Merkava Mk.4M (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Sherman Firefly (War Thunder)","KojfDiscord","CC-BY-4.0",false],["T-80 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["T-34-85 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["ZTZ99A (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Pz.Kpfw. VI Tiger Ausf. H1 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Tiger II (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Panther F (War Thunder)","KojfDiscord","CC-BY-4.0",false],["MiG-9","KojfDiscord","CC-BY-4.0",false],["GR F-104G Starfighter","KojfDiscord","CC-BY-4.0",false],["AV-8B (NA) Harrier","KojfDiscord","CC-BY-4.0",false],["F-117 Nighthawk","KojfDiscord","CC-BY-4.0",false],["F-15E Strike Eagle","KojfDiscord","CC-BY-4.0",false],["F/A-18E","KojfDiscord","CC-BY-4.0",false],["Mitsubishi F-2A","KojfDiscord","CC-BY-4.0",false],["Rafale M F3-R","KojfDiscord","CC-BY-4.0",false],["Typhoon FGR.4","KojfDiscord","CC-BY-4.0",false],["J-10C","KojfDiscord","CC-BY-4.0",false],["F9F-2 Panther","KojfDiscord","CC-BY-4.0",false],["F-86F-35 Sabre","KojfDiscord","CC-BY-4.0",false],["F-100D Super Sabre","KojfDiscord","CC-BY-4.0",false],["A-6E TRAM","KojfDiscord","CC-BY-4.0",false],["F-5E Tiger II","KojfDiscord","CC-BY-4.0",false],["GR F-4E AUP Phantom II","KojfDiscord","CC-BY-4.0",false],["F-106A Six Shooter","KojfDiscord","CC-BY-4.0",false],["F-111F","KojfDiscord","CC-BY-4.0",false],["Kfir C.7","KojfDiscord","CC-BY-4.0",false],["Tornado GR.1","KojfDiscord","CC-BY-4.0",false],["GR Mirage 2000-5EG","KojfDiscord","CC-BY-4.0",false],["F-15C Golden Eagle","KojfDiscord","CC-BY-4.0",false],["Su-27","KojfDiscord","CC-BY-4.0",false],["Su-34","KojfDiscord","CC-BY-4.0",false],["A-10C Thunderbolt II","KojfDiscord","CC-BY-4.0",false],["F/A-18C (Late) Hornet","KojfDiscord","CC-BY-4.0",false],["Su-25","KojfDiscord","CC-BY-4.0",false],["Yakolev 3 (Yak-3)","Aidan6604","CC-BY-4.0",false],["Sopwith Camel","bradacvojtech","CC-BY-4.0",false],["Fokker Dr.I (Rise of Flight)","KojfDiscord","CC-BY-4.0",false],["Hurricane Mk IIB/Trop","KojfDiscord","CC-BY-4.0",false],["Bf 109 F-2","KojfDiscord","CC-BY-4.0",false],["A6M5 Hei","KojfDiscord","CC-BY-4.0",false],["F6F-5","KojfDiscord","CC-BY-4.0",false],["P-51D-30 Mustang","KojfDiscord","CC-BY-4.0",false],["Spitfire F Mk IX","KojfDiscord","CC-BY-4.0",false],["P-47D-28 Thunderbolt","KojfDiscord","CC-BY-4.0",false],["F4U-4 Corsair","KojfDiscord","CC-BY-4.0",false],["Me 262 A-1a/U1","KojfDiscord","CC-BY-4.0",false],["FR Yak-3","KojfDiscord","CC-BY-4.0",false],["P-38L-5-LO Lightning","KojfDiscord","CC-BY-4.0",false],["F-8E Crusader","KojfDiscord","CC-BY-4.0",false],["Ki-84 Hei","KojfDiscord","CC-BY-4.0",false],["Lockheed P-38 Lightning","Aeroux","CC-BY-4.0",false],["Me 163 B","KojfDiscord","CC-BY-4.0",false],["Helijah's B-17","sabrezor (Secret Weapons - Arma 3 Mod)","CC-BY-NC-4.0",true],["IL-2","NOD (nodmans)","CC-BY-NC-4.0",true],["MiG-17 (Custom)","KojfDiscord","CC-BY-4.0",false],["Saab J 35 Draken","42manako","CC-BY-NC-4.0",true],["Russian Su-24","42manako","CC-BY-4.0",false],["Sukhoi Su-27","Rhine_Lab_Muelsyse","CC-BY-4.0",false],["Russian Su-30SM \"45 Blue\"","42manako","CC-BY-4.0",false],["Su-35S Flanker-E","rran81","Sketchfab Standard",false],["Sukhoi Su-57 Felon","bohmerang","CC-BY-NC-SA-4.0",true],["A-10 Thunderbolt II","AIRMAN Magazine","CC-BY-4.0",false],["Argentine F9F Panther","42manako","CC-BY-4.0",false],["AV-8B Harrier II","42manako","CC-BY-4.0",false],["BF 109 F-2 Messerschmitt","GRIP420","CC-BY-4.0",false],["Boeing F/A-18E/F \"Super Hornet\"","andertan","CC-BY-4.0",false],["Boeing KC-46A Pegasus","Muhamad Mirza Arrafi","CC-BY-4.0",false],["C130","manilov.ap","CC-BY-4.0",false],["China-Vietnam Border War Soldiers","fukin70all","CC-BY-4.0",false],["Dassault Rafale","andertan","CC-BY-4.0",false],["Dr1","manilov.ap","CC-BY-4.0",false],["Ea6","manilov.ap","CC-BY-4.0",false],["Eritrean Su-27S","42manako","CC-BY-4.0",false],["Eurofighter Typhoon EF-2000","andertan","CC-BY-4.0",false],["F 15 C (Pixy)","Uxman","CC-BY-4.0",false],["McDonnell Douglas F-15 Eagle Fighter Jet","Muhamad Mirza Arrafi","CC-BY-4.0",false],["General Dynamics F-16D Block 60","Muhamad Mirza Arrafi","CC-BY-4.0",false],["F-4E Phantom II","Kenny3D89","CC-BY-4.0",false],["JA37DI (War Thunder)","KojfDiscord","CC-BY-4.0",false],["JASDF F-2A Low Poly model","Yi Tsung Lee (WTigerTw)","CC-BY-4.0",false],["Sukhoi Su-75","42manako","CC-BY-4.0",false],["B1","manilov.ap","CC-BY-4.0",false],["F-16","Cxyber","CC-BY-4.0",false],["F/A-18E with AGM-65E Maverick","Jeyhun1985","CC-BY-4.0",false],["F117 Nighthawk","agreene","CC-BY-4.0",false],["F22 RAPTOR","sxnneh","SKETCHFAB Standard",false],["F4 phantom ii","dragon22blockbench","CC-BY-4.0",false],["F4u","manilov.ap","CC-BY-4.0",false],["F5","manilov.ap","CC-BY-4.0",false],["F6f","manilov.ap","CC-BY-4.0",false],["F86","manilov.ap","CC-BY-4.0",false],["Fighter Pilot Character","SoftNote","CC-BY-4.0",false],["Fw 190 A-5 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["General Dynamics F-111F Aardvark","Rhine_Lab_Muelsyse","CC-BY-4.0",false],["Gerald Ford Aircraft Carrier","Uxman","CC-BY-4.0",false],["Grumman F-14D \"Super Tomcat\"","KOG_THORNS","CC-BY-4.0",false],["Hurricane","manilov.ap","CC-BY-4.0",false],["JF-17 Thunder with LS-6","Jeyhun1985","CC-BY-4.0",false],["Kakariko Village (Ocarina of Time)","XanderPriest281","CC-BY-4.0",false],["KF-21A Boramae Fighter Jet","Muhamad Mirza Arrafi","CC-BY-4.0",false],["Lockheed Martin F-35B Lightning II","AF267","CC-BY-4.0",false],["Lockheed Martin F35 Lightning II","andertan","CC-BY-4.0",false],["Me262","maxi.ariani","CC-BY-4.0",false],["Mig-23 MLD","Tim Samedov (citizensnip)","CC-BY-4.0",false],["Mig25","manilov.ap","CC-BY-4.0",false],["Mig29","manilov.ap","CC-BY-4.0",false],["Mikoyan MiG-1.44","42manako","CC-BY-4.0",false],["Mikoyan MiG-35","42manako","CC-BY-4.0",false],["Mikoyan-Gurevich MiG-19","Tom Zimmermann","CC-BY-4.0",false],["Mirage2000","manilov.ap","CC-BY-4.0",false],["North American F-100D Super Sabre","mgg8","CC0-1.0",false],["P47","manilov.ap","CC-BY-4.0",false],["P51D Mustang","philano","CC-BY-4.0",false],["Panavia Tornado \"MiG Eater\"","42manako","CC-BY-4.0",false],["Parachute Simple","sxnneh","CC-BY-4.0",false],["rigged Northrop YF-23","metlocaypsecrasy","CC-BY-4.0",false],["Sopwith Camel","bradacvojtech","CC-BY-4.0",false],["Sr71","manilov.ap","CC-BY-4.0",false],["SU-47","harway","CC-BY-4.0",false],["su25","Alexios Apokaukos","CC-BY-4.0",false],["Su34","manilov.ap","CC-BY-4.0",false],["Sukhoi Su-15TM","Tim Samedov","CC-BY-4.0",false],["Sukhoi Su-30 flanker c","andertan","CC-BY-4.0",false],["Sukhoi Su-33 Сухой Су-33","andertan","CC-BY-4.0",false],["Sukhoi Su-35 Flanker-E (Сухой Су-35)","andertan","CC-BY-4.0",false],["Sukhoi Su-57 \"Felon\"","andertan","CC-BY-4.0",false],["UH-1C (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Ukrainian Tu-95MS","42manako","CC-BY-4.0",false],["US Army UH-60M Black Hawk low poly model","Yi Tsung Lee (WTigerTw)","CC-BY-4.0",false]];
 function showCredits(done){const ov=$('credOv'),roll=$('credRoll');const nc=CREDIT_MODELS.filter(c=>c[3]).length;
-  roll.innerHTML=`<h1>LOCK-ON WAR ACE</h1><h2>시브의 날개</h2><div class="cg"><span>원작 소설 「시브의 날개」 · 기획 · 스토리</span><b>연어회</b></div><div class="cg"><span>프로그래밍 · 개발</span><b>Claude (Anthropic AI)</b></div>
+  roll.innerHTML=`<h1>창공전선</h1><h2>시브의 날개</h2><div class="cg"><span>원작 소설 「시브의 날개」 · 기획 · 스토리</span><b>연어회</b></div><div class="cg"><span>프로그래밍 · 개발</span><b>Claude (Anthropic AI)</b></div>
    <div class="cg"><span>3D 모델</span><b>Sketchfab</b></div><p class="cn">모든 3D 모델은 Sketchfab 제작자들의 작품이에요. 전부 CC BY 또는 CC0 라이선스라, 제작자 이름을 표기하면 상업적으로도 쓸 수 있어요.</p>
    <ul>${CREDIT_MODELS.map(([t,a,l,n])=>`<li><b>${t.replace(/[<>&]/g,'')}</b><span>${a.replace(/[<>&]/g,'')} · ${l}${n?' · <i>비상업용</i>':''}</span></li>`).join('')}</ul>
    <div class="cg"><span>서울 건물 · 지형</span><b>국토교통부 · 서울시 · 브이월드 (공공누리) · © OpenStreetMap 기여자</b></div><div class="cg"><span>로비 음악 보컬 음성</span><b>MBROLA br3 (FPMs · Denis Costa)</b></div><div class="cg"><span>지형 · 바다 텍스처</span><b>Babylon.js Assets (CC BY 4.0) · three.js 예제 텍스처 (MIT)</b></div><div class="cg"><span>3D 엔진</span><b>three.js</b></div>
@@ -3606,7 +3606,7 @@ function peterCtx(){const P=player;if(!P)return'';const en=units.filter(u=>u.ali
   return `기체 ${P.P.name}, 속도 ${Math.round(P.speed*3.6)}km/h, 고도 ${Math.round(P.pos.y)}m, ${P.g.toFixed(1)}G, 연료 ${Math.round(P.fuel*100)}%, 체력 ${Math.round(P.hp/P.st.hp*100)}%, 손상: ${dm}. `+
     `무장: ${P.msl.map(m=>MSL[m.type].name+' '+m.n).join(', ')||'없음'}, 기관포 ${P.ammo}발. 적기 ${en.length}대${e?` (가장 가까운 ${e.name}, ${clockOf(P,e.pos)}시 방향 ${(e.pos.distanceTo(P.pos)/1000).toFixed(1)}km)`:''}, 지상 목표 ${gt}개. `+
     `음악: ${PETER.music<0?'꺼짐':STATIONS[PETER.music]}. 여친: ${PETER.broke?'방금 조종사 때문에 여친한테 차였음 (아직 화나고 서러움)':['ring','talk','choose','flip'].includes(GF.phase)?'지금 여친한테 전화 오는 중':'사귀는 중 (3년째)'}.`}
-const PETER_RULES=`너는 브라우저 전투기 게임 "락온 워 에이스" 속 복좌 전투기 뒷좌석의 RIO(레이더 요격 장교) "피터"다. 앞좌석 조종사(콜사인 "썬더 1")가 무전으로 너에게 말을 건다.
+const PETER_RULES=`너는 브라우저 전투기 게임 "창공전선" 속 복좌 전투기 뒷좌석의 RIO(레이더 요격 장교) "피터"다. 앞좌석 조종사(콜사인 "썬더 1")가 무전으로 너에게 말을 건다.
 성격: 수다스럽고 다혈질, 겁 많지만 의리 있음. 말은 무조건 캐주얼한 미국식 영어로만 한다 (조종사가 한국어로 말해도 영어로 답함). 조종사는 "boss"라고 부름. 가끔 "damn", "you lunatic" 같은 가벼운 욕을 하고 심하게 했으면 바로 사과함. 혐오 표현, 성적인 말, 심한 패드립은 절대 안 함. 실제 비행과 레이더 용어를 자연스럽게 섞음.
 답은 무전 자막이니까 짧게: 영어 한두 문장, 120자 안쪽. 게임 상황 정보를 근거로 말하고 지어내지 마.
 행동이 필요하면 action에 하나 넣어: "music_on"(음악 켜기), "music_next"(다음 곡), "music_off"(음악 끄기), "radar"(레이더 탐색해서 적 표시), "nearest"(제일 가까운 적 알려주기), "status"(연료·무장 보고), "quiet"(조용히 하기), "talk"(다시 수다), "none".
@@ -4239,7 +4239,7 @@ async function startOnDeckOrRunway(P){if(PLANES[planeIndex(P.P.id)].carrier){awa
   placeOnRunway(P);aimToNose();feed('활주로 대기 · Shift로 출력 올려 이륙','#ffb547');if(P===player&&S.board!==false)boardStart(P)}
 const zoomK=()=>(st.zoomHold?4:1)*(st.zoomStep||1)>8?8:(st.zoomHold?4:1)*(st.zoomStep||1);   // camera zoom factor
 // radar-guided missiles (semi-active and active) against stealth: true stealth jets can't be tracked at all, low-observable jets only inside 1 km
-const STF=new Set(['f117','b2','f22','f35','f35b','su57','yf23','j20','j31','su75','f47','sr72']),LOB=new Set(['ho229','sr71','mig41','fa18e','rafale','typhoon','kf21','gripen']);
+const STF=new Set(['f117','b2','f22','f35','f35b','su57','yf23','j20','j31','su75','f47']),LOB=new Set(['ho229','sr71','mig41','fa18e','rafale','typhoon','kf21','gripen']);
 const radSeek=s=>!!s&&!s.ir&&!s.bomb&&!s.arm&&!s.ag;
 function radOk(s,T,d){if(!radSeek(s)||!T||T.decoy)return true;const id=T.P&&T.P.id;if(STF.has(id))return d<=20000;if(LOB.has(id))return d<=1000;return true}
 
@@ -5476,8 +5476,8 @@ const planeOpen=P=>{if(S.devPass||P.tier<=1||P.pack)return true;const g=NGRP(P.n
 const tierHave=t=>PLANES.filter(p=>p.tier===t&&S.owned[p.id]).length;
 const tierOpen=t=>t<=1||!!S.devPass||PLANES.some(p=>p.tier===t&&planeOpen(p));
 const lockText=P=>{const g=NGRP(P.nation),r=natNeed(g,P.tier);return r?`${NGRP_NAME[g]} 랭크 ${ROMAN[r.k]} ${r.n}대 필요 (${Math.min(natHave(g,r.k),r.n)}/${r.n})`:'잠김'};
-/* 최고의 총 팩: the famous naval-aviator movie set — F-14, F/A-18, the black MiG-28 and the SR-72 for 200,000 coins */
-const PACKS={topgun:{name:'🎬 최고의 총 팩',price:200000,planes:['f14','f18','mig28','sr72']}};
+/* vehicle packs (none for now) */
+const PACKS={};
 function buyPack(k){const K=PACKS[k];if(!K)return false;if(K.planes.every(id=>S.owned[id])){toast('이미 다 갖고 있어요');return false}if(!S.devPass&&S.coins<K.price){toast(`코인이 부족해요 (${K.price.toLocaleString()} 필요)`);return false}
   if(!S.devPass)S.coins-=K.price;for(const id of K.planes)S.owned[id]=true;S.packs=S.packs||{};S.packs[k]=true;save();sfx.init();sfx.shot(660,.18,.14,'triangle');toast(`${K.name} 구매 완료! ${K.planes.map(id=>PLANES[planeIndex(id)].name).join(' · ')}`);return true}
 setTimeout(()=>{const b=document.getElementById('btnTopGun');if(b)b.onclick=()=>{if(buyPack('topgun')){renderHangar()}}},0);
@@ -5522,7 +5522,7 @@ function renderHangar(){
   const go=$('btnGo');
   if(!S.tut){tileText(go,'튜토리얼 시작','처음이면 여기부터');go.disabled=false;go.dataset.act='tut';tileText($('btnTut'),'튜토리얼 건너뛰기','바로 출격')}
   else if(s==='own'){tileText(go,'출격','5대5 데스매치');go.disabled=false;go.dataset.act='go';tileText($('btnTut'),'튜토리얼','기본 조작')}
-  else if(s==='pack'){const K=PACKS[P.pack];tileText(go,K.name,`${K.price.toLocaleString()} 코인 · F-14·F/A-18·MiG-28·SR-72`);go.disabled=S.coins<K.price;go.dataset.act='pack';tileText($('btnTut'),'튜토리얼','기본 조작')}
+  else if(s==='pack'){const K=PACKS[P.pack];tileText(go,K.name,`${K.price.toLocaleString()} 코인`);go.disabled=S.coins<K.price;go.dataset.act='pack';tileText($('btnTut'),'튜토리얼','기본 조작')}
   else if(s==='buy'){tileText(go,'구매',`${P.price.toLocaleString()} 코인`);go.disabled=S.coins<P.price;go.dataset.act='buy';tileText($('btnTut'),'튜토리얼','기본 조작')}
   else{tileText(go,'잠김',lockText(P));go.disabled=true;go.dataset.act='';tileText($('btnTut'),'튜토리얼','기본 조작')}
 }
@@ -7170,7 +7170,7 @@ function acctLogin(id){id=(id||'').trim().replace(/\s+/g,' ');if(id.length<2||id
   try{if(!ACCTS[id]){ACCTS[id]=Object.keys(ACCTS).length?SAVE_KEY0+'@'+id:SAVE_KEY0;acctSave();localStorage.setItem('st-gift',id)}localStorage.setItem('st-active',id)}catch(e){toast('이 브라우저는 저장이 막혀 있어요');return}
   location.reload()}
 function acctShow(){let o=document.getElementById('acctOv');if(!o){o=document.createElement('div');o.id='acctOv';o.className='ov';o.style.zIndex=60;
-    o.innerHTML=`<div class="sheet" style="text-align:center"><h2 style="margin:0">락온 워 에이스 로그인</h2><div class="hint">아이디만 넣으면 끝 · 처음이면 계정이 만들어지고 🎁 기체 선물 룰렛을 돌려요</div>
+    o.innerHTML=`<div class="sheet" style="text-align:center"><h2 style="margin:0">창공전선 로그인</h2><div class="hint">아이디만 넣으면 끝 · 처음이면 계정이 만들어지고 🎁 기체 선물 룰렛을 돌려요</div>
       <input id="acctIn" class="mpin" maxlength="16" placeholder="아이디 (2~16자)" autocomplete="off"><button class="tile primary" id="acctGo"><b>로그인 · 계정 만들기</b></button><div class="acctL" id="acctL"></div>${ACTIVE?'<button class="tile" id="acctX"><b>닫기</b></button>':''}</div>`;
     document.body.appendChild(o);const go=()=>acctLogin(o.querySelector('#acctIn').value);o.querySelector('#acctGo').onclick=go;o.querySelector('#acctIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')go()});
     const x=o.querySelector('#acctX');if(x)x.onclick=()=>o.hidden=true}
