@@ -1837,14 +1837,14 @@ const sfx=(()=>{let ctx=null,master,deaf,duck,eng={},gun={},tone={},muted=false,
     // AIM-9 style: while the seeker hunts, a growl that climbs in pitch as the lock builds; locked = one clean, piercing, unbroken tone
     tone(mode,prog=0){if(!ctx)return;const t=ctx.currentTime;if(!mode){tone.g.gain.setTargetAtTime(0,t,.03);return}
       const set=(f,k=.04)=>{tone.o.frequency.setTargetAtTime(f,t,k);tone.h.frequency.setTargetAtTime(f*2,t,k)};
-      if(mode==='lock'){set(2850,.05);tone.fm.gain.setTargetAtTime(6,t,.08);tone.lg.gain.setTargetAtTime(0,t,.05);tone.am.gain.setTargetAtTime(1,t,.05);tone.f.frequency.setTargetAtTime(9000,t,.05);tone.g.gain.setTargetAtTime(.3,t,.04);return}
-      const p=Math.max(0,Math.min(1,prog));set(560+1400*p*p,.06);tone.fm.gain.setTargetAtTime(110-60*p,t,.1);tone.lg.gain.setTargetAtTime(.25,t,.05);tone.am.gain.setTargetAtTime(.75,t,.05);tone.f.frequency.setTargetAtTime(3000+3000*p,t,.08);tone.g.gain.setTargetAtTime(.12+.1*p,t,.05)},
+      if(mode==='lock'){set(2850,.05);tone.fm.gain.setTargetAtTime(6,t,.08);tone.lg.gain.setTargetAtTime(0,t,.05);tone.am.gain.setTargetAtTime(1,t,.05);tone.f.frequency.setTargetAtTime(9000,t,.05);tone.g.gain.setTargetAtTime(.11,t,.04);return}
+      const p=Math.max(0,Math.min(1,prog));set(560+1400*p*p,.06);tone.fm.gain.setTargetAtTime(110-60*p,t,.1);tone.lg.gain.setTargetAtTime(.25,t,.05);tone.am.gain.setTargetAtTime(.75,t,.05);tone.f.frequency.setTargetAtTime(3000+3000*p,t,.08);tone.g.gain.setTargetAtTime(.045+.04*p,t,.05)},
     // threat warning receiver: 'rwr' = someone has you locked (quick two-note warble), 'warn' = missile in the air (fast high pulses)
     rwr(mode){if(!ctx||!tone.ro)return;const t=ctx.currentTime;if(!mode){tone.rg.gain.setTargetAtTime(0,t,.02);return}
       const set=f=>{tone.ro.frequency.setTargetAtTime(f,t,.006);tone.rh.frequency.setTargetAtTime(f*2,t,.006)};
-      if(mode==='warn'){const on=Math.floor(t*9)%2===0;set(1950);tone.rg.gain.setTargetAtTime(on?.2:0,t,.008);return}
-      const hi=Math.floor(t*12)%2===0,gap=Math.floor(t*2.5)%3===2;set(hi?1700:1250);tone.rg.gain.setTargetAtTime(gap?0:.14,t,.008)},
-    shot(f=900,dur=.08,vol=.3,type='square'){if(!ctx)return;const t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.5,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(master);o.start(t);o.stop(t+dur)},
+      if(mode==='warn'){const on=Math.floor(t*9)%2===0;set(1950);tone.rg.gain.setTargetAtTime(on?.07:0,t,.008);return}
+      const hi=Math.floor(t*12)%2===0,gap=Math.floor(t*2.5)%3===2;set(hi?1700:1250);tone.rg.gain.setTargetAtTime(gap?0:.05,t,.008)},
+    shot(f=900,dur=.08,vol=.3,type='square'){if(!ctx)return;if(type==='square')vol*=f>700?.4:.65;/* 8-bit squares are kept well under the engine */const t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.5,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(master);o.start(t);o.stop(t+dur)},
     whoosh(){if(!ctx)return;const t=ctx.currentTime,s=ctx.createBufferSource();s.buffer=white;const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.setValueAtTime(400,t);f.frequency.exponentialRampToValueAtTime(2500,t+.8);const g=ctx.createGain();g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+1.4);s.connect(f).connect(g).connect(master);s.start(t);s.stop(t+1.5)},
     boom(pos,big){if(!ctx)return;const d=pos?camera.position.distanceTo(pos):0,vol=clamp(1.2*big/(1+d/900),0,1.2);if(vol<.02)return;const t=ctx.currentTime+Math.min(d/343,9),s=ctx.createBufferSource();s.buffer=brown;   // sound travels at 343 m/s: far explosions flash first, rumble later, duller
       if(d<500){const c=ctx.createBufferSource();c.buffer=white;const cg=ctx.createGain();cg.gain.setValueAtTime(.0001,t);cg.gain.exponentialRampToValueAtTime(vol*.9,t+.005);cg.gain.exponentialRampToValueAtTime(.001,t+.25);c.connect(cg).connect(master);c.start(t);c.stop(t+.3)}
@@ -2286,6 +2286,18 @@ function fullInstance(M,paint){ // player / hangar: every node, own materials so
   return{grp,L,R,gearNodes,legs,setK,surfU:M.surf||f14?surfU:null,surfApply,holes,liv,prop:r.getObjectByName('propSpin')};
 }
 // photogrammetry cockpit scan (player only): same source frame as the airframe, so it drops straight into the cloned scene node
+
+// real cockpit scans for first person (photogrammetry, Sketchfab): scaled to metres and placed so the pilot's eye in the scan sits on the jet's eye point
+Object.assign(globalThis.BIN_PARTS||(globalThis.BIN_PARTS={}),{"ck_spit.glb":7});
+const CK_SCAN={spitfire:{f:'ck_spit.glb',s:.0882,eye:[0,27.6,6.6]}};
+const ckScanCache={};
+function loadCkScan(u){const C=CK_SCAN[u.P.id];if(!C||u.pitG)return;if(!ckScanCache[C.f]){ckScanCache[C.f]=fetchBin([C.f]).then(b=>loader.parseAsync(b,''));ckScanCache[C.f].catch(()=>{delete ckScanCache[C.f]})}
+  ckScanCache[C.f].then(g=>{if(u.pitG||!u.grp)return;const eye=u.M.pts.eye;
+    // the airframe's own cockpit bits would poke through the scan: hide them in first person
+    const bb=new THREE.Box3(),sz=new V3(),c=new V3(),inv=new THREE.Matrix4();u.grp.updateMatrixWorld(true);inv.copy(u.grp.matrixWorld).invert();u.fpHide=u.fpHide||[];
+    u.grp.traverse(o=>{if(!o.isMesh||o.userData.frame)return;if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();bb.copy(o.geometry.boundingBox).applyMatrix4(_m4h.multiplyMatrices(inv,o.matrixWorld));bb.getSize(sz);bb.getCenter(c);if(Math.max(sz.x,sz.y,sz.z)<2.6&&c.distanceTo(eye)<1.5&&!u.fpHide.includes(o))u.fpHide.push(o)});u._fpH=undefined;
+    const s=g.scene.clone(true);s.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.frustumCulled=false;const m=o.material;if(m&&m.map){m.emissiveMap=m.map;m.emissive=new THREE.Color(.42,.42,.42);m.roughness=.85;m.metalness=0}}});
+    s.scale.setScalar(C.s);s.position.set(-C.eye[0]*C.s,-C.eye[1]*C.s,-C.eye[2]*C.s);const w=new THREE.Group();w.add(s);w.position.copy(eye);w.visible=st.view==='ck';u.grp.add(w);u.pitG=w}).catch(e=>console.warn('ckscan',e))}
 const pitScanCache={};
 function loadPitScan(u){const P=u.P;if(!pitScanCache[P.id]){pitScanCache[P.id]=fetchBin([P.pitFile]).then(b=>loader.parseAsync(b,''));pitScanCache[P.id].catch(()=>{delete pitScanCache[P.id]})}
   pitScanCache[P.id].then(g=>{const host=u.grp.children[0]&&u.grp.children[0].children[0];if(!host||u.pitScan)return;const s=g.scene.clone(true);
@@ -2414,7 +2426,7 @@ class Aircraft{
     if(o.player&&isTom(M.id)){const f=new THREE.PointLight('#dfe8ff',1.4,4,2);f.position.set(0,1.75,6.9);this.grp.add(f)}
     if(o.player)this.fpHide=fpHideList(this);
     seatPilots(this,!!o.player);
-    if(o.player&&this.P.pitFile)loadPitScan(this);
+    if(o.player&&this.P.pitFile)loadPitScan(this);if(o.player&&CK_SCAN[this.P.id])loadCkScan(this);
     if(this.P.glass&&(o.player||!this.P.glassHide)){const re=new RegExp(this.P.glass),gr=this.P.glassR,ey=M.pts.eye,_gb=new THREE.Box3(),_gc=new V3();this.grp.updateMatrixWorld(true);this.grp.traverse(x=>{if(x.isMesh&&re.test(x.material?.name||'')&&(!gr||_gb.setFromObject(x).getCenter(_gc).distanceTo(ey)<gr)){if(this.P.glassHide){(this.fpHide=this.fpHide||[]).push(x);return}x.material=x.material.clone();x.material.transparent=true;x.material.opacity=this.P.glassO??.28;x.material.depthWrite=false;x.castShadow=false}})}   // see-through canopy glass from inside
     if(o.player)try{canopyGlass(this.grp,M,this.P)}catch(e){console.warn('canopy',e)}
     this.st=o.stats||statsFor(this.P,this.id,false);
