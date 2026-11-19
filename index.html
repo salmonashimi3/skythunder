@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sky Thunder</title>
+<title>Lock-On War Ace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
@@ -205,11 +205,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 <div id="hangar" hidden>
   <div class="top">
-    <div class="brand">SKY THUNDER<small>스카이 썬더 · HANGAR</small></div>
+    <div class="brand">LOCK-ON WAR ACE<small>락온 워 에이스 · HANGAR</small></div>
     <div class="lvl"><span class="hint">격납고</span><b class="num" id="hLvl">Lv 1</b><div><div class="prog"><i id="hProg"></i></div><div class="hint" id="hProgT">다음 레벨까지 0/10판</div></div></div>
     <div class="modesw" role="tablist" aria-label="게임 모드"><button id="mJet" role="tab">✈ 전투기</button><button id="mHeli" role="tab">🚁 헬기</button></div>
     <div class="tright">
-      <div class="coins" title="전투기 코인"><span>코인</span><b class="num" id="hCoins">0</b></div><div class="coins" title="골드 썬더 · 한 판마다 10,000 · 빠른 재출격에 1,000"><span style="color:#ffd23a">골드 썬더</span><b class="num" id="hGold">0</b></div>
+      <div class="coins" title="전투기 코인"><span>코인</span><b class="num" id="hCoins">0</b></div><div class="coins" title="에이스 골드 · 한 판마다 10,000 · 빠른 재출격에 1,000"><span style="color:#ffd23a">에이스 골드</span><b class="num" id="hGold">0</b></div>
       <button class="pass" id="btnShop">상점</button>
       <button class="pass" id="btnPass" hidden style="display:none">개발자 패스</button>
       <button class="devbtn" id="btnTod" title="시간대: 바꾸면 화면을 다시 불러와요">시간대</button>
@@ -258,7 +258,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button class="tile" id="btnSeoul"><b>🏙 서울 자유비행</b><small>실제 건물 · 한강 · 다리</small></button>
       <button class="tile" id="btnSeoulWar"><b>서울 공중전</b><small>5대5 · 빌딩 사이</small></button></div>
     <div class="grp jb"><span class="gl">창작</span>
-      <button class="tile" id="btnEditor"><b>미션 만들기</b><small>DCS 스타일 에디터</small></button></div>
+      <button class="tile" id="btnEditor"><b>미션 만들기</b><small>시뮬레이터식 에디터</small></button></div>
     <div class="grp hb"><span class="gl">베트남 작전</span>
       <button class="tile primary" id="btnHeliGo"><b>거점 소탕</b><small>작전 라이트닝</small></button>
       <button class="tile" id="btnHeliIns"><b>병력 수송</b><small>핫 LZ 3곳</small></button>
@@ -274,7 +274,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 <div id="cine" hidden><i class="lb t"></i><i class="lb b"></i><div id="cineCard"><b id="cineTitle"></b><small id="cineSub"></small></div><div id="cineCap"></div><small id="cineSkip">Space · 건너뛰기</small></div>
 <div id="fadeOv" hidden><div id="fadeTxt"></div></div>
-<div id="logoBam" hidden><div class="lg"><i class="bolt"></i><b>SKY THUNDER<span>+</span></b><small id="logoSub"></small></div></div>
+<div id="logoBam" hidden><div class="lg"><i class="bolt"></i><b>LOCK-ON WAR <span>ACE</span></b><small id="logoSub"></small></div></div>
 <div id="credOv" hidden><div id="credRoll"></div><button id="credSkip">건너뛰기</button></div>
 <div class="ov" id="shopOv" hidden><div class="sheet shop">
   <div class="hint">HANGAR SHOP · 기체 트리</div><h2>전투기 상점 · <span id="shopCoins">0</span> 코인</h2>
@@ -319,7 +319,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div class="row"><button id="passOff" hidden>패스 끄기</button><button id="passClose">닫기</button></div>
 </div></div>
 <div class="ov" id="devOv" hidden><div class="sheet">
-  <div class="hint">SKY THUNDER</div><h2>어떤 기기로 할까요?</h2>
+  <div class="hint">LOCK-ON WAR ACE</div><h2>어떤 기기로 할까요?</h2>
   <p class="hint" style="margin:0">모바일은 화면에 조이스틱과 버튼이 나오고, PC는 마우스와 키보드로 조종합니다. 나중에 격납고 위쪽 버튼으로 바꿀 수 있어요.</p>
   <div class="row"><button class="primary" id="devMobile">모바일</button><button class="primary" id="devPC">PC</button></div>
 </div></div>
@@ -392,7 +392,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <div id="sms" hidden><small>💬 문자 메시지 · 여친</small><p id="smsTxt"></p></div>
 <div id="peterMenu" hidden><b>뒷좌석 · 피터 (RIO)</b><ol id="peterList"></ol><small>숫자로 선택 · P로 닫기</small></div>
 <div class="ov" id="editor" hidden><div class="sheet edSheet">
-  <div class="edHead"><b>미션 만들기</b><span class="hint">DCS처럼: 맵 · 기체 · 무장 · 나라 · 스폰 위치 · 고도 · 아군/적군 그룹</span><button id="cmClose">닫기</button></div>
+  <div class="edHead"><b>미션 만들기</b><span class="hint">실제 시뮬레이터처럼: 맵 · 기체 · 무장 · 나라 · 스폰 위치 · 고도 · 아군/적군 그룹</span><button id="cmClose">닫기</button></div>
   <div class="edBody"><div class="edMap"><canvas id="cmMap" width="512" height="512" aria-label="미션 지도: 클릭해서 선택한 항목의 위치 지정"></canvas><div class="hint" id="cmSel"></div><div class="hint num" id="cmCoord"></div><button class="mini" id="cmMeBtn">내 기체 선택</button></div>
   <div class="edForm" id="cmForm"></div></div>
   <div class="row"><button class="primary" id="cmGo">미션 시작</button></div></div></div>
@@ -1796,11 +1796,11 @@ function chatter(who,line,p=1){if(Math.random()>p)return;if(radioCur&&radioCur.w
 const ACH=[['first_kill','첫 격추','적기를 처음 격추'],['kills_25','베테랑','누적 25기 격추'],['ace5','에이스','한 판에 5기 격추'],['gunkill','근접전의 달인','기관포로 격추'],['mach','음속 돌파','마하 1 돌파'],['ceiling','성층권','기체 상승한도까지 상승'],
   ['nuke','☢ 그걸 진짜 썼어?','핵폭탄 투하'],['trap3','3번 와이어','항모 3번 와이어 착함'],['ramen','라면 엔딩','피터가 라면 쏨'],['breakup','연애 파괴자','피터가 여친한테 차임'],['slap','짝!','피터 싸대기'],['selfshot','자해 공갈단','내 기체에 총 쏘기 (0번)'],
   ['heli_strike','작전 라이트닝','헬기 거점 소탕 성공'],['heli_insert','핫 LZ','헬기 병력 수송 성공'],['heli_rescue','아무도 두고 가지 않는다','헬기 조종사 구출 성공'],['custom_win','미션 디자이너','내가 만든 미션 성공'],['wave5','버티기','웨이브 생존 5웨이브 도달'],['wave10','불사신','웨이브 생존 10웨이브 도달'],['sead','와일드 위즐','대공망 제압 작전 성공'],['convoy','길목 차단','호송대 공격 작전 성공'],['builder','건축가','블럭 100개 이상 쌓기'],['coop','전우','멀티 협동 웨이브 5웨이브 도달'],['killcam','하이라이트','킬캠으로 격추 장면 감상']];
-/* 골드 썬더: +10,000 every finished game; 1,000 buys an instant respawn (R while waiting to respawn) */
+/* 에이스 골드: +10,000 every finished game; 1,000 buys an instant respawn (R while waiting to respawn) */
 const GOLD_GAME=10000,GOLD_RESPAWN=1000;
-function goldGame(){S.gold=(S.gold||0)+GOLD_GAME;setTimeout(()=>feed(`골드 썬더 +${GOLD_GAME.toLocaleString()} (보유 ${S.gold.toLocaleString()})`,'#ffd23a'),400)}
+function goldGame(){S.gold=(S.gold||0)+GOLD_GAME;setTimeout(()=>feed(`에이스 골드 +${GOLD_GAME.toLocaleString()} (보유 ${S.gold.toLocaleString()})`,'#ffd23a'),400)}
 function goldRespawn(){const P=player;if(!P||P.alive&&!P.dead||!(P.respawnT>0)||st.tour||st.over)return false;if(!['match','custom','free','tutorial'].includes(st.mode))return false;
-  if((S.gold||0)<GOLD_RESPAWN){feed(`골드 썬더가 부족해요 (${GOLD_RESPAWN.toLocaleString()} 필요)`,'#ff4a3d');return true}S.gold-=GOLD_RESPAWN;save();P.respawnT=99;feed(`골드 썬더 -${GOLD_RESPAWN.toLocaleString()} · 즉시 재출격! (남은 ${S.gold.toLocaleString()})`,'#ffd23a');sfx.shot(880,.15,.15,'triangle');return true}
+  if((S.gold||0)<GOLD_RESPAWN){feed(`에이스 골드가 부족해요 (${GOLD_RESPAWN.toLocaleString()} 필요)`,'#ff4a3d');return true}S.gold-=GOLD_RESPAWN;save();P.respawnT=99;feed(`에이스 골드 -${GOLD_RESPAWN.toLocaleString()} · 즉시 재출격! (남은 ${S.gold.toLocaleString()})`,'#ffd23a');sfx.shot(880,.15,.15,'triangle');return true}
 function ach(id){S.ach=S.ach||{};if(S.ach[id])return;const a=ACH.find(x=>x[0]===id);if(!a)return;S.ach[id]=Date.now();S.coins+=100;save();toast(`🏆 업적 달성 · ${a[1]} (+100 코인)`);sfx.shot(1046,.12,.18,'triangle');setTimeout(()=>sfx.shot(1568,.18,.18,'triangle'),130)}
 function renderAch(){S.ach=S.ach||{};const n=ACH.filter(a=>S.ach[a[0]]).length;$('achList').innerHTML=`<div class="hint">${n} / ${ACH.length} 달성</div>`+ACH.map(([id,t,d])=>`<div class="achR ${S.ach[id]?'got':''}"><b>${S.ach[id]?'🏆':'🔒'} ${t}</b><span>${d}</span></div>`).join('')}
 /* ================= audio ================= */
@@ -2942,7 +2942,7 @@ function logoBam(done,sub){const ov=$('logoBam');$('logoSub').textContent=sub||'
 // end credits
 const CREDIT_MODELS=[["Fighter Jet Ejection Seat","k.botond431","CC-BY-4.0",false],["UH-1C (#1 Custom Payload) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["AH-64E (#1 Custom Payload) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Mi-24V (War Thunder) Attack Helicopter","KojfDiscord","CC-BY-4.0",false],["Ka-52 (#1 Custom) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["AH-1W (#1 Custom Payload) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["OH-58D (War Thunder) Attack Helicopter","KojfDiscord","CC-BY-4.0",false],["Lynx AH. Mk.1 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["AH-129D Mangusta (#1 Custom) (War Thunder)","KojfDiscord","CC-BY-4.0",false],["EC-665 Tiger HAD (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Z-10 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["M1 Abrams (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Leopard 2 PSO (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Challenger 2E (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Leclerc S2 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Merkava Mk.4M (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Sherman Firefly (War Thunder)","KojfDiscord","CC-BY-4.0",false],["T-80 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["T-34-85 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["ZTZ99A (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Pz.Kpfw. VI Tiger Ausf. H1 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Tiger II (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Panther F (War Thunder)","KojfDiscord","CC-BY-4.0",false],["MiG-9","KojfDiscord","CC-BY-4.0",false],["GR F-104G Starfighter","KojfDiscord","CC-BY-4.0",false],["AV-8B (NA) Harrier","KojfDiscord","CC-BY-4.0",false],["F-117 Nighthawk","KojfDiscord","CC-BY-4.0",false],["F-15E Strike Eagle","KojfDiscord","CC-BY-4.0",false],["F/A-18E","KojfDiscord","CC-BY-4.0",false],["Mitsubishi F-2A","KojfDiscord","CC-BY-4.0",false],["Rafale M F3-R","KojfDiscord","CC-BY-4.0",false],["Typhoon FGR.4","KojfDiscord","CC-BY-4.0",false],["J-10C","KojfDiscord","CC-BY-4.0",false],["F9F-2 Panther","KojfDiscord","CC-BY-4.0",false],["F-86F-35 Sabre","KojfDiscord","CC-BY-4.0",false],["F-100D Super Sabre","KojfDiscord","CC-BY-4.0",false],["A-6E TRAM","KojfDiscord","CC-BY-4.0",false],["F-5E Tiger II","KojfDiscord","CC-BY-4.0",false],["GR F-4E AUP Phantom II","KojfDiscord","CC-BY-4.0",false],["F-106A Six Shooter","KojfDiscord","CC-BY-4.0",false],["F-111F","KojfDiscord","CC-BY-4.0",false],["Kfir C.7","KojfDiscord","CC-BY-4.0",false],["Tornado GR.1","KojfDiscord","CC-BY-4.0",false],["GR Mirage 2000-5EG","KojfDiscord","CC-BY-4.0",false],["F-15C Golden Eagle","KojfDiscord","CC-BY-4.0",false],["Su-27","KojfDiscord","CC-BY-4.0",false],["Su-34","KojfDiscord","CC-BY-4.0",false],["A-10C Thunderbolt II","KojfDiscord","CC-BY-4.0",false],["F/A-18C (Late) Hornet","KojfDiscord","CC-BY-4.0",false],["Su-25","KojfDiscord","CC-BY-4.0",false],["Yakolev 3 (Yak-3)","Aidan6604","CC-BY-4.0",false],["Sopwith Camel","bradacvojtech","CC-BY-4.0",false],["Fokker Dr.I (Rise of Flight)","KojfDiscord","CC-BY-4.0",false],["Hurricane Mk IIB/Trop","KojfDiscord","CC-BY-4.0",false],["Bf 109 F-2","KojfDiscord","CC-BY-4.0",false],["A6M5 Hei","KojfDiscord","CC-BY-4.0",false],["F6F-5","KojfDiscord","CC-BY-4.0",false],["P-51D-30 Mustang","KojfDiscord","CC-BY-4.0",false],["Spitfire F Mk IX","KojfDiscord","CC-BY-4.0",false],["P-47D-28 Thunderbolt","KojfDiscord","CC-BY-4.0",false],["F4U-4 Corsair","KojfDiscord","CC-BY-4.0",false],["Me 262 A-1a/U1","KojfDiscord","CC-BY-4.0",false],["FR Yak-3","KojfDiscord","CC-BY-4.0",false],["P-38L-5-LO Lightning","KojfDiscord","CC-BY-4.0",false],["F-8E Crusader","KojfDiscord","CC-BY-4.0",false],["Ki-84 Hei","KojfDiscord","CC-BY-4.0",false],["Lockheed P-38 Lightning","Aeroux","CC-BY-4.0",false],["Me 163 B","KojfDiscord","CC-BY-4.0",false],["Helijah's B-17","sabrezor (Secret Weapons - Arma 3 Mod)","CC-BY-NC-4.0",true],["IL-2","NOD (nodmans)","CC-BY-NC-4.0",true],["MiG-17 (Custom)","KojfDiscord","CC-BY-4.0",false],["Saab J 35 Draken","42manako","CC-BY-NC-4.0",true],["Russian Su-24","42manako","CC-BY-4.0",false],["Sukhoi Su-27","Rhine_Lab_Muelsyse","CC-BY-4.0",false],["Russian Su-30SM \"45 Blue\"","42manako","CC-BY-4.0",false],["Su-35S Flanker-E","rran81","Sketchfab Standard",false],["Sukhoi Su-57 Felon","bohmerang","CC-BY-NC-SA-4.0",true],["A-10 Thunderbolt II","AIRMAN Magazine","CC-BY-4.0",false],["Argentine F9F Panther","42manako","CC-BY-4.0",false],["AV-8B Harrier II","42manako","CC-BY-4.0",false],["BF 109 F-2 Messerschmitt","GRIP420","CC-BY-4.0",false],["Boeing F/A-18E/F \"Super Hornet\"","andertan","CC-BY-4.0",false],["Boeing KC-46A Pegasus","Muhamad Mirza Arrafi","CC-BY-4.0",false],["C130","manilov.ap","CC-BY-4.0",false],["China-Vietnam Border War Soldiers","fukin70all","CC-BY-4.0",false],["Dassault Rafale","andertan","CC-BY-4.0",false],["Dr1","manilov.ap","CC-BY-4.0",false],["Ea6","manilov.ap","CC-BY-4.0",false],["Eritrean Su-27S","42manako","CC-BY-4.0",false],["Eurofighter Typhoon EF-2000","andertan","CC-BY-4.0",false],["F 15 C (Pixy)","Uxman","CC-BY-4.0",false],["McDonnell Douglas F-15 Eagle Fighter Jet","Muhamad Mirza Arrafi","CC-BY-4.0",false],["General Dynamics F-16D Block 60","Muhamad Mirza Arrafi","CC-BY-4.0",false],["F-4E Phantom II","Kenny3D89","CC-BY-4.0",false],["JA37DI (War Thunder)","KojfDiscord","CC-BY-4.0",false],["JASDF F-2A Low Poly model","Yi Tsung Lee (WTigerTw)","CC-BY-4.0",false],["Sukhoi Su-75","42manako","CC-BY-4.0",false],["B1","manilov.ap","CC-BY-4.0",false],["F-16","Cxyber","CC-BY-4.0",false],["F/A-18E with AGM-65E Maverick","Jeyhun1985","CC-BY-4.0",false],["F117 Nighthawk","agreene","CC-BY-4.0",false],["F22 RAPTOR","sxnneh","SKETCHFAB Standard",false],["F4 phantom ii","dragon22blockbench","CC-BY-4.0",false],["F4u","manilov.ap","CC-BY-4.0",false],["F5","manilov.ap","CC-BY-4.0",false],["F6f","manilov.ap","CC-BY-4.0",false],["F86","manilov.ap","CC-BY-4.0",false],["Fighter Pilot Character","SoftNote","CC-BY-4.0",false],["Fw 190 A-5 (War Thunder)","KojfDiscord","CC-BY-4.0",false],["General Dynamics F-111F Aardvark","Rhine_Lab_Muelsyse","CC-BY-4.0",false],["Gerald Ford Aircraft Carrier","Uxman","CC-BY-4.0",false],["Grumman F-14D \"Super Tomcat\"","KOG_THORNS","CC-BY-4.0",false],["Hurricane","manilov.ap","CC-BY-4.0",false],["JF-17 Thunder with LS-6","Jeyhun1985","CC-BY-4.0",false],["Kakariko Village (Ocarina of Time)","XanderPriest281","CC-BY-4.0",false],["KF-21A Boramae Fighter Jet","Muhamad Mirza Arrafi","CC-BY-4.0",false],["Lockheed Martin F-35B Lightning II","AF267","CC-BY-4.0",false],["Lockheed Martin F35 Lightning II","andertan","CC-BY-4.0",false],["Me262","maxi.ariani","CC-BY-4.0",false],["Mig-23 MLD","Tim Samedov (citizensnip)","CC-BY-4.0",false],["Mig25","manilov.ap","CC-BY-4.0",false],["Mig29","manilov.ap","CC-BY-4.0",false],["Mikoyan MiG-1.44","42manako","CC-BY-4.0",false],["Mikoyan MiG-35","42manako","CC-BY-4.0",false],["Mikoyan-Gurevich MiG-19","Tom Zimmermann","CC-BY-4.0",false],["Mirage2000","manilov.ap","CC-BY-4.0",false],["North American F-100D Super Sabre","mgg8","CC0-1.0",false],["P47","manilov.ap","CC-BY-4.0",false],["P51D Mustang","philano","CC-BY-4.0",false],["Panavia Tornado \"MiG Eater\"","42manako","CC-BY-4.0",false],["Parachute Simple","sxnneh","CC-BY-4.0",false],["rigged Northrop YF-23","metlocaypsecrasy","CC-BY-4.0",false],["Sopwith Camel","bradacvojtech","CC-BY-4.0",false],["Sr71","manilov.ap","CC-BY-4.0",false],["SU-47","harway","CC-BY-4.0",false],["su25","Alexios Apokaukos","CC-BY-4.0",false],["Su34","manilov.ap","CC-BY-4.0",false],["Sukhoi Su-15TM","Tim Samedov","CC-BY-4.0",false],["Sukhoi Su-30 flanker c","andertan","CC-BY-4.0",false],["Sukhoi Su-33 Сухой Су-33","andertan","CC-BY-4.0",false],["Sukhoi Su-35 Flanker-E (Сухой Су-35)","andertan","CC-BY-4.0",false],["Sukhoi Su-57 \"Felon\"","andertan","CC-BY-4.0",false],["UH-1C (War Thunder)","KojfDiscord","CC-BY-4.0",false],["Ukrainian Tu-95MS","42manako","CC-BY-4.0",false],["US Army UH-60M Black Hawk low poly model","Yi Tsung Lee (WTigerTw)","CC-BY-4.0",false]];
 function showCredits(done){const ov=$('credOv'),roll=$('credRoll');const nc=CREDIT_MODELS.filter(c=>c[3]).length;
-  roll.innerHTML=`<h1>SKY THUNDER+</h1><h2>시브의 날개</h2><div class="cg"><span>원작 소설 「시브의 날개」 · 기획 · 스토리</span><b>연어회</b></div><div class="cg"><span>프로그래밍 · 개발</span><b>Claude (Anthropic AI)</b></div>
+  roll.innerHTML=`<h1>LOCK-ON WAR ACE</h1><h2>시브의 날개</h2><div class="cg"><span>원작 소설 「시브의 날개」 · 기획 · 스토리</span><b>연어회</b></div><div class="cg"><span>프로그래밍 · 개발</span><b>Claude (Anthropic AI)</b></div>
    <div class="cg"><span>3D 모델</span><b>Sketchfab</b></div><p class="cn">모든 3D 모델은 Sketchfab 제작자들의 작품이에요. 전부 CC BY 또는 CC0 라이선스라, 제작자 이름을 표기하면 상업적으로도 쓸 수 있어요.</p>
    <ul>${CREDIT_MODELS.map(([t,a,l,n])=>`<li><b>${t.replace(/[<>&]/g,'')}</b><span>${a.replace(/[<>&]/g,'')} · ${l}${n?' · <i>비상업용</i>':''}</span></li>`).join('')}</ul>
    <div class="cg"><span>서울 건물 · 지형</span><b>국토교통부 · 서울시 · 브이월드 (공공누리) · © OpenStreetMap 기여자</b></div><div class="cg"><span>로비 음악 보컬 음성</span><b>MBROLA br3 (FPMs · Denis Costa)</b></div><div class="cg"><span>지형 · 바다 텍스처</span><b>Babylon.js Assets (CC BY 4.0) · three.js 예제 텍스처 (MIT)</b></div><div class="cg"><span>3D 엔진</span><b>three.js</b></div>
@@ -3606,7 +3606,7 @@ function peterCtx(){const P=player;if(!P)return'';const en=units.filter(u=>u.ali
   return `기체 ${P.P.name}, 속도 ${Math.round(P.speed*3.6)}km/h, 고도 ${Math.round(P.pos.y)}m, ${P.g.toFixed(1)}G, 연료 ${Math.round(P.fuel*100)}%, 체력 ${Math.round(P.hp/P.st.hp*100)}%, 손상: ${dm}. `+
     `무장: ${P.msl.map(m=>MSL[m.type].name+' '+m.n).join(', ')||'없음'}, 기관포 ${P.ammo}발. 적기 ${en.length}대${e?` (가장 가까운 ${e.name}, ${clockOf(P,e.pos)}시 방향 ${(e.pos.distanceTo(P.pos)/1000).toFixed(1)}km)`:''}, 지상 목표 ${gt}개. `+
     `음악: ${PETER.music<0?'꺼짐':STATIONS[PETER.music]}. 여친: ${PETER.broke?'방금 조종사 때문에 여친한테 차였음 (아직 화나고 서러움)':['ring','talk','choose','flip'].includes(GF.phase)?'지금 여친한테 전화 오는 중':'사귀는 중 (3년째)'}.`}
-const PETER_RULES=`너는 브라우저 전투기 게임 "Sky Thunder+" 속 복좌 전투기 뒷좌석의 RIO(레이더 요격 장교) "피터"다. 앞좌석 조종사(콜사인 "썬더 1")가 무전으로 너에게 말을 건다.
+const PETER_RULES=`너는 브라우저 전투기 게임 "락온 워 에이스" 속 복좌 전투기 뒷좌석의 RIO(레이더 요격 장교) "피터"다. 앞좌석 조종사(콜사인 "썬더 1")가 무전으로 너에게 말을 건다.
 성격: 수다스럽고 다혈질, 겁 많지만 의리 있음. 말은 무조건 캐주얼한 미국식 영어로만 한다 (조종사가 한국어로 말해도 영어로 답함). 조종사는 "boss"라고 부름. 가끔 "damn", "you lunatic" 같은 가벼운 욕을 하고 심하게 했으면 바로 사과함. 혐오 표현, 성적인 말, 심한 패드립은 절대 안 함. 실제 비행과 레이더 용어를 자연스럽게 섞음.
 답은 무전 자막이니까 짧게: 영어 한두 문장, 120자 안쪽. 게임 상황 정보를 근거로 말하고 지어내지 마.
 행동이 필요하면 action에 하나 넣어: "music_on"(음악 켜기), "music_next"(다음 곡), "music_off"(음악 끄기), "radar"(레이더 탐색해서 적 표시), "nearest"(제일 가까운 적 알려주기), "status"(연료·무장 보고), "quiet"(조용히 하기), "talk"(다시 수다), "none".
@@ -4858,7 +4858,7 @@ $('vol').oninput=()=>{S.vol=+$('vol').value;$('volv').textContent=S.vol;sfx.volu
 $('sndBadge').onclick=e=>{e.stopPropagation();sfx.init();sfx.resume();const a=sfx.status();if(a.muted)sfx.toggle();if(a.vol<=0){S.vol=6;save();sfx.volume(.6);$('vol').value=6;$('volv').textContent=6}sfx.shot(880,.08,.15,'triangle')};
 $('devMobile').onclick=()=>chooseDevice('mobile');$('devPC').onclick=()=>chooseDevice('pc');
 function pauseGame(p){if(p){for(const k in keys)keys[k]=false}st.paused=p;$('pause').hidden=!p;if(!p)$('keysOv').hidden=true;if(p){syncSliders();sfx.gun(false);sfx.tone(null);sfx.rwr(null);st.fireHeld=false;touch.fire=touch.thrUp=touch.thrDn=false}}
-const CLOUDS=[['없음',0,0],['적게',700,.45],['보통',1500,.8]];function applyClouds(){const c=CLOUDS[S.clouds??1];if(cloudMesh)cloudMesh.geometry.instanceCount=c[1];VCU.cov.value=c[2];WX.cloudLess=c[1]===0;applyGfx&&applyGfx();$('btnClouds').textContent=c[0];$('btnMsgs').textContent=S.msgs?'켬 (락온·경고 글자)':'끔 (소리로만)';$('btnFM').textContent=S.fm==='arcade'?'아케이드 (쉬움)':'사실적 (DCS식 · 받음각·실속·에너지)'}
+const CLOUDS=[['없음',0,0],['적게',700,.45],['보통',1500,.8]];function applyClouds(){const c=CLOUDS[S.clouds??1];if(cloudMesh)cloudMesh.geometry.instanceCount=c[1];VCU.cov.value=c[2];WX.cloudLess=c[1]===0;applyGfx&&applyGfx();$('btnClouds').textContent=c[0];$('btnMsgs').textContent=S.msgs?'켬 (락온·경고 글자)':'끔 (소리로만)';$('btnFM').textContent=S.fm==='arcade'?'아케이드 (쉬움)':'사실적 (시뮬레이터식 · 받음각·실속·에너지)'}
 $('btnMsgs').onclick=()=>{S.msgs=!S.msgs;save();applyClouds()};$('btnFM').onclick=()=>{S.fm=S.fm==='arcade'?'real':'arcade';save();applyClouds()};$('btnClouds').onclick=()=>{S.clouds=((S.clouds??1)+1)%3;save();applyClouds()};
 $('btnResume').onclick=()=>{pauseGame(false);if(!isMobile())lockPointer();last=performance.now()};
 $('btnQuit').onclick=()=>{pauseGame(false);NET.leave();toHangar()};
@@ -5437,7 +5437,7 @@ function drawHUD(){
     if(t>2.4){hx.fillStyle=`rgba(40,20,10,${Math.min(.35,(t-1.2)*.1)})`;hx.fillRect(0,0,W,Hh);txt('☢ 핵폭발 · 전원 사망',cx,cy-20,30,'#ffd84a','center',700);txt(`${Math.max(0,Math.ceil(8-t))}초 뒤 모든 게 다시 시작`,cx,cy+16,16,'#e9eef2','center',600)}}
   if(st.dmgT>0){const g=hx.createRadialGradient(cx,cy,Math.min(W,Hh)*.3,cx,cy,Math.max(W,Hh)*.7);g.addColorStop(0,'rgba(255,40,30,0)');g.addColorStop(1,`rgba(255,40,30,${st.dmgT})`);hx.fillStyle=g;hx.fillRect(0,0,W,Hh)}
   if(!P.alive&&!st.over&&!st.nuke){
-    if(P.respawnT>0){txt(`${Math.max(0,Math.ceil((st.mode==='match'?5:st.mode==='custom'?4:3)-P.respawnT))}초 후 재출격`,cx,cy+30,15,ink,'center');if(!st.tour)txt(`R · 골드 썬더 ${GOLD_RESPAWN.toLocaleString()}개로 즉시 재출격 (보유 ${(S.gold||0).toLocaleString()})`,cx,cy+52,13,'#ffd23a','center')}}
+    if(P.respawnT>0){txt(`${Math.max(0,Math.ceil((st.mode==='match'?5:st.mode==='custom'?4:3)-P.respawnT))}초 후 재출격`,cx,cy+30,15,ink,'center');if(!st.tour)txt(`R · 에이스 골드 ${GOLD_RESPAWN.toLocaleString()}개로 즉시 재출격 (보유 ${(S.gold||0).toLocaleString()})`,cx,cy+52,13,'#ffd23a','center')}}
   if(P.alive&&(st.gEff>8||st.gloc>0)){const k=st.gloc>0?.92:clamp((st.gEff-8)/4,0,.7);const vg=hx.createRadialGradient(cx,cy,Math.min(W,Hh)*(.45-k*.4),cx,cy,Math.max(W,Hh)*.65);
     vg.addColorStop(0,`rgba(0,0,0,${k*.6})`);vg.addColorStop(1,`rgba(0,0,0,${Math.min(1,k*1.2)})`);hx.fillStyle=vg;hx.fillRect(0,0,W,Hh);
     if(st.gloc>0){txt('G-LOC · 의식 잃음',cx,cy,26,'#ff4a3d','center',700);txt(`조종 불가 · 마지막 조종 방향으로 흘러가는 중 · 고도 ${Math.round(P.pos.y-ground(P.pos.x,P.pos.z))}m`,cx,cy+30,14,'#e9eef2','center',600)}else if(st.gEff>9)txt(`${st.gEff.toFixed(1)} G · 블랙아웃`,cx,cy+60,16,'#ffb547','center',700)}
@@ -5506,9 +5506,9 @@ function renderHangar(){
   $('sw').innerHTML=PAINTS.map(p=>`<button aria-pressed="${(S.paint[viewId]||'std')===p.id}" data-p="${p.id}" style="background:linear-gradient(135deg,${p.c},${p.c} 55%,rgba(0,0,0,.35))" ${(S.owned[viewId]||S.devPass)?'':'disabled'}>${p.name}</button>`).join('');
   $('sw').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.paint[viewId]=b.dataset.p;save();renderHangar();showHangarModel()});
   {S.livs=S.livs||{};const L=Object.entries(LIVS).filter(([k,v])=>v.all||v.planes.includes(viewId));const cur=S.paint[viewId]||'';
-   $('livs').innerHTML=L.length?`<div class="hint" style="margin:10px 0 6px">실제 리버리 · 개당 ${LIV_PRICE} 코인</div>`+L.map(([k,v])=>{const own=S.livs[viewId+':'+k]||S.devPass,on=cur==='liv:'+k;const sw=v.c.slice(0,3).map(c=>`<i style="background:${c}"></i>`).join('');
-     return`<button class="lv${on?' on':''}" data-l="${k}" ${(S.owned[viewId]||S.devPass)?'':'disabled'}><span class="sw3">${sw}</span><b>${v.name}</b><small>${on?'사용 중':v.prem?(S.premium?'프리미엄 · 바르기':'프리미엄 패스 전용'):own?'보유 · 바르기':LIV_PRICE+' 코인'}</small></button>`}).join(''):'<div class="hint" style="margin-top:10px">이 기체는 아직 실제 리버리가 없어요.</div>';
-   $('livs').querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=b.dataset.l,key=viewId+':'+k;if(LIVS[k].prem){if(!S.premium&&!S.devPass){toast('프리미엄 패스 전용 도장이에요 (1,000,000 골드 썬더)');return}S.paint[viewId]='liv:'+k;save();renderHangar();showHangarModel();return}if(!S.livs[key]&&!S.devPass){if(S.coins<LIV_PRICE){toast(`코인이 부족해요 (${LIV_PRICE} 필요)`);return}S.coins-=LIV_PRICE;S.livs[key]=true;toast(`${LIVS[k].name} 구매! (-${LIV_PRICE} 코인)`)}else if(!S.livs[key])S.livs[key]=true;S.paint[viewId]='liv:'+k;save();renderHangar();showHangarModel()})}
+   $('livs').innerHTML=L.length?`<div class="hint" style="margin:10px 0 6px">실제 리버리 · 개당 ${LIV_PRICE} 코인</div>`+L.map(([k,v])=>{const own=S.livs[viewId+':'+k]||S.devPass||S.livAll,on=cur==='liv:'+k;const sw=v.c.slice(0,3).map(c=>`<i style="background:${c}"></i>`).join('');
+     return`<button class="lv${on?' on':''}" data-l="${k}" ${(S.owned[viewId]||S.devPass)?'':'disabled'}><span class="sw3">${sw}</span><b>${v.name}</b><small>${on?'사용 중':v.prem?((S.premium||S.premLiv)?'프리미엄 · 바르기':'👑 골드 도장 세트'):own?'보유 · 바르기':LIV_PRICE+' 코인'}</small></button>`}).join(''):'<div class="hint" style="margin-top:10px">이 기체는 아직 실제 리버리가 없어요.</div>';
+   $('livs').querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=b.dataset.l,key=viewId+':'+k;if(LIVS[k].prem){if(!S.premium&&!S.premLiv&&!S.devPass){goldShow();toast('골드 도장 세트나 프리미엄 패스가 있어야 해요');return}S.paint[viewId]='liv:'+k;save();renderHangar();showHangarModel();return}if(!S.livs[key]&&!S.devPass&&!S.livAll){if(S.coins<LIV_PRICE){toast(`코인이 부족해요 (${LIV_PRICE} 필요)`);return}S.coins-=LIV_PRICE;S.livs[key]=true;toast(`${LIVS[k].name} 구매! (-${LIV_PRICE} 코인)`)}else if(!S.livs[key])S.livs[key]=true;S.paint[viewId]='liv:'+k;save();renderHangar();showHangarModel()})}
   const dev=!!S.devPass;
   $('paneUp').innerHTML=(S.owned[viewId]||S.devPass)?UPS.map(u=>{const lv=upLv(viewId,u.k),c=upCost(viewId,lv),pc=partCost(lv),ok=dev||(S.coins>=c&&S.parts[u.k]>=pc);
     return`<div class="up"><span class="nm2">${u.n} <b class="num">${lv}/${MAXUP}</b> <span class="pips">${[...Array(MAXUP).keys()].map(k=>`<i class="${k<lv?'on':''}"></i>`).join('')}</span></span>
@@ -5593,10 +5593,11 @@ function renderJetShop(){$('shopCoins').textContent=S.devPass?'∞':S.coins.toLo
   $('jshop').querySelectorAll('.nt2').forEach(b=>b.onclick=()=>{treeNat=b.dataset.g;const f=PLANES.find(p=>NGRP(p.nation)===treeNat);if(f&&NGRP((PLANES.find(p=>p.id===treeSel)||f).nation)!==treeNat)treeSel=f.id;renderJetShop()});
   const P=PLANES.find(p=>p.id===treeSel)||PLANES[0],own=!!(S.owned[P.id]||S.devPass),open=planeOpen(P),can=open&&!own&&S.coins>=P.price;
   $('tinfo').innerHTML=`<div><b>${P.name}</b><div class="hint">랭크 ${ROMAN[P.tier]} · BR ${brTxt(P)} · ${NAT[P.nation]||P.nation}${STF.has(P.id)?' · 스텔스 (레이더 미사일 20km 안만)':LOB.has(P.id)?' · 저피탐 (레이더 미사일 1km 안만)':''}${P.carrier?' · 함재기':''}${P.prop?' · 프롭기':''}${P.bomber?' · 폭격기':''} · 최고속도 ${Math.round(topSpeed(P))} km/h</div>${P.gunners?`<div class="hint">🔫 사수: ${P.gunners.map(g=>g.n).join(' · ')}</div>`:''}${P.note?`<div class="hint" style="color:#ffd23a">※ ${P.note}</div>`:''}</div>`+
-    (own?`<button class="primary" id="tGo">타기</button>`:P.pack?`<span class="row" style="gap:10px;align-items:center"><span class="num">${PACKS[P.pack].price.toLocaleString()} 코인</span><button class="primary" id="tPack">${PACKS[P.pack].name} 구매</button></span>`:`<span class="row" style="gap:10px;align-items:center"><span class="num">${P.price?P.price.toLocaleString()+' 코인':'무료'}</span><button class="${can?'primary':''}" id="tBuy" ${can?'':'disabled'}>${!open?lockText(P):S.coins<P.price?'코인 부족':'구매'}</button></span>`);
+    (own?`<button class="primary" id="tGo">타기</button>`:P.pack?`<span class="row" style="gap:10px;align-items:center"><span class="num">${PACKS[P.pack].price.toLocaleString()} 코인</span><button class="primary" id="tPack">${PACKS[P.pack].name} 구매</button></span>`:`<span class="row" style="gap:10px;align-items:center"><span class="num">${P.price?P.price.toLocaleString()+' 코인':'무료'}</span><button class="${can?'primary':''}" id="tBuy" ${can?'':'disabled'}>${!open?lockText(P):S.coins<P.price?'코인 부족':'구매'}</button><button id="tGold" style="border-color:#ffd23a;color:#ffd23a">👑 골드로 바로 구매 · ${goldPrice(P).toLocaleString()}</button></span>`);
   $('jshop').querySelectorAll('.tc').forEach(b=>b.onclick=()=>{treeSel=b.dataset.t;viewId=treeSel;if(S.owned[viewId]||S.devPass){S.sel=viewId;save()}renderJetShop();renderHangar();showHangarModel()});
   const tp=$('tPack');if(tp)tp.onclick=()=>{if(buyPack(P.pack)){S.sel=P.id;viewId=P.id;save();renderJetShop();renderHangar();showHangarModel()}};
   const tb=$('tBuy');if(tb)tb.onclick=()=>{if(P.pack)return;if(!planeOpen(P)||S.coins<P.price||S.owned[P.id])return;S.coins-=P.price;S.owned[P.id]=true;S.sel=P.id;viewId=P.id;save();sfx.init();sfx.shot(660,.18,.14,'triangle');toast(`${P.name} 구매 완료!`);renderJetShop();renderHangar();showHangarModel()};
+  const tgd=$('tGold');if(tgd)tgd.onclick=()=>{if(S.owned[P.id])return;const n=goldPrice(P);if((S.gold||0)<n){goldShow();toast(`에이스 골드가 부족해요 (${n.toLocaleString()} 필요)`);return}S.gold-=n;S.owned[P.id]=true;S.sel=P.id;viewId=P.id;save();sfx.init();sfx.shot(660,.18,.14,'triangle');toast(`👑 ${P.name} 구매 완료!`);renderJetShop();renderHangar();showHangarModel()};
   const tg=$('tGo');if(tg)tg.onclick=()=>{viewId=P.id;S.sel=P.id;save();$('shopOv').hidden=true;renderHangar();showHangarModel()}}
 function renderShop(){if(!$('shopOv').hidden)renderJetShop();$('crN').textContent=S.devPass?'∞':S.crates;$('partsList').innerHTML=UPS.map(u=>`<div><span>${u.part}</span><b>${S.devPass?'∞':S.parts[u.k]}</b></div>`).join('')}
 $('btnShop').onclick=()=>{treeSel=viewId;treeNat=null;$('shopOv').hidden=false;renderShop();renderJetShop();$('boxMsg').textContent='';$('shopOv').hidden=false};
@@ -6135,7 +6136,7 @@ Object.assign(globalThis.BIN_PARTS||(globalThis.BIN_PARTS={}),{"h_uh1c.glb": 2, 
 // realistic War Thunder helicopter models (KojfDiscord, CC-BY) with full cockpits. gen = rotor cut-out spec in the file's own frame (mast x/z, blade height band, tail-rotor hub)
 {const W=(o)=>o;const g=(mast,band,R,cut,hubR,miny,bladeY,tail,top)=>({mast,band,R,cut,hubR,miny,bladeY,tail,top});
  Object.assign(HTYPES.huey,{file:'h_uh1c.glb',gen:g([0,0],[2.25,2.6],7,2.2,.9,-1.32,2.38,{hub:[.4,2,-8.08],r:1.4,x:.3}),gy:1.32,eye:[-.55,.55,2],gun:[[2.15,-.6,.9],[-2.15,-.6,.9]],pod:[[2,-.5,.3],[-2,-.5,.3]],disc:6.7,tdisc:1.3,len:15.3,
-   brief:'1960년대 베트남전의 상징. 문짝 미니건과 로켓 포드를 단 건십. 느리지만 튼튼하다. (워썬더 실사 모델 · 오른쪽 기장석 조종석)'});
+   brief:'1960년대 베트남전의 상징. 문짝 미니건과 로켓 포드를 단 건십. 느리지만 튼튼하다. (오른쪽 기장석 조종석)'});
  Object.assign(HTYPES.ah64,{file:'h_ah64e.glb',short:'AH-64E',name:'AH-64E 가디언',gen:g([0,0],[1.75,2.15],7.6,1.6,.8,-2.07,1.92,{hub:[.75,1,-9.3],r:1.55,x:.45},2.18),gy:2.07,eye:[0,.85,2.05],gun:[[0,-1.45,3.3],[0,-1.45,3.3]],pod:[[2.3,-.35,-.2],[-2.3,-.35,-.2]],disc:7.32,tdisc:1.4,len:17.8,
    brief:'롱보우 레이더를 얹은 최신형 아파치. 30mm 체인건 턱 포탑이 마우스 방향으로 크게 돌아가고, 탄이 폭발한다. 뒷좌석 실사 조종석.'});
  Object.assign(HTYPES,{
@@ -6661,18 +6662,18 @@ function dailyOpen(){let ov=document.getElementById('dailyOv');
 function dailyClose(){const ov=document.getElementById('dailyOv');if(ov){ov.hidden=true;ov.style.display='none'}dailyBadge()}
 function dailyRender(){const D=daily(),el=document.getElementById('dailySheet');if(!el)return;const s=Math.min(D.streak||1,7);
   let h=`<div class="hint">DAILY · ${D.d}</div><h2 style="margin:0">📅 일일 미션</h2>`;
-  h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,210,58,.08);border:1px solid rgba(255,210,58,.3);border-radius:6px"><div style="flex:1"><b>출석 ${D.streak}일째</b><br><small style="color:#8c9aa6">코인 ${(500*s).toLocaleString()} + 골드 썬더 ${(2000*s).toLocaleString()} (7일까지 매일 늘어남)</small></div>${D.att?'<span style="color:#7dffa0">받음 ✓</span>':'<button class="primary" data-a="att">받기</button>'}</div>`;
+  h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,210,58,.08);border:1px solid rgba(255,210,58,.3);border-radius:6px"><div style="flex:1"><b>출석 ${D.streak}일째</b><br><small style="color:#8c9aa6">코인 ${(500*s).toLocaleString()} + 에이스 골드 ${(2000*s).toLocaleString()} (7일까지 매일 늘어남)</small></div>${D.att?'<span style="color:#7dffa0">받음 ✓</span>':'<button class="primary" data-a="att">받기</button>'}</div>`;
   for(let i=0;i<D.m.length;i++){const m=D.m[i],g=DPOOL.find(x=>x[0]===m.id),f=m.p/g[2],done=m.p>=g[2];
     const pt=m.id==='fly'?`${Math.floor(m.p/60)} / 10분`:`${m.p} / ${g[2]}`;
-    h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(233,238,242,.12);border-radius:6px"><div style="flex:1"><b>${g[1]}</b> <small style="color:#8c9aa6">${pt}</small><div style="height:6px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.round(f*100)}%;background:${done?'#7dffa0':'#ffd23a'}"></div></div><small style="color:#8c9aa6">보상 코인 ${D_COIN.toLocaleString()} + 골드 썬더 ${D_GOLD.toLocaleString()}</small></div>${m.c?'<span style="color:#7dffa0">받음 ✓</span>':done?`<button class="primary" data-a="m${i}">받기</button>`:'<span style="color:#5f6b74">진행 중</span>'}</div>`}
+    h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(233,238,242,.12);border-radius:6px"><div style="flex:1"><b>${g[1]}</b> <small style="color:#8c9aa6">${pt}</small><div style="height:6px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.round(f*100)}%;background:${done?'#7dffa0':'#ffd23a'}"></div></div><small style="color:#8c9aa6">보상 코인 ${D_COIN.toLocaleString()} + 에이스 골드 ${D_GOLD.toLocaleString()}</small></div>${m.c?'<span style="color:#7dffa0">받음 ✓</span>':done?`<button class="primary" data-a="m${i}">받기</button>`:'<span style="color:#5f6b74">진행 중</span>'}</div>`}
   const all=D.m.every(m=>m.c);
-  h+=`<div style="padding:10px 12px;border:1px dashed rgba(255,210,58,.4);border-radius:6px;display:flex;align-items:center;gap:10px"><div style="flex:1"><b>3개 다 깨면</b><br><small style="color:#8c9aa6">보급 상자 1개 + 골드 썬더 ${D_ALL_GOLD.toLocaleString()}</small></div>${D.all?'<span style="color:#7dffa0">받음 ✓</span>':all?'<button class="primary" data-a="all">받기</button>':'<span style="color:#5f6b74">잠김</span>'}</div>`;
+  h+=`<div style="padding:10px 12px;border:1px dashed rgba(255,210,58,.4);border-radius:6px;display:flex;align-items:center;gap:10px"><div style="flex:1"><b>3개 다 깨면</b><br><small style="color:#8c9aa6">보급 상자 1개 + 에이스 골드 ${D_ALL_GOLD.toLocaleString()}</small></div>${D.all?'<span style="color:#7dffa0">받음 ✓</span>':all?'<button class="primary" data-a="all">받기</button>':'<span style="color:#5f6b74">잠김</span>'}</div>`;
   h+='<small style="color:#8c9aa6">미션은 매일 자정에 새로 나와요. 멀티킬(12초 안에 연속 격추)과 연속 격추도 보너스가 붙어요.</small><div class="row"><button id="dailyClose">닫기</button></div>';
   el.innerHTML=h;el.querySelector('#dailyClose').onclick=dailyClose;
   for(const b of el.querySelectorAll('button[data-a]'))b.onclick=()=>{const a=b.dataset.a,D=daily();
-    if(a==='att'&&!D.att){D.att=true;S.coins+=500*s;S.gold=(S.gold||0)+2000*s;toast(`출석 보상 · 코인 +${(500*s).toLocaleString()} · 골드 썬더 +${(2000*s).toLocaleString()}`)}
-    else if(a==='all'&&!D.all&&all){D.all=true;S.crates=(S.crates||0)+1;S.gold=(S.gold||0)+D_ALL_GOLD;toast(`올클리어! 보급 상자 +1 · 골드 썬더 +${D_ALL_GOLD.toLocaleString()}`);jFanfare(4)}
-    else if(a[0]==='m'){const m=D.m[+a.slice(1)];if(m&&!m.c){m.c=true;S.coins+=D_COIN;S.gold=(S.gold||0)+D_GOLD;toast(`미션 보상 · 코인 +${D_COIN.toLocaleString()} · 골드 썬더 +${D_GOLD.toLocaleString()}`)}}
+    if(a==='att'&&!D.att){D.att=true;S.coins+=500*s;S.gold=(S.gold||0)+2000*s;toast(`출석 보상 · 코인 +${(500*s).toLocaleString()} · 에이스 골드 +${(2000*s).toLocaleString()}`)}
+    else if(a==='all'&&!D.all&&all){D.all=true;S.crates=(S.crates||0)+1;S.gold=(S.gold||0)+D_ALL_GOLD;toast(`올클리어! 보급 상자 +1 · 에이스 골드 +${D_ALL_GOLD.toLocaleString()}`);jFanfare(4)}
+    else if(a[0]==='m'){const m=D.m[+a.slice(1)];if(m&&!m.c){m.c=true;S.coins+=D_COIN;S.gold=(S.gold||0)+D_GOLD;toast(`미션 보상 · 코인 +${D_COIN.toLocaleString()} · 에이스 골드 +${D_GOLD.toLocaleString()}`)}}
     sfx.shot(1319,.15,.15,'triangle');save();try{refreshHangar&&refreshHangar()}catch(e){}dailyRender()}}
 {const r=document.getElementById('btnRank');if(r){const b=document.createElement('button');b.className='tile';b.id='btnDaily';b.innerHTML='<b>📅 일일 미션</b><small>매일 3개 · 출석 보상</small>';r.after(b);b.onclick=dailyOpen}
   setTimeout(()=>{try{dailyBadge();if(!daily().att)toast('📅 오늘 출석 보상이 있어요 · 격납고 일일 미션')}catch(e){}},2500);setInterval(()=>{if(st.mode==='hangar')try{dailyBadge()}catch(e){}},3000)}
@@ -6687,7 +6688,7 @@ function jKill(u){const now=performance.now()/1000;J.streak=J.streak.filter(t=>n
   const n=Math.min(J.streak.length,5);
   if(n>=2){const T=[0,0,['DOUBLE KILL','더블 킬',200],['TRIPLE KILL','트리플 킬',400],['QUAD KILL','쿼드 킬',700],['ACE IN A DAY','에이스',1000]][n];S.coins+=T[2];save();if(n===2)dailyEv('streak');
     setTimeout(()=>{callout(T[0],'#ffd23a',2.4,true);feed(`${T[1]}! 보너스 코인 +${T[2]}`,'#ffd23a');jFanfare(n);betty(T[0].charAt(0)+T[0].slice(1).toLowerCase()+'!',1,1)},1100)}
-  if(J.life>0&&J.life%5===0){const g=J.life*500;S.gold=(S.gold||0)+g;save();setTimeout(()=>feed(`🔥 안 죽고 ${J.life}연속 격추! 골드 썬더 +${g.toLocaleString()}`,'#ff8a2a'),1800)}}
+  if(J.life>0&&J.life%5===0){const g=J.life*500;S.gold=(S.gold||0)+g;save();setTimeout(()=>feed(`🔥 안 죽고 ${J.life}연속 격추! 에이스 골드 +${g.toLocaleString()}`,'#ff8a2a'),1800)}}
 
 /* ---- per-frame feel: gun recoil shake, phone buzz on hits, flight-time mission ---- */
 function juiceTick(dt){const P=player;if(!P||st.mode==='hangar'||st.mode==='heli'||st.mode==='build'){J.lastHp=null;return}
@@ -6731,7 +6732,7 @@ function jTourCard(){const S2=st.tour;if(!S2||!S2.T||!S2.T.rd)return;const T=S2.
       hx.fillText(nm(L.a),cx-w*.27,y+6);hx.fillText(nm(L.b),cx+w*.27,y+6);hx.font='600 12px sans-serif';hx.fillStyle='#c9d4dc';hx.fillText(pn(L.a),cx-w*.27,y+28);hx.fillText(pn(L.b),cx+w*.27,y+28);
       const pz=1+.12*Math.sin(performance.now()/120);hx.font=`900 ${Math.round(34*pz)}px sans-serif`;hx.fillStyle=gold;hx.fillText('VS',cx,y+12);hx.restore()}
     else J.cdK=0}
-  if(T.champ&&J.champSeen!==T.champ){J.champSeen=T.champ;jConfetti(T.champ===NET.uid);if(T.champ===NET.uid){S.gold=(S.gold||0)+50000;save();setTimeout(()=>feed('🏆 우승 보너스 골드 썬더 +50,000','#ffd23a'),1500)}}}
+  if(T.champ&&J.champSeen!==T.champ){J.champSeen=T.champ;jConfetti(T.champ===NET.uid);if(T.champ===NET.uid){S.gold=(S.gold||0)+50000;save();setTimeout(()=>feed('🏆 우승 보너스 에이스 골드 +50,000','#ffd23a'),1500)}}}
 function jConfetti(me){let cv=document.getElementById('confCv');if(!cv){cv=document.createElement('canvas');cv.id='confCv';cv.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:12;pointer-events:none';document.body.appendChild(cv)}
   const d=Math.min(devicePixelRatio,2);cv.width=innerWidth*d;cv.height=innerHeight*d;const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);cv.style.display='block';
   const C=['#ffd23a','#7dffa0','#4aa8ff','#ff4a3d','#ffffff','#ff8a2a'],ps=[];
@@ -6834,7 +6835,7 @@ CH_TICK.bomb=(S2,dt)=>{const P=player,m=S2.m,C=BOMB_CITY,era=m.era;if(!P)return;
         bombs.push({m:mm,type:'mk82',p:u.pos.clone().add(_v.set(0,-2,0)),v:u.vel.clone(),owner:u,t:0,g:null,gps:false})}}
     else if(u.bombsLeft>0&&dh<1600&&!A.passed){}else if(u.bombsLeft>0&&A.passed){A.dest.set(C.x+rnd(-2000,2000),0,C.z+rnd(-2000,2000));A.passed=0}
     if(dh<200)A.passed=1;if(u.bombsLeft<=0&&!A.home){A.home=1;A.dest.set(C.x,0,C.z+30000);chatter(u.name,'투하 완료, 이탈한다!',1)}}
-  if(S2.bk>=S2.goal&&!S2.endT){S2.endT=1;const bonus=S2.bk*25;S.coins+=bonus;S.gold=(S.gold||0)+5000;save();callout('TARGET DESTROYED','#7dffa0',4,true);radio(m.radio.win);feed(`폭격 보너스 · 코인 +${bonus} · 골드 썬더 +5,000`,'#ffd23a');later(7000,()=>{S2.win=true})}};
+  if(S2.bk>=S2.goal&&!S2.endT){S2.endT=1;const bonus=S2.bk*25;S.coins+=bonus;S.gold=(S.gold||0)+5000;save();callout('TARGET DESTROYED','#7dffa0',4,true);radio(m.radio.win);feed(`폭격 보너스 · 코인 +${bonus} · 에이스 골드 +5,000`,'#ffd23a');later(7000,()=>{S2.win=true})}};
 // buildings in the target city that come down count toward the objective
 {const _cf=cityFall;cityFall=function(b,to,quiet){const was=b&&b.falling;const r=_cf.apply(this,arguments);
   try{const S2=st.story;if(!was&&b&&!b.bombCounted&&st.mode==='story'&&S2&&S2.m&&S2.m.bombRun&&Math.hypot(b.x-BOMB_CITY.x,b.z-BOMB_CITY.z)<BOMB_CITY.r+800){b.bombCounted=true;S2.bk++;if(S2.bk%5===0&&S2.bk<S2.goal)feed(`건물 ${S2.bk} / ${S2.goal} 파괴`,'#ffb547')}}catch(e){}return r}}
@@ -7088,7 +7089,7 @@ function bossTick(S2,dt){const B=S2.boss;if(!B)return;S2.bt+=dt;const pct=Math.m
   if(B.engines&&B.alive){for(const e of B.engines)if(e.dead&&Math.random()<dt*14){const w=e.lp.clone().applyQuaternion(B.q).add(B.pos);fire.emit(w,B.vel,4,9,.4,1,.6,.3,1,0);smoke.emit(w,_v.copy(B.vel).multiplyScalar(.6),6,30,3,.2,.2,.2,.8,1)}
     if(B.ai&&B.ai.dest&&Math.hypot(B.pos.x-B.ai.dest.x,B.pos.z-B.ai.dest.z)<2500)B.ai.dest.set(B.pos.x+rnd(-12000,12000),0,B.pos.z+rnd(-12000,12000))}
   const W=[[60,2],[150,2],[260,3]];const foes=S2.m.extra.slice(1);while(W[S2.wv]&&S2.bt>W[S2.wv][0]&&B.alive){spawnStoryWave({list:[[foes[S2.wv%foes.length],W[S2.wv][1]]],x:player.pos.x+rnd(-3000,3000),z:player.pos.z-rnd(8000,11000)},S2.Ms);S2.wv++;radio([['관제','호위기 추가 접근!']])}
-  if(!B.alive&&!S2.endT){S2.endT=1;const c=3000,g=20000;S.coins+=c;S.gold=(S.gold||0)+g;save();callout('BOSS DOWN','#7dffa0',4,true);feed(`보스 격파 보상 · 코인 +${c} · 골드 썬더 +${g.toLocaleString()}`,'#ffd23a');radio([['관제','격추 확인! 대단하다, 귀환하라.']]);later(6000,()=>{S2.win=true})}}
+  if(!B.alive&&!S2.endT){S2.endT=1;const c=3000,g=20000;S.coins+=c;S.gold=(S.gold||0)+g;save();callout('BOSS DOWN','#7dffa0',4,true);feed(`보스 격파 보상 · 코인 +${c} · 에이스 골드 +${g.toLocaleString()}`,'#ffd23a');radio([['관제','격추 확인! 대단하다, 귀환하라.']]);later(6000,()=>{S2.win=true})}}
 CH_TICK.boss_fort=bossTick;CH_TICK.boss_ace=bossTick;
 // engines of the fortress take hits near them
 {const _hp=hitPart;hitPart=function(u,d,lp,kind){const r=_hp.apply(this,arguments);try{if(u&&u.engines&&lp){for(const e of u.engines){if(e.dead)continue;if(lp.distanceTo(e.lp)<(kind==='msl'?14:7)*(st.story&&st.story.bossK||1)/2.4){e.hp-=d*(kind==='msl'?2.2:1.6);if(e.hp<=0){e.dead=true;u.st.hp*=1;u.hp-=u.st.hp*.12;u.speed*=.9;
@@ -7156,7 +7157,7 @@ function paintRender(P){const el=document.getElementById('paintSheet'),cur=(S.pa
 
 /* ---------- ACCOUNTS · 개발자 선물 룰렛 · 프리미엄 패스 ----------
    ID-only login (saved on this device). Every new account spins a roulette over every aircraft in the game and gets the one it lands on.
-   Premium pass (1,000,000 골드 썬더): one more roulette spin every week, black/white gold-stripe paint for every aircraft, +1 nuke on nuclear bombers. */
+   Premium pass (1,000,000 에이스 골드): one more roulette spin every week, black/white gold-stripe paint for every aircraft, +1 nuke on nuclear bombers. */
 {const css=document.createElement('style');css.textContent=`
 #acctOv input{width:100%;box-sizing:border-box}.acctL{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.acctL button{background:#1b2733;color:#e9eef2;border:1px solid #33475a;border-radius:4px;padding:6px 10px;font-weight:700;cursor:pointer}
 .rlWin{position:relative;overflow:hidden;height:100px;border-radius:10px;background:#0b1118;border:1px solid #2a3a4a}.rlStrip{position:absolute;left:0;top:9px;display:flex;gap:8px;will-change:transform}
@@ -7169,7 +7170,7 @@ function acctLogin(id){id=(id||'').trim().replace(/\s+/g,' ');if(id.length<2||id
   try{if(!ACCTS[id]){ACCTS[id]=Object.keys(ACCTS).length?SAVE_KEY0+'@'+id:SAVE_KEY0;acctSave();localStorage.setItem('st-gift',id)}localStorage.setItem('st-active',id)}catch(e){toast('이 브라우저는 저장이 막혀 있어요');return}
   location.reload()}
 function acctShow(){let o=document.getElementById('acctOv');if(!o){o=document.createElement('div');o.id='acctOv';o.className='ov';o.style.zIndex=60;
-    o.innerHTML=`<div class="sheet" style="text-align:center"><h2 style="margin:0">Sky Thunder+ 로그인</h2><div class="hint">아이디만 넣으면 끝 · 처음이면 계정이 만들어지고 🎁 기체 선물 룰렛을 돌려요</div>
+    o.innerHTML=`<div class="sheet" style="text-align:center"><h2 style="margin:0">락온 워 에이스 로그인</h2><div class="hint">아이디만 넣으면 끝 · 처음이면 계정이 만들어지고 🎁 기체 선물 룰렛을 돌려요</div>
       <input id="acctIn" class="mpin" maxlength="16" placeholder="아이디 (2~16자)" autocomplete="off"><button class="tile primary" id="acctGo"><b>로그인 · 계정 만들기</b></button><div class="acctL" id="acctL"></div>${ACTIVE?'<button class="tile" id="acctX"><b>닫기</b></button>':''}</div>`;
     document.body.appendChild(o);const go=()=>acctLogin(o.querySelector('#acctIn').value);o.querySelector('#acctGo').onclick=go;o.querySelector('#acctIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')go()});
     const x=o.querySelector('#acctX');if(x)x.onclick=()=>o.hidden=true}
@@ -7187,7 +7188,7 @@ function roulette(title,sub,onWin){const pool=PLANES.filter(p=>!p.hidden);const 
     const tick=now=>{const k=Math.min(1,(now-t0)/T),e=1-Math.pow(1-k,4),x=end*e;strip.style.transform=`translateX(${-x}px)`;const idx=Math.floor((x+ww/2)/step);if(idx!==last){last=idx;try{sfx.shot(1200,.025,.05,'square')}catch(_){}}
       if(k<1){requestAnimationFrame(tick);return}
       strip.querySelector(`[data-i="${W}"]`).classList.add('win');try{jFanfare(4)}catch(_){}const had=!!S.owned[win.id];onWin(win,had);
-      res.innerHTML=had?`🎁 <span style="color:#ffd23a">${win.name}</span> · 이미 있는 기체라 골드 썬더 +200,000`:`🎁 <span style="color:#ffd23a">${win.name}</span> 획득!`;btn.disabled=false;btn.innerHTML='<b>받기</b>';done=true};
+      res.innerHTML=had?`🎁 <span style="color:#ffd23a">${win.name}</span> · 이미 있는 기체라 에이스 골드 +200,000`:`🎁 <span style="color:#ffd23a">${win.name}</span> 획득!`;btn.disabled=false;btn.innerHTML='<b>받기</b>';done=true};
     requestAnimationFrame(tick)}}
 function giveGift(win,had){if(had)S.gold=(S.gold||0)+200000;else{S.owned[win.id]=true;S.sel=win.id;viewId=win.id}save();try{renderHangar();showHangarModel()}catch(e){}}
 // premium pass
@@ -7197,15 +7198,54 @@ function premShow(){let o=document.getElementById('pmOv');if(!o){o=document.crea
   const own=!!S.premium,left=spinLeft(),d=Math.ceil(left/864e5);
   o.innerHTML=`<div class="sheet" style="width:min(440px,100%)"><h2 style="margin:0;color:#ffd23a">👑 프리미엄 패스</h2>
     <ul class="pmL"><li>🎰 매주 1번 기체 룰렛 (모든 기체 중 하나)</li><li>🎨 블랙 골드 · 화이트 골드 전용 도장 (모든 기체 · 도장 탭)</li><li>☢ 핵폭격기 핵폭탄 1발 더</li></ul>
-    <div class="hint">${own?'✅ 보유 중':'가격 1,000,000 골드 썬더 · 지금 '+(S.gold||0).toLocaleString()}</div>
-    ${own?`<button class="tile primary" id="pmSpin" ${left>0?'disabled':''}><b>🎰 주간 룰렛 돌리기</b><small>${left>0?d+'일 후에 다시':'지금 돌릴 수 있어요'}</small></button>`:`<button class="tile primary" id="pmBuy"><b>구매 · 1,000,000 골드 썬더</b></button>`}
+    <div class="hint">${own?'✅ 보유 중':'가격 1,000,000 에이스 골드 · 지금 '+(S.gold||0).toLocaleString()}</div>
+    ${own?`<button class="tile primary" id="pmSpin" ${left>0?'disabled':''}><b>🎰 주간 룰렛 돌리기</b><small>${left>0?d+'일 후에 다시':'지금 돌릴 수 있어요'}</small></button>`:`<button class="tile primary" id="pmBuy"><b>구매 · 1,000,000 에이스 골드</b></button>`}
     <button class="tile" id="pmX"><b>닫기</b></button></div>`;
   o.hidden=false;o.querySelector('#pmX').onclick=()=>o.hidden=true;
-  const b=o.querySelector('#pmBuy');if(b)b.onclick=()=>{if((S.gold||0)<PREM_PRICE){toast(`골드 썬더가 부족해요 (${PREM_PRICE.toLocaleString()} 필요)`);return}S.gold-=PREM_PRICE;S.premium={t:Date.now()};S.spinT=0;save();try{jFanfare(4)}catch(_){}toast('👑 프리미엄 패스 활성화!');premShow();try{renderHangar()}catch(e){}};
+  const b=o.querySelector('#pmBuy');if(b)b.onclick=()=>{if((S.gold||0)<PREM_PRICE){toast(`에이스 골드가 부족해요 (${PREM_PRICE.toLocaleString()} 필요)`);return}S.gold-=PREM_PRICE;S.premium={t:Date.now()};S.spinT=0;save();try{jFanfare(4)}catch(_){}toast('👑 프리미엄 패스 활성화!');premShow();try{renderHangar()}catch(e){}};
   const sp=o.querySelector('#pmSpin');if(sp)sp.onclick=()=>{if(spinLeft()>0)return;S.spinT=Date.now();save();o.hidden=true;roulette('🎰 주간 기체 룰렛','프리미엄 패스 · 일주일에 한 번',giveGift)}}
 // hangar: account chip next to the gold, premium tile in the dock
 {const gold=document.getElementById('hGold');const box=gold&&gold.parentElement;if(box){const c=document.createElement('div');c.className='coins';c.id='acctChip';c.title='계정 바꾸기';c.innerHTML=`<span>👤</span><b>${(ACTIVE||'로그인').replace(/</g,'&lt;')}${S.premium?' 👑':''}</b>`;c.onclick=acctShow;box.after(c)}
  const ref=document.getElementById('btnTopGun');if(ref){const b=document.createElement('button');b.className='tile';b.id='btnPrem';b.style.borderColor='#ffd23a';b.innerHTML='<b>👑 프리미엄 패스</b><small>주간 룰렛 · 골드 도장 · 핵 +1</small>';b.onclick=premShow;ref.after(b)}}
+/* ---------- STORE: War-Thunder-style premium economy. 에이스 골드 packs (real money, through a payment
+   provider set in PAY), premium jets bought straight with gold (skips the rank lock), and paint sets ---------- */
+const PAY={links:{},verify:''};   // fill in after opening a payment-provider account: links[packId]=checkout URL, verify=server URL that checks a purchase code
+const GOLD_PACKS=[{id:'g1',gold:100000,krw:1200},{id:'g2',gold:550000,krw:5900,tag:'+10%'},{id:'g3',gold:1200000,krw:11900,tag:'+20%'},
+  {id:'g4',gold:3300000,krw:29900,tag:'+30%'},{id:'g5',gold:7000000,krw:59000,tag:'+40% · 최고 가성비'},
+  {id:'starter',gold:1500000,krw:9900,crates:5,coins:50000,tag:'1회 한정 · 스타터 팩',once:true}];
+const goldPrice=P=>Math.max(150000,Math.round((P.price||0)*15/10000)*10000);   // premium jets: gold instead of coins + rank
+const LIV_ALL_GOLD=300000,LIV_PREM_GOLD=500000;
+function goldShow(){let o=document.getElementById('goldOv');if(!o){o=document.createElement('div');o.id='goldOv';o.className='ov';o.style.zIndex=61;document.body.appendChild(o)}
+  const won=n=>'₩'+n.toLocaleString(),g=(S.gold||0).toLocaleString();
+  const packs=GOLD_PACKS.filter(k=>!(k.once&&S.starter)).map(k=>`<button class="tile${k.id==='starter'?' primary':''}" data-k="${k.id}"><b>💎 ${k.gold.toLocaleString()} 골드${k.crates?` + 상자 ${k.crates} + 코인 ${k.coins.toLocaleString()}`:''}</b><small>${won(k.krw)}${k.tag?' · '+k.tag:''}</small></button>`).join('');
+  o.innerHTML=`<div class="sheet" style="width:min(520px,100%);max-height:92vh;overflow:auto"><div class="hint">STORE</div><h2 style="margin:0;color:#ffd23a">💎 에이스 골드 상점</h2>
+    <div class="hint">지금 ${g} 골드 · 골드로 프리미엄 기체(랭크 상관없이 바로 구매) · 도색 세트 · 프리미엄 패스를 살 수 있어요.</div>
+    <div class="hint" style="margin-top:12px">골드 충전</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">${packs}</div>
+    <div class="row" style="margin-top:8px"><input id="payCode" class="mpin" placeholder="구매 코드 (결제 후 이메일로 받음)" autocomplete="off" spellcheck="false" style="flex:1;min-width:0"><button id="payRedeem">코드 등록</button></div>
+    <div class="hint" id="payMsg" role="status"></div>
+    <div class="hint" style="margin-top:12px">도색</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">
+      <button class="tile" id="gLivAll" ${S.livAll?'disabled':''}><b>🎨 실제 리버리 전부 해금</b><small>${S.livAll?'✅ 보유 중':'모든 기체 · '+LIV_ALL_GOLD.toLocaleString()+' 골드'}</small></button>
+      <button class="tile" id="gLivPrem" ${(S.premLiv||S.premium)?'disabled':''}><b>👑 골드 도장 세트</b><small>${(S.premLiv||S.premium)?'✅ 보유 중':'블랙 골드 · 화이트 골드 · '+LIV_PREM_GOLD.toLocaleString()+' 골드'}</small></button>
+      <button class="tile" id="gPrem"><b>👑 프리미엄 패스</b><small>${S.premium?'✅ 보유 중':PREM_PRICE.toLocaleString()+' 골드'}</small></button></div>
+    <div class="hint" style="margin-top:12px">프리미엄 기체는 상점 기체 트리에서 기체를 누르고 「👑 골드로 바로 구매」를 눌러요.</div>
+    <button class="tile" id="goldX" style="margin-top:10px"><b>닫기</b></button></div>`;
+  o.hidden=false;const q=x=>o.querySelector(x),msg=t=>{q('#payMsg').textContent=t};
+  q('#goldX').onclick=()=>o.hidden=true;q('#gPrem').onclick=()=>{o.hidden=true;premShow()};
+  o.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=GOLD_PACKS.find(x=>x.id===b.dataset.k),url=PAY.links[k.id];
+    if(!url){msg('결제 연동 준비 중이에요. 결제사 계정이 연결되면 바로 열려요.');return}
+    window.open(url+(url.includes('?')?'&':'?')+'ref='+encodeURIComponent(ACTIVE||''),'_blank','noopener');msg('결제 창이 열렸어요. 결제가 끝나면 받은 구매 코드를 위 칸에 넣어요.')});
+  q('#payRedeem').onclick=async()=>{const c=q('#payCode').value.trim();if(!c)return;if(!PAY.verify){msg('결제 연동 준비 중이에요.');return}
+    S.payUsed=S.payUsed||{};if(S.payUsed[c]){msg('이미 등록한 코드예요.');return}msg('확인 중…');
+    try{const r=await fetch(PAY.verify,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:c,user:ACTIVE||''})}),j=await r.json();
+      const k=j&&j.ok&&GOLD_PACKS.find(x=>x.id===j.pack);if(!k){msg('코드를 확인할 수 없어요.');return}
+      S.payUsed[c]=Date.now();S.gold=(S.gold||0)+k.gold;if(k.crates)S.crates=(S.crates||0)+k.crates;if(k.coins)S.coins+=k.coins;if(k.once)S.starter=true;save();
+      try{jFanfare(4)}catch(_){}toast(`💎 에이스 골드 +${k.gold.toLocaleString()}`);renderHangar();goldShow()}catch(e){msg('서버에 연결할 수 없어요. 잠시 뒤 다시 해 주세요.')}};
+  const spend=(n,f)=>{if((S.gold||0)<n){toast(`에이스 골드가 부족해요 (${n.toLocaleString()} 필요)`);return}S.gold-=n;f();save();try{jFanfare(3)}catch(_){}renderHangar();try{showHangarModel()}catch(_){}goldShow()};
+  q('#gLivAll').onclick=()=>spend(LIV_ALL_GOLD,()=>{S.livAll=true;toast('🎨 실제 리버리 전부 해금!')});
+  q('#gLivPrem').onclick=()=>spend(LIV_PREM_GOLD,()=>{S.premLiv=true;toast('👑 골드 도장 세트 해금!')})}
+{const gold=document.getElementById('hGold'),box=gold&&gold.parentElement;if(box){box.style.cursor='pointer';box.title='에이스 골드 · 눌러서 충전';box.onclick=goldShow}
+ const sb=document.getElementById('btnShop');if(sb){const b=document.createElement('button');b.className='pass';b.id='btnGold';b.textContent='💎 골드 충전';b.style.color='#ffd23a';b.onclick=goldShow;sb.after(b)}}
 // first visit: log in; a brand-new account spins its gift roulette
 if(!location.search.includes('dbg')){if(!ACTIVE||!ACCTS[ACTIVE])setTimeout(acctShow,400);
   else{let g=null;try{g=localStorage.getItem('st-gift')}catch(e){}if(g===ACTIVE){try{localStorage.removeItem('st-gift')}catch(e){}S.acct={id:ACTIVE,t:Date.now()};save();setTimeout(()=>roulette('🎁 개발자 선물 룰렛',`${ACTIVE} 님, 가입 축하해요! 모든 기체 중 하나를 선물로 드려요`,giveGift),700)}}}
