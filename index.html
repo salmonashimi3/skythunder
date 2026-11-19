@@ -4813,18 +4813,14 @@ document.addEventListener('pointerlockchange',()=>{if(st.mode==='build'){if(!doc
   document.addEventListener('touchmove',e=>{if(st.mode!=='hangar')e.preventDefault()},{passive:false});
 }
 
-/* ---- graphics toggle, top right: MELTDOWN (everything maxed, default) or 60FPS SAFE (no volumetric clouds, lighter resolution) ---- */
-setTimeout(()=>{const b=document.createElement('button');b.id='gfxTog';b.tabIndex=-1;b.style.cssText='position:fixed;top:10px;right:10px;z-index:70;font:700 11px system-ui,sans-serif;padding:5px 9px;border-radius:6px;background:rgba(10,14,20,.6);color:#ffd27a;border:1px solid rgba(255,210,122,.5);cursor:pointer;letter-spacing:.04em';
-  const lab=()=>{b.textContent=GQ==='ultra'?'🔥 MELTDOWN 모드':'⚡ 60FPS SAFE 모드';b.title='클릭해서 그래픽 모드 전환'};
-  b.onclick=e=>{e.preventDefault();if(GQ_BASE==='low'||isMobile())return;S.gfxMode=GQ==='ultra'?'safe':'melt';save();GQ=S.gfxMode==='safe'?'high':'ultra';applyGfx();lab();b.blur();
-    try{feed(GQ==='ultra'?'MELTDOWN: 볼류메트릭 구름·5K 해상도·8K 그림자 전부 최고':'60FPS SAFE: 구름·해상도 낮춰서 프레임 우선','#ffd27a')}catch(_){}};
-  document.body.appendChild(b);lab();setInterval(()=>{b.hidden=st.mode==='hangar'||isMobile();lab()},500)},0)
+/* graphics are always ULTRA on desktop (no toggle) */
+
 function chooseDevice(d){S.device=d;save();$('devOv').hidden=true;applyDevice();renderHangar()}
-function applyDevice(){GQ=GQ_BASE==='low'||isMobile()?'low':(S.gfxMode==='safe'?'high':'ultra');applyGfx();$('btnDev').textContent=isMobile()?'조작: 모바일':'조작: PC'}
+function applyDevice(){GQ=GQ_BASE==='low'||isMobile()?'low':'ultra';applyGfx();$('btnDev').textContent=isMobile()?'조작: 모바일':'조작: PC'}
 const GFX={low:{pr:.8,sh:false,cl:false,far:18000,t:'낮음: 그림자·구름 끔, 해상도 낮춤. 느린 기기용'},mid:{pr:1,sh:true,cl:true,far:34000,t:'보통: 그림자·구름 켬, 기본 해상도'},high:{pr:2,sh:true,cl:true,far:42000,t:'높음: 블룸·갓레이·렌즈 플레어·색보정, 선명한 해상도. 빠른 기기용'},ultra:{pr:2,sh:true,cl:true,far:64000,t:'시뮬레이터급 고정 · RTX 3050 · RAM 16GB에서도 동적 해상도로 프레임 유지 (여유 있으면 5K까지 올림) · 권장 RTX 5080 이상. 5K 렌더링 + 레이 트레이싱 지형 그림자 + 원거리 8K 그림자(빌딩·나무 3km) + 엔진 열기 아지랑이 + 블룸·갓레이·렌즈 플레어·색보정, 12.5m 지형, 나무 2배, 도시 21km. 화질은 낮출 수 없습니다.'}};
 const NOVAP=location.search.includes('novap');
 const WRECK=true;   // wreck mode is always on: every jet breaks apart
-let GQ=location.search.includes('lowgfx')?'low':'ultra';const GQ_BASE=GQ;if(GQ==='ultra'&&S.gfxMode==='safe')GQ='high';const PRCAP_=0,PRCAP=+(new URLSearchParams(location.search).get('prcap')||9);   // ?lowgfx / ?prcap only for software-GPU testing   // ?lowgfx only for software-GPU testing
+let GQ=location.search.includes('lowgfx')?'low':'ultra';const GQ_BASE=GQ;const PRCAP_=0,PRCAP=+(new URLSearchParams(location.search).get('prcap')||9);   // ?lowgfx / ?prcap only for software-GPU testing   // ?lowgfx only for software-GPU testing
 // performance on mid-range PCs (e.g. RTX 3050 · 16 GB RAM): every ultra effect stays on, but these cards start at native resolution with 4K shadows,
 // and dynamic resolution then raises the render scale toward 5K supersampling when there is headroom, or lowers it (down to 70 % of native) to hold ~60 fps
 const GPU_NAME=(()=>{try{const gl=renderer.getContext(),e=gl.getExtension('WEBGL_debug_renderer_info');return e?String(gl.getParameter(e.UNMASKED_RENDERER_WEBGL)):''}catch(_){return''}})();
