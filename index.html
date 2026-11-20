@@ -486,7 +486,7 @@ const ACTIVE=(()=>{try{return localStorage.getItem('st-active')||''}catch(e){ret
 const SAVE_KEY=ACTIVE&&ACCTS[ACTIVE]?ACCTS[ACTIVE]:SAVE_KEY0;
 const S=(()=>{let s=null;try{s=JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){}
   return Object.assign({coins:0,matches:0,tut:false,owned:{p51:true},sel:'p51',paint:{},up:{},sens:5,crates:0,parts:{eng:0,arm:0,gun:0,msl:0},used:[]},s||{})})();
-S.parts=Object.assign({eng:0,arm:0,gun:0,msl:0},S.parts||{});for(const k of['a4','a7','mig28','sr72']){if(S.owned)delete S.owned[k];if(S.sel===k)S.sel='p51'}if(S.packs&&S.packs.topgun&&!S.tgRefund){S.coins+=200000;S.tgRefund=true}   /* the movie pack is gone: buyers get their 200,000 coins back */S.used=S.used||[];S.crates=S.crates||0;
+S.parts=Object.assign({eng:0,arm:0,gun:0,msl:0},S.parts||{});for(const k of['a4','a7','mig28','sr72']){if(S.owned)delete S.owned[k];if(S.sel===k)S.sel='p51'}if(S.packs&&S.packs.topgun&&!S.tgRefund){S.coins+=200000;S.tgRefund=true}if(S.devPass||S.passCode){S.devPass=false;delete S.passCode;S.owned.p51=true;if(!S.owned[S.sel])S.sel='p51'}   /* release: developer pass removed */   /* the movie pack is gone: buyers get their 200,000 coins back */S.used=S.used||[];S.crates=S.crates||0;
 function bombsFor(id,def=[['mk82',6]]){const L=BOMBS[id]||def;return S.premium?L.map(([t,n])=>[t,n+(MSL[t]&&MSL[t].nuke?1:0)]):L}   // premium pass: one more nuke on nuclear bombers
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
 const hangarLevel=()=>1+Math.floor(S.matches/10);
@@ -4646,7 +4646,7 @@ function updEject(dt){const E=st.ej;if(!E||!E.g)return;E.t+=dt;const g=E.g,U=g.u
   if(!E.ground&&E.t>.25&&obstacleAt(g.position)){E.ground=true;E.dead=true;U.chute.visible=false;explosion(g.position.clone(),.25);sfx.shot(90,.4,.3,'sawtooth');feed('사출한 조종사가 벽·나무에 부딪혔다 · 조종사 사망','#ff4a3d');return}
   const gy=ground(g.position.x,g.position.z);if(g.position.y<gy+.2){g.position.y=gy+.2;E.ground=true;U.chute.rotation.z=1.3;U.chute.position.set(4,-6.5,0);
     if(E.t<2.6||E.v.y<-13){E.dead=true;g.rotation.set(-Math.PI/2,E.yaw,0);smoke.emit(g.position,_v.set(0,3,0),2,9,2,.55,.5,.42,.6,1);feed('너무 낮은 고도 · 낙하산이 펴지기 전에 추락 · 조종사 사망','#ff4a3d')}else feed('착지','#8c9aa6')}}
-if(location.search.includes('dbg'))window.__dbg={get GQ(){return GQ},isMobile:()=>isMobile(),get renderer(){return renderer},get camera(){return camera},wpnStations,wpnMount,tourGunGate,get CITY(){return CITY},get scene(){return scene},get NET(){return NET},get PeerDB(){return PeerDB},tourStart,tourLoadout,get tour(){return st.tour},S,splitGear,inProp,THREE,XR,renderXray,drawXrayFrame,xrBuild,xrShow,getModel,loadHeli,fullInstance,deckPoint,carrierFwd,cliffhanger,boardUpdate,boardClose,BOARD,startBFM,startCobra,massR,get bfm(){return st.bfm},drawHUD,RAD,radarUpdate,radCycle,radDesignate,radarTarget,radGeom,radKm,FSH,fshRender,get hazePass(){return hazePass},CFX,cityImpact,cityBlastFx,cfxUpdate,citySeg,cityNormal,SEOUL,loadSeoul,startSeoulFree,needSeoul,seoulNear,seoulTex,SEU,cityUpdate,cityBlast,cityHit,cityAt,explosion,buildUpdate,heliCamera,heliUpdate,blkUpdate,stopLoop:()=>{window.requestAnimationFrame=()=>0},rtime:(only,parts)=>{const hid=[];for(const o of scene.children)if(o!==only&&!o.isLight&&o.visible){o.visible=false;hid.push(o)}const gl=renderer.getContext(),px=new Uint8Array(4);const out=[];for(const f of parts){const undo=f();const t=performance.now();renderer.render(scene,camera);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);out.push(Math.round(performance.now()-t));undo&&undo()}for(const o of hid)o.visible=true;return out},get BLK(){return BLK},get bkey(){return bkey},openBuilder,bldApply,bldClick,blkEncode,blkLoad,blkBlast,bldFlyNow,bldMenu,shareMission,listShared,get CMm(){return CM.m},get HTYPES(){return HTYPES},loadHeli,snap:(only,upd)=>{if(upd){if(st.mode==='heli')heliCamera(.05);else if(player)for(let i=0;i<20;i++)updateCamera(.05)}const hid=[];if(only)for(const o of scene.children)if(o!==only&&!o.isLight&&o.visible){o.visible=false;hid.push(o)}const bg=scene.background;if(only)scene.background=new THREE.Color('#8fa3b3');fshRender();if(upd===2&&composer){updPostFx(.016);updHaze(.016);composer.render()}else renderer.render(scene,camera);const u=renderer.domElement.toDataURL('image/jpeg',.85);for(const o of hid)o.visible=true;scene.background=bg;return u},get player(){return player},cam:camera,get units(){return units},damage,eject,repairDamage,alerts:()=>alerts,missiles,launchMissile,playerMissile,dlCandidates,mslFree,updEject,catapultUpdate,CV,updCarrier,GTS,dropBomb,updBombs,carrierTouch,deckUpdate,deckPoint,WIRE_Z,carrierFwd,ccip,spawnSupply,PETER,peterMenuToggle,peterPick,setIdle:(ms)=>{lastInput=performance.now()-ms},rg:()=>RG,peterBailout,updRioGame,GF,gfUpdate,gfPick,get HM(){return HM},get AIEJ(){return AIEJ},get FXR(){return FXR},damage,ach,openEditor,startCustom,get CM(){return CM},get CMRUN(){return CMRUN},ramenEnding,faceEvent,TRAPM2:()=>TRAPM,heliDamage,updSoldiers,updHeliShots,get EBUL(){return EBUL},get HELI(){return HELI},get SOLDIERS(){return SOLDIERS},get CAMPS(){return CAMPS},heliUpdate,heliRocket,soldierHit,setWorld,get WORLD(){return WORLD},H,steer,update,TRAPM,trapPass,FACE,buildFace,PARKED,SHELTERS,groundUpdate,TGP,tgpUpdate,sabotageCtl,peterSabotage,ground,argue,peterChat,PCHAT,keys,addGT,bombs,updGT,set SAMPLE(f){SAMPLE=f},idleMs:()=>performance.now()-lastInput,updPeterGame,V3,st,setWeather,H,NEAR};
+if(location.search.includes('dbg'))window.__dbg={get GQ(){return GQ},isMobile:()=>isMobile(),get renderer(){return renderer},get camera(){return camera},wpnStations,wpnMount,tourGunGate,get CITY(){return CITY},get scene(){return scene},get NET(){return NET},get PeerDB(){return PeerDB},tourStart,tourLoadout,get tour(){return st.tour},S,splitGear,inProp,THREE,XR,renderXray,drawXrayFrame,xrBuild,xrShow,getModel,loadHeli,fullInstance,deckPoint,carrierFwd,cliffhanger,boardUpdate,boardClose,BOARD,startBFM,startCobra,massR,get bfm(){return st.bfm},drawHUD,RAD,radarUpdate,radCycle,radDesignate,radarTarget,radGeom,radKm,FSH,fshRender,get hazePass(){return hazePass},CFX,cityImpact,cityBlastFx,cfxUpdate,citySeg,cityNormal,SEOUL,loadSeoul,startSeoulFree,needSeoul,seoulNear,seoulTex,SEU,cityUpdate,cityBlast,cityHit,cityAt,explosion,buildUpdate,heliCamera,heliUpdate,blkUpdate,stopLoop:()=>{window.requestAnimationFrame=()=>0},rtime:(only,parts)=>{const hid=[];for(const o of scene.children)if(o!==only&&!o.isLight&&o.visible){o.visible=false;hid.push(o)}const gl=renderer.getContext(),px=new Uint8Array(4);const out=[];for(const f of parts){const undo=f();const t=performance.now();renderer.render(scene,camera);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);out.push(Math.round(performance.now()-t));undo&&undo()}for(const o of hid)o.visible=true;return out},get BLK(){return BLK},get bkey(){return bkey},openBuilder,bldApply,bldClick,blkEncode,blkLoad,blkBlast,bldFlyNow,bldMenu,shareMission,listShared,get CMm(){return CM.m},get HTYPES(){return HTYPES},loadHeli,snap:(only,upd)=>{if(upd){if(st.mode==='heli')heliCamera(.05);else if(player)for(let i=0;i<20;i++)updateCamera(.05)}const hid=[];if(only)for(const o of scene.children)if(o!==only&&!o.isLight&&o.visible){o.visible=false;hid.push(o)}const bg=scene.background;if(only)scene.background=new THREE.Color('#8fa3b3');fshRender();try{updGrass(performance.now()/1000)}catch(e){console.warn('grass',e)}if(upd===2&&composer){updPostFx(.016);updHaze(.016);composer.render()}else renderer.render(scene,camera);const u=renderer.domElement.toDataURL('image/jpeg',.85);for(const o of hid)o.visible=true;scene.background=bg;return u},get player(){return player},cam:camera,get units(){return units},damage,eject,repairDamage,alerts:()=>alerts,missiles,launchMissile,playerMissile,dlCandidates,mslFree,updEject,catapultUpdate,CV,updCarrier,GTS,dropBomb,updBombs,carrierTouch,deckUpdate,deckPoint,WIRE_Z,carrierFwd,ccip,spawnSupply,PETER,peterMenuToggle,peterPick,setIdle:(ms)=>{lastInput=performance.now()-ms},rg:()=>RG,peterBailout,updRioGame,GF,gfUpdate,gfPick,get HM(){return HM},get AIEJ(){return AIEJ},get FXR(){return FXR},damage,ach,openEditor,startCustom,get CM(){return CM},get CMRUN(){return CMRUN},ramenEnding,faceEvent,TRAPM2:()=>TRAPM,heliDamage,updSoldiers,updHeliShots,get EBUL(){return EBUL},get HELI(){return HELI},get SOLDIERS(){return SOLDIERS},get CAMPS(){return CAMPS},heliUpdate,heliRocket,soldierHit,setWorld,get WORLD(){return WORLD},H,steer,update,TRAPM,trapPass,FACE,buildFace,PARKED,SHELTERS,groundUpdate,TGP,tgpUpdate,sabotageCtl,peterSabotage,ground,argue,peterChat,PCHAT,keys,addGT,bombs,updGT,set SAMPLE(f){SAMPLE=f},idleMs:()=>performance.now()-lastInput,updPeterGame,V3,st,setWeather,H,NEAR};
 if(window.__dbg)Object.assign(window.__dbg,{cineUpdate,endCine,skipCine,get cine(){return st.cine}});
 if(window.__dbg)Object.assign(window.__dbg,{nukeBlast,get NUKU(){return NUKU},get NUKES(){return NUKES},get st(){return st},get foliage(){return foliage},snapSurf,zoomK,updNukes,updateCamera,stopLoop2:()=>{window.requestAnimationFrame=()=>0}});
 // inverted ejection: the rocket drives the seat down toward the ground; the seat never separates and the parachute only streams
@@ -5481,6 +5481,53 @@ const PACKS={};
 function buyPack(k){const K=PACKS[k];if(!K)return false;if(K.planes.every(id=>S.owned[id])){toast('이미 다 갖고 있어요');return false}if(!S.devPass&&S.coins<K.price){toast(`코인이 부족해요 (${K.price.toLocaleString()} 필요)`);return false}
   if(!S.devPass)S.coins-=K.price;for(const id of K.planes)S.owned[id]=true;S.packs=S.packs||{};S.packs[k]=true;save();sfx.init();sfx.shot(660,.18,.14,'triangle');toast(`${K.name} 구매 완료! ${K.planes.map(id=>PLANES[planeIndex(id)].name).join(' · ')}`);return true}
 setTimeout(()=>{const b=document.getElementById('btnTopGun');if(b)b.onclick=()=>{if(buyPack('topgun')){renderHangar()}}},0);
+/* ---------- GROUND COVER: blade grass round the camera. Instanced, wind-swayed, each cell hashed so blades stay put as you fly; none on water or inside towns ---------- */
+let GR=null;const _gcache=new Map();
+function grassH(x,z){const k=Math.floor(x*.5)*100003+Math.floor(z*.5);let v=_gcache.get(k);if(v===undefined){if(_gcache.size>40000)_gcache.clear();v=H(x,z);_gcache.set(k,v)}return v}
+function updGrass(t){
+  if(typeof camera==='undefined'||typeof scene==='undefined'||typeof H!=='function')return;
+  if(!GR){
+    const cv=document.createElement('canvas');cv.width=32;cv.height=64;const g2=cv.getContext('2d');g2.clearRect(0,0,32,64);
+    const bl=g2.createLinearGradient(0,64,0,0);bl.addColorStop(0,'#ffffff');bl.addColorStop(1,'#ffffff');g2.fillStyle=bl;
+    g2.beginPath();g2.moveTo(4,64);g2.quadraticCurveTo(12,30,16,0);g2.quadraticCurveTo(20,30,28,64);g2.closePath();g2.fill();
+    const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
+    const geo=new THREE.PlaneGeometry(.2,.46,1,4).translate(0,.23,0);
+    const mat=new THREE.MeshStandardMaterial({map:tex,alphaTest:.45,side:THREE.DoubleSide,roughness:.95,metalness:0});
+    mat.onBeforeCompile=sh=>{sh.uniforms.uGT={value:0};GR.u=sh.uniforms.uGT;
+      sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uGT;varying float vGh;')
+        .replace('#include <begin_vertex>',`#include <begin_vertex>
+        vGh=clamp(position.y/.46,0.,1.);
+        {vec3 ip=instanceMatrix[3].xyz;float ph=ip.x*.7+ip.z*.9;
+         float gust=sin(uGT*1.3+ip.x*.05+ip.z*.04)*.5+.5;
+         transformed.x+=(sin(uGT*2.6+ph)*.1+gust*.2)*vGh*vGh;
+         transformed.z+=cos(uGT*2.1+ph*1.3)*.06*vGh*vGh;}`);
+      sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vGh;')
+        .replace('#include <color_fragment>',`#include <color_fragment>
+        diffuseColor.rgb*=mix(vec3(.45,.42,.2),vec3(1.05,1.1,.55),vGh);`)};
+    mat.customProgramCacheKey=()=>'grassblade';
+    const M=60,CELL=1.2,PER=3,N=M*M*PER;
+    const im=new THREE.InstancedMesh(geo,mat,N);im.frustumCulled=false;im.receiveShadow=true;im.castShadow=false;im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    im.visible=typeof foliageQ==='undefined'||foliageQ!=='low';scene.add(im);
+    GR={im,M,CELL,PER,N,ox:1e9,oz:1e9,u:null};}
+  if(GR.u)GR.u.value=t;
+  const {im,M,CELL,PER}=GR;im.visible=typeof foliageQ==='undefined'||foliageQ!=='low';if(!im.visible)return;
+  const cx=Math.floor(camera.position.x/CELL),cz=Math.floor(camera.position.z/CELL),ox=cx-(M>>1),oz=cz-(M>>1);
+  if(ox===GR.ox&&oz===GR.oz)return;GR.ox=ox;GR.oz=oz;
+  if(!im.instanceColor){im.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(GR.N*3),3);}
+  const Mx=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),p=new THREE.Vector3(),c=new THREE.Color(),Y=new THREE.Vector3(0,1,0);
+  const hs=(a,b,s)=>{let h=Math.imul(a|0,374761393)^Math.imul(b|0,668265263)^Math.imul((s|0)+1,1274126177);h=Math.imul(h^(h>>>13),1103515245);h^=h>>>16;return (h>>>0)/4294967296};
+  let i=0;
+  for(let ix=0;ix<M;ix++)for(let iz=0;iz<M;iz++){
+    const gx=ox+ix,gz=oz+iz,cxw=(gx+.5)*CELL,czw=(gz+.5)*CELL;
+    const y=grassH(cxw,czw),dead=y<2.5||(typeof cityD==='function'&&cityD(cxw,czw)>.3);
+    for(let k=0;k<PER;k++,i++){
+      const jx=hs(gx,gz,k*4+1),jz=hs(gx,gz,k*4+2),ry=hs(gx,gz,k*4+3)*6.283,s=.75+hs(gx,gz,k*4+4)*.7;
+      p.set((gx+jx)*CELL,y-.02,(gz+jz)*CELL);q.setFromAxisAngle(Y,ry);
+      if(dead)sc.set(0,0,0);else sc.set(s,s*(.8+hs(gx,gz,k+9)*.5),s);
+      Mx.compose(p,q,sc);im.setMatrixAt(i,Mx);
+      c.setHSL(.19+hs(gx,gz,k+17)*.07,.42+hs(gx,gz,k+23)*.18,.22+hs(gx,gz,k+31)*.14);im.setColorAt(i,c);}}
+  im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;
+}
 function status(i){const P=PLANES[i];if(S.owned[P.id]||S.devPass)return'own';if(P.pack)return'pack';return planeOpen(P)?'buy':'lock'}
 function tileText(b,t,sub){b.innerHTML=`<b>${t}</b><small>${sub}</small>`}
 function renderHangar(){
@@ -5547,9 +5594,8 @@ function renderPass(){$('btnPass').classList.toggle('on',!!S.devPass);$('btnPass
 $('btnPass').onclick=()=>{$('passOv').hidden=false;$('passMsg').textContent='';renderPass();$('passCode').focus()};
 $('passClose').onclick=()=>{$('passOv').hidden=true};
 $('passOff').onclick=()=>{S.devPass=false;delete S.passCode;if(!S.owned[S.sel])S.sel=(PLANES.find(P=>S.owned[P.id])||PLANES[0]).id;save();renderPass();renderHangar();toast('개발자 패스 꺼짐')};
-/* hidden entry: tap the SKY THUNDER logo 5 times quickly */
-{let n=0,t0=0;const b=document.querySelector('.brand');if(b)b.addEventListener('click',()=>{const t=performance.now();if(t-t0>1500)n=0;t0=t;if(++n>=5){n=0;$('passOv').hidden=false;$('passMsg').textContent='';renderPass();$('passCode').focus()}})}
-$('passApply').onclick=()=>{const v=$('passCode').value.trim();
+/* developer pass: removed for release (no hidden entry) */
+$('passApply').onclick=()=>{return;const v=$('passCode').value.trim();
   if(!passValid(v)){$('passMsg').textContent='코드가 올바르지 않아요. 글자를 다시 확인해 주세요.';$('passMsg').style.color='var(--red)';return}
   S.devPass=true;S.passCode=v.toUpperCase();save();
   $('passMsg').textContent=`개발자 패스 적용 완료! 전투기 ${PLANES.length}대 해금 · 코인 · 부품 · 상자 · 업그레이드 무한.`;$('passMsg').style.color='var(--hud)';renderPass();renderHangar();toast(`개발자 패스 적용 · 전투기 ${PLANES.length}대 해금`)};
@@ -7166,13 +7212,16 @@ function paintRender(P){const el=document.getElementById('paintSheet'),cur=(S.pa
 .rlMark{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;background:#ffd23a;box-shadow:0 0 12px #ffd23a;z-index:2}
 .pmL{margin:0;padding-left:18px;line-height:1.9;color:#dfe7ee}#acctChip{cursor:pointer}#rlBtn,#acctGo,#pmBuy,#pmSpin{background:#ffd23a!important;color:#14110a!important;border-color:#ffd23a!important}#rlBtn b,#acctGo b,#pmBuy b,#pmSpin b{color:#14110a!important}#pmSpin[disabled]{opacity:.45}`;document.head.appendChild(css)}
 function acctSave(){try{localStorage.setItem('st-accounts',JSON.stringify(ACCTS))}catch(e){}}
-function acctLogin(id){id=(id||'').trim().replace(/\s+/g,' ');if(id.length<2||id.length>16){toast('아이디는 2~16자로 넣어 주세요');return}
+function acctEmails(){try{return JSON.parse(localStorage.getItem('st-emails')||'{}')}catch(e){return{}}}   // optional e-mail per account, kept only on this device
+function acctLogin(id,em){id=(id||'').trim().replace(/\s+/g,' ');if(id.length<2||id.length>16){toast('아이디는 2~16자로 넣어 주세요');return}
+  em=(em||'').trim();if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){toast('이메일 주소를 다시 확인해 주세요');return}
+  if(em){const E=acctEmails();E[id]=em;try{localStorage.setItem('st-emails',JSON.stringify(E))}catch(e){}}
   try{if(!ACCTS[id]){ACCTS[id]=Object.keys(ACCTS).length?SAVE_KEY0+'@'+id:SAVE_KEY0;acctSave();localStorage.setItem('st-gift',id)}localStorage.setItem('st-active',id)}catch(e){toast('이 브라우저는 저장이 막혀 있어요');return}
   location.reload()}
 function acctShow(){let o=document.getElementById('acctOv');if(!o){o=document.createElement('div');o.id='acctOv';o.className='ov';o.style.zIndex=60;
     o.innerHTML=`<div class="sheet" style="text-align:center"><h2 style="margin:0">창공전선 로그인</h2><div class="hint">아이디만 넣으면 끝 · 처음이면 계정이 만들어지고 🎁 기체 선물 룰렛을 돌려요</div>
-      <input id="acctIn" class="mpin" maxlength="16" placeholder="아이디 (2~16자)" autocomplete="off"><button class="tile primary" id="acctGo"><b>로그인 · 계정 만들기</b></button><div class="acctL" id="acctL"></div>${ACTIVE?'<button class="tile" id="acctX"><b>닫기</b></button>':''}</div>`;
-    document.body.appendChild(o);const go=()=>acctLogin(o.querySelector('#acctIn').value);o.querySelector('#acctGo').onclick=go;o.querySelector('#acctIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')go()});
+      <input id="acctIn" class="mpin" maxlength="16" placeholder="아이디 (2~16자)" autocomplete="off"><input id="acctEm" class="mpin" type="email" maxlength="80" placeholder="이메일 (선택 · 구매 영수증·공지용)" autocomplete="email"><div class="hint" style="font-size:11px">이메일은 이 기기에만 저장돼요.</div><button class="tile primary" id="acctGo"><b>로그인 · 계정 만들기</b></button><div class="acctL" id="acctL"></div>${ACTIVE?'<button class="tile" id="acctX"><b>닫기</b></button>':''}</div>`;
+    document.body.appendChild(o);const go=()=>acctLogin(o.querySelector('#acctIn').value,o.querySelector('#acctEm').value);o.querySelector('#acctGo').onclick=go;for(const q of['#acctIn','#acctEm'])o.querySelector(q).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')go()});
     const x=o.querySelector('#acctX');if(x)x.onclick=()=>o.hidden=true}
   const L=Object.keys(ACCTS);o.querySelector('#acctL').innerHTML=L.length?L.map(k=>`<button data-a="${k.replace(/"/g,'&quot;')}">${k===ACTIVE?'✓ ':''}${k.replace(/</g,'&lt;')}</button>`).join(''):'';
   o.querySelectorAll('#acctL button').forEach(b=>b.onclick=()=>acctLogin(b.dataset.a));o.hidden=false;setTimeout(()=>{try{o.querySelector('#acctIn').focus()}catch(e){}},50)}
@@ -7218,10 +7267,11 @@ const LIV_ALL_GOLD=300000,LIV_PREM_GOLD=500000;
 function goldShow(){let o=document.getElementById('goldOv');if(!o){o=document.createElement('div');o.id='goldOv';o.className='ov';o.style.zIndex=61;document.body.appendChild(o)}
   const won=n=>'₩'+n.toLocaleString(),g=(S.gold||0).toLocaleString();
   const packs=GOLD_PACKS.filter(k=>!(k.once&&S.starter)).map(k=>`<button class="tile${k.id==='starter'?' primary':''}" data-k="${k.id}"><b>💎 ${k.gold.toLocaleString()} 골드${k.crates?` + 상자 ${k.crates} + 코인 ${k.coins.toLocaleString()}`:''}</b><small>${won(k.krw)}${k.tag?' · '+k.tag:''}</small></button>`).join('');
+  const steamB=window.BUILD==='steam';   // the Steam build may only sell through the Steam wallet (microtransactions), so its gold packs wait for that hookup
   o.innerHTML=`<div class="sheet" style="width:min(520px,100%);max-height:92vh;overflow:auto"><div class="hint">STORE</div><h2 style="margin:0;color:#ffd23a">💎 에이스 골드 상점</h2>
     <div class="hint">지금 ${g} 골드 · 골드로 프리미엄 기체(랭크 상관없이 바로 구매) · 도색 세트 · 프리미엄 패스를 살 수 있어요.</div>
-    <div class="hint" style="margin-top:12px">골드 충전</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">${packs}</div>
-    <div class="row" style="margin-top:8px"><input id="payCode" class="mpin" placeholder="구매 코드 (결제 후 이메일로 받음)" autocomplete="off" spellcheck="false" style="flex:1;min-width:0"><button id="payRedeem">코드 등록</button></div>
+    <div class="hint" style="margin-top:12px">골드 충전</div>${steamB?'<div class="hint">Steam 버전 골드 충전은 Steam 지갑 결제로 곧 열려요.</div>':`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">${packs}</div>`}
+    <div class="row" style="margin-top:8px${steamB?';display:none':''}"><input id="payCode" class="mpin" placeholder="구매 코드 (결제 후 이메일로 받음)" autocomplete="off" spellcheck="false" style="flex:1;min-width:0"><button id="payRedeem">코드 등록</button></div>
     <div class="hint" id="payMsg" role="status"></div>
     <div class="hint" style="margin-top:12px">도색</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">
@@ -7248,7 +7298,7 @@ function goldShow(){let o=document.getElementById('goldOv');if(!o){o=document.cr
  const sb=document.getElementById('btnShop');if(sb){const b=document.createElement('button');b.className='pass';b.id='btnGold';b.textContent='💎 골드 충전';b.style.color='#ffd23a';b.onclick=goldShow;sb.after(b)}}
 // first visit: log in; a brand-new account spins its gift roulette
 if(!location.search.includes('dbg')){if(!ACTIVE||!ACCTS[ACTIVE])setTimeout(acctShow,400);
-  else{let g=null;try{g=localStorage.getItem('st-gift')}catch(e){}if(g===ACTIVE){try{localStorage.removeItem('st-gift')}catch(e){}S.acct={id:ACTIVE,t:Date.now()};save();setTimeout(()=>roulette('🎁 개발자 선물 룰렛',`${ACTIVE} 님, 가입 축하해요! 모든 기체 중 하나를 선물로 드려요`,giveGift),700)}}}
+  else{let g=null;try{g=localStorage.getItem('st-gift')}catch(e){}if(g===ACTIVE){try{localStorage.removeItem('st-gift')}catch(e){}S.acct={id:ACTIVE,t:Date.now()};save();setTimeout(()=>roulette('🎁 가입 선물 룰렛',`${ACTIVE} 님, 가입 축하해요! 모든 기체 중 하나를 선물로 드려요`,giveGift),700)}}}
 
 /* ---------- 4. REPLAY & HIGHLIGHTS: the last 3 minutes are recorded; after a battle watch it again, watch just your kills in slow motion, or save the highlights as a video ---------- */
 const RP={buf:[],ev:[],t:0,acc:0,ids:new WeakMap(),nid:1,play:null,rec:null};
