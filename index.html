@@ -1233,14 +1233,14 @@ function buildFoliage(){const gen=++FGEN,vn=WORLD==='vn';TREEH.clear();for(const
     const jungle=mergeGeometries([col(new THREE.CylinderGeometry(.32,.55,10,6).translate(0,5,0),'#5a4630'),col(new THREE.IcosahedronGeometry(4.6,1).scale(1,.48,1).translate(0,10.6,0),'#2c4d1f'),col(new THREE.IcosahedronGeometry(3,0).scale(1,.6,1).translate(1.8,12,1),'#365c25')].map(ni));
     const palm=mergeGeometries([col(new THREE.CylinderGeometry(.16,.24,8.5,5).translate(0,4.25,0).applyMatrix4(new THREE.Matrix4().makeShear(0,0,.12,0,0,0)),'#6b5a40'),
       ...[0,1,2,3,4,5,6].map(i=>col(new THREE.ConeGeometry(.55,4.4,3).rotateZ(Math.PI/2+.45).translate(2.1,8.2,0).rotateY(i/7*Math.PI*2),'#3f6a28'))].map(ni));
-    place(jungle,HI()?68000:34000,(x,z)=>forest(x,z)&&!nearBase(x,z,500),(x,y,z)=>y>9&&y<1300&&nrmY(x,z)>.78);
-    place(palm,HI()?20000:10000,(x,z)=>Math.random()<.5&&!nearBase(x,z,450),(x,y,z)=>y>1.5&&y<40&&nrmY(x,z)>.95);
+    place(jungle,HI()?102000:34000,(x,z)=>forest(x,z)&&!nearBase(x,z,500),(x,y,z)=>y>9&&y<1300&&nrmY(x,z)>.78);
+    place(palm,HI()?30000:10000,(x,z)=>Math.random()<.5&&!nearBase(x,z,450),(x,y,z)=>y>1.5&&y<40&&nrmY(x,z)>.95);
   }else if(WORLD==='seoul'){   // Seoul: wooded mountains (Bukhansan, Gwanaksan, Namsan...) and trees in the parks
-    place(pine,HI()?60000:30000,(x,z)=>seoulUrb(x,z)<.08&&!nearBase(x,z,600),(x,y,z)=>y>45&&y<900&&nrmY(x,z)>.7);
-    place(leafy,HI()?44000:22000,(x,z)=>seoulUrb(x,z)<.18&&!nearBase(x,z,600),(x,y,z)=>y>12&&y<400&&nrmY(x,z)>.85&&(y>45||Math.random()<.5));
+    place(pine,HI()?90000:30000,(x,z)=>seoulUrb(x,z)<.08&&!nearBase(x,z,600),(x,y,z)=>y>45&&y<900&&nrmY(x,z)>.7);
+    place(leafy,HI()?66000:22000,(x,z)=>seoulUrb(x,z)<.18&&!nearBase(x,z,600),(x,y,z)=>y>12&&y<400&&nrmY(x,z)>.85&&(y>45||Math.random()<.5));
   }else{
-  place(pine,HI()?60000:30000,(x,z)=>forest(x,z)&&!nearBase(x,z,600)&&cityD(x,z)<.05,(x,y,z)=>y>120&&y<1500&&nrmY(x,z)>.86);
-  place(leafy,HI()?30000:15000,(x,z)=>(forest(x,z)||Math.random()<.12)&&!nearBase(x,z,600)&&cityD(x,z)<.12,(x,y,z)=>y>35&&y<500&&nrmY(x,z)>.93);}
+  place(pine,HI()?90000:30000,(x,z)=>forest(x,z)&&!nearBase(x,z,600)&&cityD(x,z)<.05,(x,y,z)=>y>120&&y<1500&&nrmY(x,z)>.86);
+  place(leafy,HI()?45000:15000,(x,z)=>(forest(x,z)||Math.random()<.12)&&!nearBase(x,z,600)&&cityD(x,z)<.12,(x,y,z)=>y>35&&y<500&&nrmY(x,z)>.93);}
   // towns: low-poly houses with pitched roofs in a few lowland clusters near each base and the village
   const body=col(new THREE.BoxGeometry(1,1,1).translate(0,.5,0),vn?'#b49a6c':'#d8d2c4'),roof=vn?col(new THREE.ConeGeometry(.84,.95,4).rotateY(Math.PI/4).translate(0,1.47,0),'#a8904f'):col(new THREE.ConeGeometry(.78,.55,4).rotateY(Math.PI/4).scale(1,1,1).translate(0,1.27,0),'#9a4b36');
   const house=mergeGeometries([body,roof].map(ni));
@@ -1700,28 +1700,41 @@ function hFlyUpdate(dt){const F=hFly;F.t+=dt;const t=F.t;
 /* ================= particles ================= */
 class Particles{
   constructor(n,add){this.n=n;this.i=0;this.p=new Float32Array(n*3);this.v=new Float32Array(n*3);this.life=new Float32Array(n);this.max=new Float32Array(n).fill(1);
-    this.s0=new Float32Array(n);this.s1=new Float32Array(n);this.c=new Float32Array(n*4);this.a0=new Float32Array(n);this.drag=new Float32Array(n);this.buoy=new Float32Array(n);this.size=new Float32Array(n);
+    this.s0=new Float32Array(n);this.s1=new Float32Array(n);this.c=new Float32Array(n*4);this.a0=new Float32Array(n);this.drag=new Float32Array(n);this.buoy=new Float32Array(n);this.size=new Float32Array(n);this.sd=new Float32Array(n);
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(this.p,3).setUsage(THREE.DynamicDrawUsage));
-    g.setAttribute('size',new THREE.BufferAttribute(this.size,1).setUsage(THREE.DynamicDrawUsage));g.setAttribute('col',new THREE.BufferAttribute(this.c,4).setUsage(THREE.DynamicDrawUsage));
+    g.setAttribute('size',new THREE.BufferAttribute(this.size,1).setUsage(THREE.DynamicDrawUsage));g.setAttribute('col',new THREE.BufferAttribute(this.c,4).setUsage(THREE.DynamicDrawUsage));g.setAttribute('sd',new THREE.BufferAttribute(this.sd,1).setUsage(THREE.DynamicDrawUsage));
     this.mat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending,uniforms:{ps:{value:500},fogC:{value:FOG},add:{value:add?1:0}},
-      vertexShader:`attribute float size;attribute vec4 col;uniform float ps;varying vec4 vC;varying float vF;
+      vertexShader:`attribute float size;attribute vec4 col;attribute float sd;uniform float ps;varying vec4 vC;varying float vF;varying float vS;
       #include <common>
       #include <logdepthbuf_pars_vertex>
-      void main(){vC=col;vec4 mv=modelViewMatrix*vec4(position,1.);vF=-mv.z;gl_PointSize=size>0.?max(size*ps/-mv.z,1.5):0.;gl_Position=projectionMatrix*mv;
+      void main(){vC=col;vS=sd;vec4 mv=modelViewMatrix*vec4(position,1.);vF=-mv.z;gl_PointSize=size>0.?max(size*ps/-mv.z,1.5):0.;gl_Position=projectionMatrix*mv;
       #include <logdepthbuf_vertex>
       }`,
-      fragmentShader:`uniform vec3 fogC;uniform float add;varying vec4 vC;varying float vF;
+      fragmentShader:`uniform vec3 fogC;uniform float add;varying vec4 vC;varying float vF;varying float vS;
+      float hsh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+      float vnz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hsh(i),hsh(i+vec2(1.,0.)),f.x),mix(hsh(i+vec2(0.,1.)),hsh(i+vec2(1.,1.)),f.x),f.y);}
+      float lumps(vec2 p){return vnz(p)*.55+vnz(p*2.03+7.1)*.3+vnz(p*4.07+3.7)*.15;}
       #include <logdepthbuf_pars_fragment>
       void main(){
       #include <logdepthbuf_fragment>
-      vec2 c=gl_PointCoord-.5;float a=smoothstep(.5,0.,length(c));a*=a;float f=smoothstep(4000.,40000.,vF);vec3 col=add>.5?vC.rgb:mix(vC.rgb,fogC,f);gl_FragColor=vec4(col,vC.a*a*(add>.5?1.-f:1.));}`});
+      vec2 c=gl_PointCoord-.5;float r=length(c);
+      float ang=vS*6.2831;mat2 R=mat2(cos(ang),-sin(ang),sin(ang),cos(ang));
+      vec2 q=R*c*2.6+vec2(vS*17.3,vS*9.1);
+      float L=lumps(q);                                        // cloud lumps, each puff gets its own shape
+      float rr=r+(L-.5)*(add>.5?.22:.42);                      // lumpy, irregular silhouette (less for fire)
+      float a=1.-smoothstep(0.,.5,rr);a*=a;                    // soft radial falloff
+      a*=.55+.9*L;                                             // dense clumps with thin gaps between them
+      float f=smoothstep(4000.,40000.,vF);
+      vec3 col=add>.5?vC.rgb:mix(vC.rgb,fogC,f);
+      if(add<.5){float Lu=lumps(q+vec2(0.,-.22));col*=clamp(1.-(Lu-L)*.9,.7,1.12);}   // lit tops, shaded undersides
+      gl_FragColor=vec4(col,vC.a*clamp(a,0.,1.)*(add>.5?1.-f:1.));}`});
     this.pts=new THREE.Points(g,this.mat);this.pts.frustumCulled=false;this.pts.renderOrder=add?8:6;scene.add(this.pts)}
   emit(pos,vel,s0,s1,life,r,g,b,a,drag=.5,buoy=0){const i=this.i;this.i=(i+1)%this.n;this.p[i*3]=pos.x;this.p[i*3+1]=pos.y;this.p[i*3+2]=pos.z;this.v[i*3]=vel.x;this.v[i*3+1]=vel.y;this.v[i*3+2]=vel.z;
-    this.life[i]=life;this.max[i]=life;this.s0[i]=s0;this.s1[i]=s1;this.c[i*4]=r;this.c[i*4+1]=g;this.c[i*4+2]=b;this.a0[i]=a;this.drag[i]=drag;this.buoy[i]=buoy}
+    this.life[i]=life;this.max[i]=life;this.s0[i]=s0;this.s1[i]=s1;this.c[i*4]=r;this.c[i*4+1]=g;this.c[i*4+2]=b;this.a0[i]=a;this.drag[i]=drag;this.buoy[i]=buoy;this.sd[i]=Math.random()}
   update(dt){const{p,v,life,max,c,size}=this;for(let i=0;i<this.n;i++){if(life[i]<=0){size[i]=0;continue}life[i]-=dt;const t=1-life[i]/max[i];const dr=Math.exp(-this.drag[i]*dt);
       v[i*3]*=dr;v[i*3+1]=v[i*3+1]*dr+this.buoy[i]*dt;v[i*3+2]*=dr;p[i*3]+=v[i*3]*dt;p[i*3+1]+=v[i*3+1]*dt;p[i*3+2]+=v[i*3+2]*dt;
       size[i]=lerp(this.s0[i],this.s1[i],Math.sqrt(t));c[i*4+3]=this.a0[i]*(1-t)*(t<.05?t/.05:1);if(life[i]<=0)size[i]=0}
-    const a=this.pts.geometry.attributes;a.position.needsUpdate=a.size.needsUpdate=a.col.needsUpdate=true}
+    const a=this.pts.geometry.attributes;a.position.needsUpdate=a.size.needsUpdate=a.col.needsUpdate=a.sd.needsUpdate=true}
   clear(){this.life.fill(0)}
 }
 const smoke=new Particles(9000,false),fire=new Particles(6000,true);
@@ -5491,42 +5504,56 @@ function updGrass(t){
     const bl=g2.createLinearGradient(0,64,0,0);bl.addColorStop(0,'#ffffff');bl.addColorStop(1,'#ffffff');g2.fillStyle=bl;
     g2.beginPath();g2.moveTo(4,64);g2.quadraticCurveTo(12,30,16,0);g2.quadraticCurveTo(20,30,28,64);g2.closePath();g2.fill();
     const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
-    const geo=new THREE.PlaneGeometry(.2,.46,1,4).translate(0,.23,0);
+    const geo=new THREE.PlaneGeometry(.14,.5,1,3).translate(0,.25,0);
     const mat=new THREE.MeshStandardMaterial({map:tex,alphaTest:.45,side:THREE.DoubleSide,roughness:.95,metalness:0});
     mat.onBeforeCompile=sh=>{sh.uniforms.uGT={value:0};GR.u=sh.uniforms.uGT;
       sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uGT;varying float vGh;')
         .replace('#include <begin_vertex>',`#include <begin_vertex>
-        vGh=clamp(position.y/.46,0.,1.);
+        vGh=clamp(position.y/.5,0.,1.);
         {vec3 ip=instanceMatrix[3].xyz;float ph=ip.x*.7+ip.z*.9;
          float gust=sin(uGT*1.3+ip.x*.05+ip.z*.04)*.5+.5;
          transformed.x+=(sin(uGT*2.6+ph)*.1+gust*.2)*vGh*vGh;
-         transformed.z+=cos(uGT*2.1+ph*1.3)*.06*vGh*vGh;}`);
+         transformed.z+=cos(uGT*2.1+ph*1.3)*.06*vGh*vGh;
+         transformed*=clamp((42.-distance(ip.xz,cameraPosition.xz))/16.,0.,1.);}`);
       sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vGh;')
         .replace('#include <color_fragment>',`#include <color_fragment>
-        diffuseColor.rgb*=mix(vec3(.45,.42,.2),vec3(1.05,1.1,.55),vGh);`)};
+        diffuseColor.rgb*=mix(vec3(.32,.38,.14),vec3(.95,1.05,.42),vGh);`)};
     mat.customProgramCacheKey=()=>'grassblade';
-    const M=60,CELL=1.2,PER=3,N=M*M*PER;
-    const im=new THREE.InstancedMesh(geo,mat,N);im.frustumCulled=false;im.receiveShadow=true;im.castShadow=false;im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    // window of M×M cells (0.9 m each) around the camera, PER blades per cell; a slot keeps its world cell while the window slides over it
+    const M=96,CELL=.9,PER=8,N=M*M*PER;
+    const im=new THREE.InstancedMesh(geo,mat,N);im.frustumCulled=false;im.receiveShadow=true;im.castShadow=false;
+    im.instanceMatrix.setUsage(THREE.DynamicDrawUsage).array.fill(0);
+    im.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(N*3),3).setUsage(THREE.DynamicDrawUsage);
     im.visible=typeof foliageQ==='undefined'||foliageQ!=='low';scene.add(im);
-    GR={im,M,CELL,PER,N,ox:1e9,oz:1e9,u:null};}
+    GR={im,M,CELL,PER,N,ox:1e9,oz:1e9,u:null,cx:new Int32Array(M*M).fill(2147483647),cz:new Int32Array(M*M).fill(2147483647)};}
   if(GR.u)GR.u.value=t;
   const {im,M,CELL,PER}=GR;im.visible=typeof foliageQ==='undefined'||foliageQ!=='low';if(!im.visible)return;
   const cx=Math.floor(camera.position.x/CELL),cz=Math.floor(camera.position.z/CELL),ox=cx-(M>>1),oz=cz-(M>>1);
-  if(ox===GR.ox&&oz===GR.oz)return;GR.ox=ox;GR.oz=oz;
-  if(!im.instanceColor){im.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(GR.N*3),3);}
+  if(!GR.pending&&ox===GR.ox&&oz===GR.oz)return;GR.ox=ox;GR.oz=oz;
   const Mx=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),p=new THREE.Vector3(),c=new THREE.Color(),Y=new THREE.Vector3(0,1,0);
   const hs=(a,b,s)=>{let h=Math.imul(a|0,374761393)^Math.imul(b|0,668265263)^Math.imul((s|0)+1,1274126177);h=Math.imul(h^(h>>>13),1103515245);h^=h>>>16;return (h>>>0)/4294967296};
-  let i=0;
+  const pnz=(x,z)=>{const xi=Math.floor(x),zi=Math.floor(z),u=x-xi,v=z-zi,uu=u*u*(3-2*u),vv=v*v*(3-2*v);
+    return (hs(xi,zi,777)*(1-uu)+hs(xi+1,zi,777)*uu)*(1-vv)+(hs(xi,zi+1,777)*(1-uu)+hs(xi+1,zi+1,777)*uu)*vv};
+  const ma=im.instanceMatrix,ca=im.instanceColor;ma.clearUpdateRanges();ca.clearUpdateRanges();
+  let changed=0,budget=768,done=true;
   for(let ix=0;ix<M;ix++)for(let iz=0;iz<M;iz++){
-    const gx=ox+ix,gz=oz+iz,cxw=(gx+.5)*CELL,czw=(gz+.5)*CELL;
+    const gx=ox+ix,gz=oz+iz,s=(((gx%M)+M)%M)*M+(((gz%M)+M)%M);
+    if(GR.cx[s]===gx&&GR.cz[s]===gz)continue;   // this slot already holds that cell
+    if(budget<=0){done=false;continue}           // a teleport streams in over a few frames instead of one long stall
+    budget--;GR.cx[s]=gx;GR.cz[s]=gz;changed++;
+    const cxw=(gx+.5)*CELL,czw=(gz+.5)*CELL;
     const y=grassH(cxw,czw),dead=y<2.5||(typeof cityD==='function'&&cityD(cxw,czw)>.3);
-    for(let k=0;k<PER;k++,i++){
-      const jx=hs(gx,gz,k*4+1),jz=hs(gx,gz,k*4+2),ry=hs(gx,gz,k*4+3)*6.283,s=.75+hs(gx,gz,k*4+4)*.7;
+    const dry=Math.max(0,(pnz(cxw*.03,czw*.03)-.68)*3.2);   // dry patches, roughly 30 m across
+    for(let k=0;k<PER;k++){
+      const i=s*PER+k;
+      const jx=hs(gx,gz,k*4+1),jz=hs(gx,gz,k*4+2),ry=hs(gx,gz,k*4+3)*6.283,sz=.75+hs(gx,gz,k*4+4)*.7;
       p.set((gx+jx)*CELL,y-.02,(gz+jz)*CELL);q.setFromAxisAngle(Y,ry);
-      if(dead)sc.set(0,0,0);else sc.set(s,s*(.8+hs(gx,gz,k+9)*.5),s);
+      if(dead)sc.set(0,0,0);else sc.set(sz,sz*(.8+hs(gx,gz,k+9)*.5),sz);
       Mx.compose(p,q,sc);im.setMatrixAt(i,Mx);
-      c.setHSL(.19+hs(gx,gz,k+17)*.07,.42+hs(gx,gz,k+23)*.18,.22+hs(gx,gz,k+31)*.14);im.setColorAt(i,c);}}
-  im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;
+      c.setHSL(.24+hs(gx,gz,k+17)*.07-dry*.1,.5+hs(gx,gz,k+23)*.22-dry*.15,.2+hs(gx,gz,k+31)*.14+dry*.06);im.setColorAt(i,c);}
+    ma.addUpdateRange(s*PER*16,PER*16);ca.addUpdateRange(s*PER*3,PER*3);}
+  GR.pending=!done;
+  if(changed){ma.needsUpdate=true;ca.needsUpdate=true}
 }
 function status(i){const P=PLANES[i];if(S.owned[P.id]||S.devPass)return'own';if(P.pack)return'pack';return planeOpen(P)?'buy':'lock'}
 function tileText(b,t,sub){b.innerHTML=`<b>${t}</b><small>${sub}</small>`}
