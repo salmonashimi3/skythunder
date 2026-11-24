@@ -1,8 +1,8 @@
 # Credits / 크레딧
 
-창공전선(Sky Frontline)에 쓰인 외부 자료와 그 라이선스 목록이에요. 3D 모델은 전부 Sketchfab 제작자들의 작품이고, **CC BY 4.0** 또는 **CC0** 라이선스라 제작자 표기를 지키면 상업적으로도 쓸 수 있어요. 게임 안 엔딩 크레딧에도 같은 목록이 나와요.
+창공전선(Sky Frontline)에 쓰인 외부 자료와 그 라이선스 목록이에요. 3D 모델은 전부 Sketchfab 제작자들의 작품이고, **A-5 비질란테 하나만 빼고** 전부 **CC BY 4.0** 또는 **CC0** 라이선스라 제작자 표기를 지키면 상업적으로도 쓸 수 있어요. A-5 비질란테는 **Sketchfab Free Standard** 라이선스라 아래 [라이선스 모델](#licensed-model-not-cc--라이선스-모델) 조건을 따라요. 게임 안 엔딩 크레딧에도 같은 목록이 나와요.
 
-All 3D models are by their Sketchfab creators and are used under **CC BY 4.0** (or **CC0 1.0**), which allow commercial use with attribution. No endorsement by the creators is implied.
+All 3D models are by their Sketchfab creators. All but one are used under **CC BY 4.0** (or **CC0 1.0**), which allow commercial use with attribution; the exception is the A-5 Vigilante, used under the **Sketchfab Free Standard** licence (see [Licensed model](#licensed-model-not-cc--라이선스-모델)). No endorsement by the creators is implied.
 
 - CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ — CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
 - Each model file also keeps its title, author, licence and source URL in `asset.extras`.
@@ -10,7 +10,7 @@ All 3D models are by their Sketchfab creators and are used under **CC BY 4.0** (
 - Changes: every model was converted for the web (listed per model below). In the game, models may also be scaled, rotated, recoloured, split into moving parts (propellers, control surfaces, landing gear) or have parts hidden at runtime.
 - Provided "as is" by the creators, without warranties.
 
-## 3D models (203 files)
+## 3D models (204 files)
 
 | File | Model | Creator | Licence | Changes |
 |---|---|---|---|---|
@@ -71,6 +71,7 @@ All 3D models are by their Sketchfab creators and are used under **CC BY 4.0** (
 | `m_su30sm.glb` (2 parts) | [Russian Su-30SM "45 Blue"](https://sketchfab.com/3d-models/russian-su-30sm-45-blue-8dc883ebe3c84da3834f10aae5d58386) | 42manako | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Optimized for the game with glTF-Transform: textures re-encoded to WebP, meshes quantized, Meshopt-compressed |
 | `models/a10.glb.js` | [A-10 Thunderbolt II](https://sketchfab.com/3d-models/a-10-thunderbolt-ii-9521ff6ba5d448958ea45a89e94ab23d) | AIRMAN Magazine | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Optimized for the game with glTF-Transform: textures re-encoded to WebP, meshes quantized, Meshopt-compressed |
 | `models/a4.glb` (2 parts) | [A-4E Skyhawk with AGM-12B Bullpup](https://sketchfab.com/3d-models/a-4e-skyhawk-with-agm-12b-bullpup-257fb132578d49b99ba205620a7b8aee) | Jeyhun1985 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Converted for the game: textures re-encoded to WebP (max 2048 px), meshes quantized and Meshopt-compressed; removed the under-wing missiles |
+| `models/a5.sfx.js` | [North American A-5 Vigilante](https://sketchfab.com/3d-models/north-american-a-5-vigilante-01ccd7a8a6f647baad2327afae18a408) | helijah | Sketchfab Free Standard (not CC) | Converted for the game: textures re-encoded to WebP (max 2048 px), meshes quantized and Meshopt-compressed; stored sealed (encrypted), decoded only in memory by the game |
 | `models/a6.glb.js` | [Ea6](https://sketchfab.com/3d-models/ea6-2b121bdd0edc468db67f161b840451c6) | manilov.ap | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Optimized for the game with glTF-Transform: textures re-encoded to WebP, meshes quantized, Meshopt-compressed |
 | `models/a6m.glb.js` | [Mitsubishi A6M2 ZERO - zeke](https://sketchfab.com/3d-models/mitsubishi-a6m2-zero-zeke-d701787b75fa4c979792b0c0c14221e2) | Savinien B. | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Optimized for the game with glTF-Transform: textures re-encoded to WebP, meshes quantized, Meshopt-compressed |
 | `models/a7.glb` (2 parts) | [A-7E Corsair II with AGM-62A Walleye I](https://sketchfab.com/3d-models/a-7e-corsair-ii-with-agm-62a-walleye-i-0a1f6959ef724e9fb45852ddd2488931) | Jeyhun1985 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Converted for the game: textures re-encoded to WebP (max 2048 px), meshes quantized and Meshopt-compressed; removed the under-wing bombs and pylons |
@@ -217,6 +218,22 @@ All 3D models are by their Sketchfab creators and are used under **CC BY 4.0** (
 | `w2_p51.glb.js` | [P-51D-30 Mustang (War Thunder)](https://sketchfab.com/3d-models/p-51d-30-mustang-war-thunder-de212256c0cd4ac5bd1c2387e6ed4839) | KojfDiscord | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Optimized for the game with glTF-Transform: textures re-encoded to WebP, meshes quantized, Meshopt-compressed |
 | `w2_spitfire.glb.js` | [Spitfire F Mk IX (War Thunder)](https://sketchfab.com/3d-models/spitfire-f-mk-ix-war-thunder-711a88c98f624016894b27d241864eb5) | KojfDiscord | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Optimized for the game with glTF-Transform: textures re-encoded to WebP, meshes quantized, Meshopt-compressed |
 | `w2_yak3.glb.js` | [FR Yak-3 (War Thunder)](https://sketchfab.com/3d-models/fr-yak-3-war-thunder-9e3e29e628184870828ab546cbddcaf7) | KojfDiscord | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Optimized for the game with glTF-Transform: textures re-encoded to WebP, meshes quantized, Meshopt-compressed |
+
+## Licensed model (not CC) · 라이선스 모델
+
+| Model | Creator | Licence | Sketchfab ID |
+|---|---|---|---|
+| North American A-5 Vigilante | © helijah | [Sketchfab Free Standard](https://sketchfab.com/licenses) | 01ccd7a8a6f647baad2327afae18a408 |
+
+- This model is **not** under a Creative Commons licence. It is included in the game only, in a sealed (encrypted) file (`models/a5.sfx.js`) that the game decodes in memory. It is not offered as a download.
+- 이 모델은 CC 라이선스가 아니에요. 게임 안에서만 쓰이고, 파일은 봉인(암호화)된 형태로만 들어 있어서 게임이 메모리에서만 풀어 써요. 따로 내려받으라고 제공하는 파일이 아니에요.
+
+### Terms of use for this site and game · 이용 조건
+
+- You may not extract, download, copy, republish, sell or otherwise use the A-5 Vigilante model (or any part of it) outside this game, in any form, including as a stand-alone file.
+- A-5 비질란테 모델(또는 그 일부)을 어떤 형태로든 게임 밖으로 뽑아내거나, 내려받거나, 복사·재배포·판매하거나, 따로 떼어 쓰는 건 금지예요.
+- The other 3D models may only be reused under their own licences listed above (CC BY 4.0 / CC0), with the attribution those licences require.
+- 나머지 3D 모델은 위 표에 적힌 각 라이선스(CC BY 4.0 / CC0) 조건, 특히 제작자 표기를 지킬 때만 다시 쓸 수 있어요.
 
 ## Other assets
 
