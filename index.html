@@ -181,7 +181,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .mpgrid{display:grid;gap:10px}.mpin{font-family:var(--f-ui);font-size:16px;background:rgba(0,0,0,.3);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:10px 12px;min-width:0}
 .teams{display:grid;grid-template-columns:1fr 1fr;gap:10px}.teams>div{border:1px solid var(--line);border-radius:6px;padding:10px;min-width:0}
 .teams ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px;font-size:13px}.teams li{display:flex;justify-content:space-between;gap:6px}.teams li span{color:var(--dim);font-size:11px}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.seg button[aria-checked="true"]{background:var(--amber);color:#1a1205;border-color:var(--amber)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.seg button[aria-checked="true"]{background:var(--amber);color:#1a1205;border-color:var(--amber)}.qseg{grid-template-columns:repeat(5,minmax(0,1fr))}.qseg button{padding:8px 4px;white-space:nowrap}@media (max-width:420px){.qseg{gap:4px}.qseg button{font-size:12px;padding:8px 0}}
 #keysOv{z-index:8}
 .shop{max-height:calc(100vh - 32px);overflow:auto}
 .crate{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;border:1px solid var(--amber);border-radius:6px;background:rgba(255,181,71,.07)}
@@ -215,6 +215,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button class="devbtn" id="btnTod" title="시간대: 바꾸면 화면을 다시 불러와요">시간대</button>
       <button class="devbtn" id="btnMus">음악 끄기</button>
       <button class="devbtn" id="btnDev">조작: PC</button>
+      <button class="devbtn" id="btnSetH">설정</button>
       <button class="devbtn" id="btnHot">🕹 조종 장치</button>
     </div>
   </div>
@@ -367,9 +368,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 <div class="ov" id="pause" hidden><div class="sheet">
   <div class="hint">PAUSED</div><h2>일시정지</h2><p class="hint" style="margin:0">게임이 멈춰 있어요. 지금 나가면 이번 판 보상은 받지 못합니다.</p>
-  <div><div class="hint" style="margin-bottom:6px">그래픽 화질</div>
-    <div style="font-weight:700">울트라 (고정)</div>
-    <div class="hint" id="qInfo" style="margin-top:6px"></div></div>
   <div><div class="hint" style="margin-bottom:6px">날씨</div>
     <div class="seg wxseg" role="radiogroup" aria-label="날씨"><button data-w="clear" role="radio">맑음</button><button data-w="rain" role="radio">비</button><button data-w="auto" role="radio">랜덤</button></div></div>
   <div><div class="hint" style="margin-bottom:6px">파손 모드</div><div style="font-weight:700">항상 켜짐 (고정) · B 키로 내 기체 부수기</div></div>
@@ -377,9 +375,16 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div class="row"><label class="hint" for="vol">소리</label><input id="vol" type="range" min="0" max="10" style="flex:1;accent-color:var(--amber)"><b class="num" id="volv">6</b></div>
   <div class="row"><span class="hint">화면 메시지</span><button id="btnMsgs"></button><span class="hint">구름</span><button id="btnClouds"></button></div>
   <div class="row"><span class="hint">비행 모델</span><button id="btnFM"></button><span class="hint">HOTAS</span><button id="btnHot2">🕹 조종 장치</button></div>
-  <div class="row"><button class="primary" id="btnResume">계속하기</button><button id="btnHelp">조작법</button><button id="btnQuit">격납고로 나가기</button></div>
+  <div class="row"><button class="primary" id="btnResume">계속하기</button><button id="btnHelp">조작법</button><button id="btnSet">설정</button><button id="btnQuit">격납고로 나가기</button></div>
 </div></div>
 
+<div class="ov" id="settings" hidden><div class="sheet">
+  <div class="hint">SETTINGS</div><h2>설정</h2>
+  <div><div class="hint" style="margin-bottom:6px">그래픽 모드</div>
+    <div class="seg qseg" role="radiogroup" aria-label="그래픽 모드"><button data-q="auto" role="radio">자동</button><button data-q="low" role="radio">낮음</button><button data-q="mid" role="radio">보통</button><button data-q="high" role="radio">높음</button><button data-q="ultra" role="radio">낭만모드</button></div>
+    <div class="hint" id="qInfo" style="margin-top:6px"></div></div>
+  <div class="row"><button class="primary" id="btnSetClose">닫기</button></div>
+</div></div>
 <div class="ov" id="storyOv" hidden><div class="sheet story">
   <div class="row" style="justify-content:flex-end;margin:0 0 -6px"><button id="stClose">✕ 닫기</button></div>
   <div class="hint">CAMPAIGN · 노스필드 공화국 공군 제7비행단 썬더 편대</div><h2 id="stTitle">작전 목록</h2>
@@ -491,6 +496,7 @@ function bombsFor(id,def=[['mk82',6]]){const L=BOMBS[id]||def;return S.premium?L
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
 const hangarLevel=()=>1+Math.floor(S.matches/10);
 const planeIndex=id=>PLANES.findIndex(p=>p.id===id);
+if(!S.owned||typeof S.owned!=='object')S.owned={p51:true};if(planeIndex(S.sel)<0){S.owned.p51=true;S.sel='p51'}   // 목록에 없는 기체가 저장돼 있으면 P-51D로 돌려놔요 (다른 게임 저장 등)
 const reqLevel=i=>PLANES[i].lvl||i+1;   // hangar level that opens plane #i (every 10 matches = +1 level); new jets share a level with their neighbours
 const MAXUP=10;
 const UPS=[{k:'eng',n:'엔진',e:'추력 +3%/단계',part:'터빈 블레이드'},{k:'arm',n:'장갑',e:'체력 +5%/단계',part:'복합 장갑판'},{k:'gun',n:'기관포',e:'피해 +4%/단계',part:'강화 총열'},{k:'msl',n:'미사일',e:'락온 −4% · 사거리 +4%/단계',part:'적외선 탐색기'}];
@@ -4763,6 +4769,7 @@ addEventListener('keydown',e=>{if(e.target===chatIn)return;
   if((e.code==='KeyT'&&!rioT||e.code==='KeyY'&&rioT)&&st.mode!=='hangar'&&!st.paused&&!st.over&&!e.repeat){e.preventDefault();radioMenu(true);return}
   keys[e.code]=true;
   if(['Space','Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','F1','Enter'].includes(e.code)&&st.mode!=='hangar'&&e.target.tagName!=='INPUT')e.preventDefault();
+  if(e.code==='Escape'&&!$('settings').hidden){$('settings').hidden=true;return}
   if(e.code==='Escape'&&st.mode!=='hangar'&&!st.over){if(!$('keysOv').hidden){$('keysOv').hidden=true;return}if(st.paused){$('btnResume').click()}else if(!document.pointerLockElement)pauseGame(true);return}
   if(st.mode==='hangar'||st.paused)return;
   if(st.mode==='heli'){heliKey(e);return}
@@ -4841,8 +4848,8 @@ document.addEventListener('pointerlockchange',()=>{if(st.mode==='build'){if(!doc
 /* graphics are always ULTRA on desktop (no toggle) */
 
 function chooseDevice(d){S.device=d;save();$('devOv').hidden=true;applyDevice();renderHangar()}
-function applyDevice(){GQ=GQ_BASE==='low'||isMobile()?'low':'ultra';applyGfx();$('btnDev').textContent=isMobile()?'조작: 모바일':'조작: PC'}
-const GFX={low:{pr:.8,sh:false,cl:false,far:18000,t:'낮음: 그림자·구름 끔, 해상도 낮춤. 느린 기기용'},mid:{pr:1,sh:true,cl:true,far:34000,t:'보통: 그림자·구름 켬, 기본 해상도'},high:{pr:2,sh:true,cl:true,far:42000,t:'높음: 블룸·갓레이·렌즈 플레어·색보정, 선명한 해상도. 빠른 기기용'},ultra:{pr:2,sh:true,cl:true,far:64000,t:'시뮬레이터급 고정 · RTX 3050 · RAM 16GB에서도 동적 해상도로 프레임 유지 (여유 있으면 5K까지 올림) · 권장 RTX 5080 이상. 5K 렌더링 + 레이 트레이싱 지형 그림자 + 원거리 8K 그림자(빌딩·나무 3km) + 엔진 열기 아지랑이 + 블룸·갓레이·렌즈 플레어·색보정, 12.5m 지형, 나무 2배, 도시 21km. 화질은 낮출 수 없습니다.'}};
+function applyDevice(){qAutoReset();GQ=gfxPick();applyGfx();$('btnDev').textContent=isMobile()?'조작: 모바일':'조작: PC'}
+const GFX={low:{pr:.8,sh:false,cl:false,far:18000,t:'낮음: 그림자·구름을 끄고 해상도를 낮춰요. 느린 기기용이에요.'},mid:{pr:1,sh:true,cl:true,far:34000,t:'보통: 그림자·구름을 켜고 기본 해상도로 그려요.'},high:{pr:2,sh:true,cl:true,far:42000,t:'높음: 블룸·갓레이·렌즈 플레어·색보정을 켜고 선명하게 그려요. 빠른 기기용이에요.'},ultra:{pr:2,sh:true,cl:true,far:64000,t:'낭만모드: 시뮬레이터급 최고 화질 · RTX 3050 · RAM 16GB에서도 동적 해상도로 프레임 유지 (여유 있으면 5K까지 올림) · 권장 RTX 5080 이상. 5K 렌더링 + 레이 트레이싱 지형 그림자 + 원거리 8K 그림자(빌딩·나무 3km) + 엔진 열기 아지랑이 + 블룸·갓레이·렌즈 플레어·색보정, 12.5m 지형, 나무 2배, 도시 21km. 고사양 PC용이에요.'}};
 const NOVAP=location.search.includes('novap');
 const WRECK=true;   // wreck mode is always on: every jet breaks apart
 let GQ=location.search.includes('lowgfx')?'low':'ultra';const GQ_BASE=GQ;const PRCAP_=0,PRCAP=+(new URLSearchParams(location.search).get('prcap')||9);   // ?lowgfx / ?prcap only for software-GPU testing   // ?lowgfx only for software-GPU testing
@@ -4853,15 +4860,39 @@ const GPU_MID=/RTX\s*(20[5-7]0|30[5-6]0|40[5-6]0|A[1-5]000)|GTX|MX\s?\d|Intel|Ir
 const DYN={s:GPU_MID?0:1,acc:0,n:0,cool:3};
 function gfxPR(){const q=GQ,g=GFX[q];if(q!=='ultra')return Math.min(devicePixelRatio,q==='high'?1.5:g.pr);const top=Math.min(3,PRCAP,Math.max(devicePixelRatio,(isMobile()?2560:5120)/Math.max(innerWidth,1))),nat=Math.min(devicePixelRatio,PRCAP);
   return DYN.s>=0?nat+(top-nat)*DYN.s:nat*(1+DYN.s)}
-function dynRes(dt){if(GQ!=='ultra'||st.paused||st.mode==='hangar')return;DYN.acc+=dt;DYN.n++;DYN.cool-=dt;if(DYN.n<60||DYN.cool>0)return;const avg=DYN.acc/DYN.n;DYN.acc=0;DYN.n=0;
-  let ns=DYN.s;if(avg>1/50)ns=Math.max(-.3,DYN.s-(avg>1/34?.25:.1));else if(avg<1/68)ns=Math.min(1,DYN.s+.06);if(Math.abs(ns-DYN.s)<.01)return;DYN.s=ns;DYN.cool=4;
+function dynRes(dt){if(GQ!=='ultra'||st.paused||st.mode==='hangar')return;DYN.acc+=dt;DYN.n++;DYN.cool-=dt;const qa=qAuto();if(DYN.n<(qa?30:60)||DYN.cool>0)return;const avg=DYN.acc/DYN.n;DYN.acc=0;DYN.n=0;
+  let ns=DYN.s;if(avg>1/50)ns=Math.max(-.3,DYN.s-(qa?(avg>1/34?.5:.25):(avg>1/34?.25:.1)));else if(avg<1/68)ns=Math.min(1,DYN.s+.06);if(Math.abs(ns-DYN.s)<.01)return;DYN.s=ns;DYN.cool=qa?1.5:4;
   const pr=gfxPR();if(Math.abs(renderer.getPixelRatio()-pr)<.02)return;renderer.setPixelRatio(pr);if(composer)makeComposer();resize()}
 function applyGfx(){const q=GQ,g=GFX[q];const pr=gfxPR();const prChanged=Math.abs(renderer.getPixelRatio()-pr)>.01;renderer.setPixelRatio(pr);RTU.value=q==='ultra'?1:0;{const sz=q==='ultra'?(isMobile()||GPU_MID?4096:Math.min(8192,renderer.capabilities.maxTextureSize||4096)):2048;if(sun.shadow.mapSize.x!==sz){sun.shadow.mapSize.set(sz,sz);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}}renderer.shadowMap.enabled=g.sh;
   scene.traverse(o=>{if(o.material&&o.material.needsUpdate!==undefined&&o.isMesh&&o.receiveShadow)o.material.needsUpdate=true});
   VCU.on.value=q==='ultra'&&!WX.cloudsOff&&!WX.cloudLess&&!location.search.includes('nocl')?1:0;TCS.value=VCU.on.value;
   if(cloudMesh)cloudMesh.visible=g.cl&&!WX.cloudsOff&&!VCU.on.value&&!WX.cloudLess;scene.fog.far=g.far*(WX.fogMul||1);const fx=q==='high'||q==='ultra';if(fx&&(!composer||prChanged))makeComposer();if(composer){gradePass.uniforms.ca.value=q==='ultra'?1:0;gradePass.uniforms.grain.value=q==='ultra'?.035:.018}foliageQ=q;for(const f of foliage){f.visible=q!=='low';f.count=q==='high'||q==='ultra'?f.userData.full:Math.round(f.userData.full*.45)}resize();
-  document.querySelectorAll('.seg:not(.wxseg):not(.wkseg) button').forEach(b=>b.setAttribute('aria-checked',b.dataset.q===q));document.querySelectorAll('.wxseg button').forEach(b=>b.setAttribute('aria-checked',b.dataset.w===(S.weather||'auto')));$('qInfo').textContent=g.t}
-document.querySelectorAll('.seg:not(.wxseg):not(.wkseg) button').forEach(b=>b.onclick=()=>{S.gfx=b.dataset.q;save();applyGfx()});
+  qUI();document.querySelectorAll('.wxseg button').forEach(b=>b.setAttribute('aria-checked',b.dataset.w===(S.weather||'auto')))}
+/* ---------- 설정 · 그래픽 모드: 자동 · 낮음 · 보통 · 높음 · 낭만모드 ----------
+   낭만모드 = 예전의 울트라 고정 화질 그대로 (동적 해상도 포함).
+   자동 = PC는 낭만모드, 휴대폰은 낮음에서 시작해요. 프레임이 떨어지면 한 단계씩 내리고, 6초 넘게 여유가 있으면 다시 올려요 (휴대폰은 보통까지만, 발열 때문에).
+   낭만모드에서는 먼저 동적 해상도를 끝까지(원래 해상도의 70%) 내려 보고, 그래도 느리거나 25fps 아래로 떨어질 때만 단계를 내려요.
+   자동일 때는 동적 해상도도 더 빨리 반응해요 (30프레임마다·1.5초 간격). 낭만모드로 다시 올려 볼 때는 가장 낮은 해상도부터 시작해요.
+   올렸다가 10초 안에 다시 느려지면 그 단계는 90초(두 배씩, 최대 5분) 동안 다시 시도하지 않아요. */
+const QORDER=['ultra','high','mid','low'],QNAME={ultra:'낭만모드',high:'높음',mid:'보통',low:'낮음'};
+const QA={cur:0,slow:0,ms:16.7,good:0,warm:0,chg:0,ban:{},banLen:90000,upAt:-1e9,upTo:-1};
+const qAuto=()=>GQ_BASE!=='low'&&!(S.gfx&&S.gfx!=='auto'&&GFX[S.gfx]);
+function gfxPick(){if(GQ_BASE==='low')return'low';return qAuto()?QORDER[QA.cur]:S.gfx}
+function qAutoReset(){QA.cur=isMobile()?3:0;QA.slow=0;QA.ms=16.7;QA.good=0;QA.warm=performance.now()+2500;QA.chg=0}
+function qAutoSet(i,now){QA.cur=i;QA.slow=0;QA.good=0;QA.chg=now+1200;QA.warm=now+1500;GQ=QORDER[i];if(GQ==='ultra'){DYN.s=-.3;DYN.acc=0;DYN.n=0;DYN.cool=1.5}applyGfx()}
+function qAutoTick(now,ms){if(!qAuto())return;
+  if(st.paused||st.mode==='hangar'){QA.warm=now+2500;return}               // 격납고·일시정지 중엔 재지 않아요
+  if(ms<=2||document.hidden||now<QA.warm||now<QA.chg)return;               // 탭 숨김·로딩·단계 바꾼 직후는 빼요
+  QA.slow+=((ms>22?1:0)-QA.slow)*.05;QA.ms+=(Math.min(ms,200)-QA.ms)*.05;const lv=QA.cur;
+  if(QA.slow>.3&&lv<QORDER.length-1&&(QORDER[lv]!=='ultra'||DYN.s<=-.29||QA.ms>40)){
+    if(now-QA.upAt<10000&&QA.upTo===lv){QA.ban[lv]=now+QA.banLen;QA.banLen=Math.min(QA.banLen*2,300000)}
+    qAutoSet(lv+1,now);return}
+  if(QA.slow<.03){QA.good+=ms;if(lv>(isMobile()?2:0)&&QA.good>6000&&!(QA.ban[lv-1]>now)){QA.upAt=now;QA.upTo=lv-1;qAutoSet(lv-1,now)}}else QA.good=0}
+function qUI(){const sel=qAuto()?'auto':S.gfx;document.querySelectorAll('.qseg button').forEach(b=>b.setAttribute('aria-checked',b.dataset.q===sel));
+  const el=$('qInfo');if(el)el.textContent=GQ_BASE==='low'?'테스트용 낮은 화질(?lowgfx)로 고정돼 있어요.':qAuto()?`자동: 지금 ${QNAME[GQ]||GQ} 화질로 그려요. 프레임이 떨어지면 한 단계씩 낮추고, 여유가 생기면 다시 올려요.`:GFX[GQ].t}
+document.querySelectorAll('.qseg button').forEach(b=>b.onclick=()=>{S.gfx=b.dataset.q;save();qAutoReset();GQ=gfxPick();applyGfx()});
+document.addEventListener('visibilitychange',()=>{QA.warm=performance.now()+2500});   // 탭에서 돌아온 직후 몇 초는 재지 않아요
+$('btnSet').onclick=()=>{qUI();$('settings').hidden=false};$('btnSetH').onclick=()=>{qUI();$('settings').hidden=false};$('btnSetClose').onclick=()=>{$('settings').hidden=true};
 document.querySelectorAll('.wxseg button').forEach(b=>b.onclick=()=>{S.weather=b.dataset.w;save();if(b.dataset.w!=='auto')setWeather(b.dataset.w==='rain');else applyGfx()});
 function rollWeather(){const w=S.weather||'auto';setWeather(w==='rain'||(w==='auto'&&Math.random()<.3))}
 $('btnHelp').onclick=()=>{$('keysOv').hidden=false};
@@ -6696,8 +6727,11 @@ async function submitScore(mode,score,wave,kills,tag){const D=await dbGet();if(!
 async function showRank(){$('rankOv').hidden=false;const el=$('rankList');el.innerHTML='<div class="hint">불러오는 중…</div>';const D=await dbGet();if(!D){el.innerHTML='<div class="hint">랭킹 서버에 연결하지 못했어요 (Claude 앱에서 열면 돼요)</div>';return}
   try{const q=await D.db.collection('scores').orderBy('score','desc').limit(30).get();const rows=q.docs.map(d=>d.data()).filter(r=>r.mode==='waves');const esc=t=>String(t??'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c]);
     el.innerHTML=rows.length?rows.map((r,i)=>`<div class="rk ${r.by&&r.by===D.id?'me':''}"><b>${i+1}</b><span class="n">${esc(r.name)}${r.tag==='coop'?' 👥':''}</span><span>${esc(r.plane)}</span><span>웨이브 ${+r.wave||0}</span><b class="num">${(+r.score||0).toLocaleString()}</b></div>`).join(''):'<div class="hint">아직 기록이 없어요. 웨이브 생존으로 첫 기록을 세워 보세요!</div>'}catch(e){el.innerHTML='<div class="hint">랭킹을 불러오지 못했어요</div>'}}
+let rafPrev=0,rafAvg=16.7;
 function frame(now){
-  requestAnimationFrame(frame);$('portrait').hidden=!(isMobile()&&st.mode!=='hangar'&&innerHeight>innerWidth);let dt=Math.max(0,Math.min((now-last)/1000,.05));last=Math.max(now,last);dynRes(dt);
+  requestAnimationFrame(frame);const rafGap=now-rafPrev;rafPrev=now;if(rafGap>2&&rafGap<100)rafAvg+=(rafGap-rafAvg)*.05;
+  if(rafAvg<10&&now-last<13)return;   // 120Hz 이상 화면(맥북 프로모션 등)은 60fps 까지만 그려요: 배터리·발열을 아끼고 프레임을 고르게
+  $('portrait').hidden=!(isMobile()&&st.mode!=='hangar'&&innerHeight>innerWidth);const gapMs=now-last;let dt=Math.max(0,Math.min((now-last)/1000,.05));last=Math.max(now,last);dynRes(dt);qAutoTick(now,gapMs);
   if(st.slowT>0){st.slowT-=dt;dt*=.35}   // hit-stop: a short slow-motion beat when you shoot something down
   if(st.mode==='hangar'){if(lastFilter){glc.style.filter='';lastFilter=''}
     if(hDrag==null)hYaw+=dt*.12;if(hFly.on&&hModel){hFlyUpdate(dt);const r=hLen*1.5+8;hCam.position.set(Math.sin(hYaw)*r,hLen*.2+1.5,Math.cos(hYaw)*r);hCam.lookAt(0,0,0);hFly.sky.position.copy(hCam.position)}
@@ -7229,7 +7263,7 @@ function paintRender(P){const el=document.getElementById('paintSheet'),cur=(S.pa
 {const _pc=paintColor;paintColor=function(id){const v=S.paint&&S.paint[id];if(v&&v.startsWith('c:'))return v.slice(2);return _pc.apply(this,arguments)}}
 
 /* ---------- ACCOUNTS · 개발자 선물 룰렛 · 프리미엄 패스 ----------
-   ID-only login (saved on this device). Every new account spins a roulette over every aircraft in the game and gets the one it lands on.
+   ID-only login (saved on this device). Every new account spins a roulette over aircraft up to 3rd-gen fighters (tiers 1-3, no bombers) and gets the one it lands on.
    Premium pass (1,000,000 에이스 골드): one more roulette spin every week, black/white gold-stripe paint for every aircraft, +1 nuke on nuclear bombers. */
 {const css=document.createElement('style');css.textContent=`
 #acctOv input{width:100%;box-sizing:border-box}.acctL{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.acctL button{background:#1b2733;color:#e9eef2;border:1px solid #33475a;border-radius:4px;padding:6px 10px;font-weight:700;cursor:pointer}
@@ -7253,7 +7287,8 @@ function acctShow(){let o=document.getElementById('acctOv');if(!o){o=document.cr
   const L=Object.keys(ACCTS);o.querySelector('#acctL').innerHTML=L.length?L.map(k=>`<button data-a="${k.replace(/"/g,'&quot;')}">${k===ACTIVE?'✓ ':''}${k.replace(/</g,'&lt;')}</button>`).join(''):'';
   o.querySelectorAll('#acctL button').forEach(b=>b.onclick=()=>acctLogin(b.dataset.a));o.hidden=false;setTimeout(()=>{try{o.querySelector('#acctIn').focus()}catch(e){}},50)}
 // the roulette: a strip of every aircraft spins under the gold marker and stops on the gift
-function roulette(title,sub,onWin){const pool=PLANES.filter(p=>!p.hidden);const win=pool[Math.floor(Math.random()*pool.length)];
+const GIFT_OK=p=>p.tier>=1&&p.tier<=3&&!p.bomber;   // 가입 선물은 프로펠러기부터 3세대 전투기(냉전 초음속기)까지만. 4세대 이상·5세대·특별 기체와 폭격기는 안 줘요
+function roulette(title,sub,onWin,ok){const pool=PLANES.filter(p=>!p.hidden&&(!ok||ok(p)));const win=pool[Math.floor(Math.random()*pool.length)];
   let o=document.getElementById('rlOv');if(o)o.remove();o=document.createElement('div');o.id='rlOv';o.className='ov';o.style.zIndex=61;
   o.innerHTML=`<div class="sheet" style="width:min(760px,96vw);text-align:center"><h2 style="margin:0">${title}</h2><div class="hint">${sub}</div><div class="rlWin"><div class="rlStrip" id="rlStrip"></div><div class="rlMark"></div></div><div id="rlRes" style="min-height:44px;font-weight:800;font-size:18px"></div><button class="tile primary" id="rlBtn"><b>돌리기!</b></button></div>`;
   document.body.appendChild(o);const N=64,W=52,cards=[];for(let i=0;i<N;i++)cards.push(i===W?win:pool[Math.floor(Math.random()*pool.length)]);
@@ -7325,7 +7360,7 @@ function goldShow(){let o=document.getElementById('goldOv');if(!o){o=document.cr
  const sb=document.getElementById('btnShop');if(sb){const b=document.createElement('button');b.className='pass';b.id='btnGold';b.textContent='💎 골드 충전';b.style.color='#ffd23a';b.onclick=goldShow;sb.after(b)}}
 // first visit: log in; a brand-new account spins its gift roulette
 if(!location.search.includes('dbg')){if(!ACTIVE||!ACCTS[ACTIVE])setTimeout(acctShow,400);
-  else{let g=null;try{g=localStorage.getItem('st-gift')}catch(e){}if(g===ACTIVE){try{localStorage.removeItem('st-gift')}catch(e){}S.acct={id:ACTIVE,t:Date.now()};save();setTimeout(()=>roulette('🎁 가입 선물 룰렛',`${ACTIVE} 님, 가입 축하해요! 모든 기체 중 하나를 선물로 드려요`,giveGift),700)}}}
+  else{let g=null;try{g=localStorage.getItem('st-gift')}catch(e){}if(g===ACTIVE){try{localStorage.removeItem('st-gift')}catch(e){}S.acct={id:ACTIVE,t:Date.now()};save();setTimeout(()=>roulette('🎁 가입 선물 룰렛',`${ACTIVE} 님, 가입 축하해요! 프로펠러기부터 3세대 전투기까지 중 하나를 선물로 드려요`,giveGift,GIFT_OK),700)}}}
 
 /* ---------- 4. REPLAY & HIGHLIGHTS: the last 3 minutes are recorded; after a battle watch it again, watch just your kills in slow motion, or save the highlights as a video ---------- */
 const RP={buf:[],ev:[],t:0,acc:0,ids:new WeakMap(),nid:1,play:null,rec:null};
@@ -8353,7 +8388,7 @@ const BOOT_LINES=['All systems online. Welcome back, pilot.','Avionics online. W
 addEventListener('pointerdown',lobbyMusic);addEventListener('keydown',lobbyMusic);
 $('btnMus').textContent=S.music===false?'소리 켜기':'소리 끄기';
 $('btnMus').onclick=()=>{S.music=S.music===false;save();$('btnMus').textContent=S.music===false?'소리 켜기':'소리 끄기';if(S.music===false){sfx.music(false);sfx.hum(0)}else{st.ambOn=false;lobbyMusic()}};requestAnimationFrame(frame);
-window.__game={getModel,withLoading,NET,H,hModel:()=>hModel,st,S,units:()=>units,player:()=>player,update,THREE,aimDir,startMatch,startTutorial,toHangar,save};
+window.__game={getModel,withLoading,NET,H,hModel:()=>hModel,st,S,units:()=>units,player:()=>player,update,THREE,aimDir,startMatch,startTutorial,toHangar,save,quality:()=>({GQ,auto:qAuto(),lvl:QA.cur,slow:+QA.slow.toFixed(2),qms:+QA.ms.toFixed(1),dyn:+DYN.s.toFixed(2),pr:+renderer.getPixelRatio().toFixed(2),sh:renderer.shadowMap.enabled,frameMs:+rafAvg.toFixed(1)})};
 </script>
 
 </body>
