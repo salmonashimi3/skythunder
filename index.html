@@ -1,6 +1,121 @@
 <!doctype html>
 <html lang="ko">
 <head>
+<script>/* 언어 (판매용 · 대회판 공용): 첫 실행 때 언어를 고르고, 화면에 나오는 한국어 글자를 그 언어로 바꿔 보여줘요.
+   i18n/keys.js = 한국어 원문 목록(숫자는 #, 바뀌는 말은 {}), i18n/<언어>.js = 같은 순서의 번역 ({0},{1}… = 원문의 #/{} 자리) */
+(function(){
+ var LANGS=[['ko','한국어','Korean'],['en','English','English'],['ja','日本語','Japanese'],['zh','简体中文','Chinese (Simplified)'],['zh-Hant','繁體中文','Chinese (Traditional)'],
+  ['es','Español','Spanish'],['fr','Français','French'],['de','Deutsch','German'],['pt','Português','Portuguese'],['ru','Русский','Russian'],['it','Italiano','Italian'],
+  ['tr','Türkçe','Turkish'],['pl','Polski','Polish'],['uk','Українська','Ukrainian'],['vi','Tiếng Việt','Vietnamese'],['th','ไทย','Thai'],['id','Bahasa Indonesia','Indonesian'],
+  ['hi','हिन्दी','Hindi'],['ar','العربية','Arabic'],['nl','Nederlands','Dutch'],['sv','Svenska','Swedish'],['cs','Čeština','Czech'],['el','Ελληνικά','Greek'],['he','עברית','Hebrew'],
+  ['ro','Română','Romanian'],['hu','Magyar','Hungarian'],['da','Dansk','Danish'],['fi','Suomi','Finnish'],['no','Norsk','Norwegian'],['bn','বাংলা','Bengali'],['hr','Hrvatski','Croatian'],
+  ['sk','Slovenčina','Slovak'],['bg','Български','Bulgarian'],['lt','Lietuvių','Lithuanian'],['sl','Slovenščina','Slovenian'],['ta','தமிழ்','Tamil'],['te','తెలుగు','Telugu'],
+  ['mr','मराठी','Marathi'],['kn','ಕನ್ನಡ','Kannada']];
+ var FONTS={ja:'"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo"',zh:'"Noto Sans SC","PingFang SC","Microsoft YaHei"','zh-Hant':'"Noto Sans TC","PingFang TC","Microsoft JhengHei"',
+  th:'"Noto Sans Thai","Leelawadee UI","Thonburi"',hi:'"Noto Sans Devanagari","Nirmala UI","Kohinoor Devanagari"',mr:'"Noto Sans Devanagari","Nirmala UI"',bn:'"Noto Sans Bengali","Nirmala UI"',
+  ta:'"Noto Sans Tamil","Nirmala UI"',te:'"Noto Sans Telugu","Nirmala UI"',kn:'"Noto Sans Kannada","Nirmala UI"',ar:'"Noto Sans Arabic","Segoe UI","Geeza Pro"',he:'"Noto Sans Hebrew","Segoe UI","Arial Hebrew"'};
+ var KEY='pa-lang',lang=null;
+ try{lang=localStorage.getItem(KEY)}catch(e){}
+ var qs=new URLSearchParams(location.search),ql=qs.get('lang');if(ql)lang=ql;
+ if(!lang&&qs.has('dbg'))lang='ko';   // 자동 테스트는 바로 한국어로
+ var HG=/[가-힣ㄱ-ㆎ]/,DICT=null,TEMPL=[],cache=new Map(),MISS=globalThis.PA_MISS=new Set();
+ function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+ function hc(o){var n=0;for(var i=0;i<o.length;i++){var c=o.charCodeAt(i);if(c>=0xAC00&&c<=0xD7A3)n++}return n}
+ function build(){var K=globalThis.PA_KEYS,V=globalThis.PA_TR;if(!K||!V)return false;DICT=new Map();TEMPL=[];
+  var seen=new Set(K);
+  for(var i=0;i<K.length;i++){var v=V[i],k=K[i];if(v==null||v==='')continue;
+   add(k,v);
+   // "· 상승한도 {}m" also as "상승한도 {}m" (a list piece that lost its separator)
+   var m1=/^[·・•]\s*/.exec(k),m2=/\s*[·・•]$/.exec(k);
+   if(m1){var k2=k.slice(m1[0].length);if(k2&&!seen.has(k2)){seen.add(k2);add(k2,v.replace(/^\s*[·・•]\s*/,''))}}
+   if(m2){var k3=k.slice(0,k.length-m2[0].length);if(k3&&!seen.has(k3)){seen.add(k3);add(k3,v.replace(/\s*[·・•]\s*$/,''))}}}
+  TEMPL.sort(function(a,b){return b.w-a.w});cache.clear();return true}
+ function add(k,v){
+  if(k.indexOf('{}')<0){DICT.set(k,v);return}
+  var kinds=[],lz=[],gr=[];k.split(/(\{\}|#)/).forEach(function(p){
+   if(p==='{}'){kinds.push('s');lz.push('([\\s\\S]+?)');gr.push('([\\s\\S]+)');return}
+   if(p==='#'){kinds.push('n');lz.push('(\\d+(?:[.,]\\d+)*)');gr.push('(\\d+(?:[.,]\\d+)*)');return}
+   var e=esc(p).replace(/ +/g,'\\s+');lz.push(e);gr.push(e)});
+  try{TEMPL.push({re:new RegExp('^'+lz.join('')+'$'),rg:new RegExp('^'+gr.join('')+'$'),v:v,kinds:kinds,w:k.replace(/\{\}|#/g,'').length})}catch(e){}}
+ function fill(v,a){return v.replace(/\{(\d+)\}/g,function(_,i){return a[+i]!=null?a[+i]:''})}
+ var depth=0;
+ function core(s){
+  if(++depth>6){depth--;return s}
+  try{return core2(s)}finally{depth--}}
+ function core2(s){
+  var nums=[],k=s.replace(/\d+(?:[.,]\d+)*/g,function(x){nums.push(x);return'#'}).replace(/\s+/g,' ');
+  var v=DICT.get(k);if(v!=null)return fill(v,nums);
+  // templates: try the lazy and the greedy split, keep the one that leaves the least Korean
+  var best=null,bh=1e9,tries=0;
+  for(var i=0;i<TEMPL.length&&tries<4;i++){var t=TEMPL[i],hit=false;
+   for(var r=0;r<2;r++){var m=(r?t.rg:t.re).exec(s);if(!m)continue;hit=true;
+    var a=[];for(var j=1;j<m.length;j++){var x=m[j];a.push(t.kinds[j-1]==='s'&&HG.test(x)?core(x.trim()):x)}
+    var o=fill(t.v,a),h=hc(o);if(h<bh){best=o;bh=h}if(!h)return o}
+   if(hit)tries++}
+  if(best!==null&&bh===0)return best;
+  // a leading icon (🔒, 🏆, ⛽…) or a trailing hotkey "[4]" around a known phrase
+  var pm=/^([^가-힣A-Za-z0-9]+)([\s\S]*[가-힣][\s\S]*)$/.exec(s);
+  if(pm){var pre=pm[1],cuts=[];for(var c=0;c<pre.length;c++)if(pre[c]===' ')cuts.push(c+1);if(cuts[cuts.length-1]!==pre.length)cuts.push(pre.length);
+   for(var q=0;q<cuts.length;q++){var r1=core(s.slice(cuts[q]));if(!hc(r1))return s.slice(0,cuts[q])+r1}}
+  var sm=/^([\s\S]*?[가-힣][\s\S]*?)(\s*\[[^\]]{1,6}\]\s*)$/.exec(s);
+  if(sm){var r2=core(sm[1]);if(!hc(r2))return r2+sm[2]}
+  var parts=s.split(/( · | \| |\n| — | ― |: | \/ |, )/);
+  if(parts.length>1){var o2=parts.map(function(p,i){return i%2||!HG.test(p)?p:p.replace(/^(\s*)([\s\S]*?)(\s*)$/,function(_,a,b,c){return a+core(b)+c})}).join('');
+   if(best!==null&&hc(best)<=hc(o2))return best;return o2}
+  if(best!==null)return best;
+  return s.replace(/[가-힣]+(?: [가-힣]+)*/g,function(w){var y=DICT.get(w);if(y!=null&&y.indexOf('{')<0)return y;
+   return w.split(' ').map(function(x){var z=DICT.get(x);return z!=null&&z.indexOf('{')<0?z:x}).join(' ')})}
+ function tr(s){if(!DICT||typeof s!=='string'||!HG.test(s))return s;var c=cache.get(s);if(c!==undefined)return c;
+  var m=/^(\s*)([\s\S]*?)(\s*)$/.exec(s.replace(/([13])인칭/g,function(_,d){return d==='1'?'일인칭':'삼인칭'})),o;try{o=m[1]+core(m[2])+m[3]}catch(e){o=s}
+  if(cache.size>12000)cache.clear();cache.set(s,o);if(HG.test(o)&&MISS.size<3000)MISS.add(s);return o}
+ globalThis.PA_T=tr;
+ // ---- DOM ----
+ var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,NOSCRIPT:1},last=new WeakMap(),ATTR=['placeholder','title','aria-label','alt','data-tip','data-title'];
+ function skipEl(p){return !p||SKIP[p.nodeName]||(p.closest&&p.closest('[data-notr],#paLang,#chatBox,#chatLog'))}
+ function doText(n){var v=n.nodeValue;if(!v||!HG.test(v)||last.get(n)===v)return;if(skipEl(n.parentNode))return;var t=tr(v);if(t!==v){last.set(n,t);n.nodeValue=t}}
+ function doEl(e){if(!e.getAttribute)return;for(var i=0;i<ATTR.length;i++){var v=e.getAttribute(ATTR[i]);if(v&&HG.test(v)){var t=tr(v);if(t!==v)e.setAttribute(ATTR[i],t)}}
+  if(e.tagName==='INPUT'&&(e.type==='button'||e.type==='submit')&&HG.test(e.value))e.value=tr(e.value)}
+ function walk(r){if(r.nodeType===3){doText(r);return}if(r.nodeType!==1||SKIP[r.nodeName])return;doEl(r);
+  var w=document.createTreeWalker(r,5),n;while((n=w.nextNode())){if(n.nodeType===3)doText(n);else doEl(n)}}
+ var started=false;
+ function start(){if(started||!DICT)return;started=true;
+  if(document.documentElement)walk(document.documentElement);
+  new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='characterData')doText(m.target);else if(m.type==='attributes')doEl(m.target);else for(var j=0;j<m.addedNodes.length;j++)walk(m.addedNodes[j])}})
+   .observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTR.concat(['value'])});
+  var C=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;
+  if(C){['fillText','strokeText'].forEach(function(f){var o=C[f];C[f]=function(t){if(typeof t==='string'&&HG.test(t))arguments[0]=tr(t);return o.apply(this,arguments)}});
+   var mt=C.measureText;C.measureText=function(t){return mt.call(this,typeof t==='string'&&HG.test(t)?tr(t):t)}}
+  ['alert','confirm','prompt'].forEach(function(f){var o=window[f];if(o)window[f]=function(t){var a=[].slice.call(arguments);if(typeof t==='string')a[0]=tr(t);return o.apply(window,a)}});
+  var td=Object.getOwnPropertyDescriptor(Document.prototype,'title');
+  if(td&&td.set)Object.defineProperty(document,'title',{configurable:true,get:function(){return td.get.call(document)},set:function(v){td.set.call(document,tr(v))}});
+  try{if(document.querySelector('title'))document.title=document.title}catch(e){}}
+ function setLangAttr(l){var d=document.documentElement;d.lang=l==='zh'?'zh-CN':l==='zh-Hant'?'zh-TW':l;
+  if(FONTS[l]){var st=document.createElement('style');st.textContent=':root{--f-kr:'+FONTS[l]+',system-ui,sans-serif;--f-ui:"Saira Semi Condensed",'+FONTS[l]+',system-ui,sans-serif}';(document.head||d).appendChild(st)}}
+ function loadScripts(l,cb){var n=0,left=2,done=function(){if(--left===0)cb()};
+  ['i18n/keys.js','i18n/'+l+'.js'].forEach(function(u){var s=document.createElement('script');s.src=u+'?v='+(globalThis.PA_I18N_V||'1');s.onload=done;s.onerror=done;(document.head||document.documentElement).appendChild(s)})}
+ // ---- 언어 고르기 화면 ----
+ function picker(onPick){var ov=document.createElement('div');ov.id='paLang';
+  var nav=(navigator.language||'en').toLowerCase(),guess=nav.indexOf('zh')===0?(/tw|hk|hant/.test(nav)?'zh-Hant':'zh'):nav.split('-')[0];if(guess==='nb'||guess==='nn')guess='no';if(guess==='iw')guess='he';
+  var L=LANGS.slice().sort(function(a,b){return(b[0]===guess)-(a[0]===guess)});
+  var brand=((document.title||'').split(' · ').pop()||'PROJECT ACE').toUpperCase();
+  ov.innerHTML='<div class="box"><h1>'+brand.replace(/[<>&]/g,'')+'<small>Select your language · 언어를 선택하세요</small></h1><div class="wait"></div><div class="grid">'+
+   L.map(function(x){return'<button data-l="'+x[0]+'"'+(x[0]===(lang||guess)?' class="on"':'')+'>'+x[1]+'<small>'+x[2]+'</small></button>'}).join('')+'</div></div>';
+  (document.body||document.documentElement).appendChild(ov);
+  ov.querySelectorAll('button').forEach(function(b){b.onclick=function(){var l=b.dataset.l;ov.querySelector('.wait').textContent='…';try{localStorage.setItem(KEY,l)}catch(e){}onPick(l,ov)}})}
+ globalThis.PA_LANG_PICK=function(){picker(function(l){location.reload()})};
+ globalThis.PA_LANG=function(){return lang||'ko'};
+ if(lang&&lang!=='ko'){
+  setLangAttr(lang);
+  if(document.readyState==='loading'){document.write('<script src="i18n/keys.js"><\/script><script src="i18n/'+lang+'.js"><\/script>');
+   document.addEventListener('readystatechange',function(){if(!started&&build())start()});
+   // the two scripts above run before the body is parsed: build right after them
+   document.write('<script>window.PA_I18N_GO&&window.PA_I18N_GO()<\/script>')}
+  else loadScripts(lang,function(){if(build())start()})}
+ globalThis.PA_I18N_GO=function(){if(!started&&build())start()};
+ if(!lang){var show=function(){picker(function(l,ov){lang=l;if(l==='ko'){ov.remove();return}setLangAttr(l);loadScripts(l,function(){if(build())start();ov.remove()})})};
+  if(document.body)show();else document.addEventListener('DOMContentLoaded',show)}
+})();
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>창공전선 · Sky Frontline</title>
@@ -195,6 +310,168 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .parts div{display:flex;justify-content:space-between;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:4px}.parts b{font-family:var(--f-ui)}
 .item{padding:12px;border:1px solid var(--line);border-radius:6px}
 @media (max-width:860px){#hangar{grid-template-columns:1fr;grid-template-rows:auto 160px 1fr auto auto;overflow:auto}.stage{min-height:120px}}
+</style>
+<style>/* ===== PROJECT ACE hangar (War Thunder-style layout) ===== */
+#hangar.wt{display:block;padding:0;--wtTop:64px;--wtBot:224px;--wtPanel:rgba(13,17,22,.86);--wtPanel2:rgba(22,28,35,.92);--wtEdge:rgba(255,255,255,.09);--wtRed:#d8282a;--wtRed2:#8f1214}
+#hangar.wt>*{pointer-events:auto}
+#hangar.wt button{font-family:var(--f-ui)}
+/* --- top bar --- */
+#hangar.wt>.top{position:absolute;left:0;right:0;top:0;height:var(--wtTop);display:flex;align-items:center;gap:12px;flex-wrap:nowrap;padding:0 14px;box-sizing:border-box;
+  background:linear-gradient(180deg,rgba(9,12,16,.97),rgba(12,16,21,.88));border-bottom:1px solid var(--wtEdge);box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:3}
+#hangar.wt .brand{font-size:21px;line-height:1;white-space:nowrap;letter-spacing:.1em;color:#f2f5f7}
+#hangar.wt .brand small{display:block;margin-top:5px;font-size:9.5px;letter-spacing:.32em;color:#e3a73c}
+#hangar.wt .modesw{display:none}
+.wtProf{display:flex;align-items:center;gap:10px;padding:5px 12px 5px 6px;background:rgba(255,255,255,.04);border:1px solid var(--wtEdge);border-radius:4px;min-width:0;max-width:min(290px,calc(50vw - 330px));cursor:pointer;overflow:hidden}
+.wtAv{flex:none;width:38px;height:38px;border-radius:4px;display:grid;place-items:center;background:linear-gradient(135deg,#3d4c5c,#1c252e);border:1px solid rgba(255,255,255,.18);font:700 17px var(--f-ui);color:#ffd27a;text-transform:uppercase}
+.wtWho{display:grid;gap:3px;min-width:0}
+.wtWho b{font:600 15px var(--f-ui);color:#f1f4f6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wtWho .wtLv{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim);white-space:nowrap;min-width:0}
+#wtProgT{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.wtWho .wtLv .num{color:#ffd27a;font-weight:700;font-size:12px}
+.wtWho .prog{width:92px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden}
+.wtWho .prog i{display:block;height:100%;background:linear-gradient(90deg,#e3a73c,#ffd27a)}
+#hangar.wt .lvl{display:none}
+.wtGo{position:absolute;left:50%;top:6px;transform:translateX(-50%);display:grid;justify-items:center;gap:3px;z-index:4}
+#wtGoBtn{display:block;margin:0;min-width:250px;height:44px;padding:0 54px;border:0;border-radius:0;cursor:pointer;color:#fff;font:800 25px/44px var(--f-ui);letter-spacing:.14em;text-align:center;
+  background:linear-gradient(180deg,#ef4136 0%,var(--wtRed) 48%,var(--wtRed2) 100%);clip-path:polygon(16px 0,calc(100% - 16px) 0,100% 50%,calc(100% - 16px) 100%,16px 100%,0 50%);
+  text-shadow:0 1px 0 rgba(0,0,0,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);transition:filter .15s}
+#wtGoBtn:hover{filter:brightness(1.12)}
+#wtGoBtn:active{filter:brightness(.92)}
+#wtModeBtn{display:flex;align-items:center;gap:7px;margin:0;padding:2px 14px 3px;border:1px solid var(--wtEdge);border-top:0;border-radius:0 0 6px 6px;background:rgba(8,10,13,.9);color:#e9eef2;font:600 12px var(--f-ui);letter-spacing:.03em;cursor:pointer;max-width:360px;white-space:nowrap}
+#wtModeBtn span{overflow:hidden;text-overflow:ellipsis}
+#wtModeBtn:hover{background:rgba(30,36,44,.95)}
+#wtModeBtn i{font-style:normal;color:#e3a73c;font-size:10px}
+#hangar.wt .tright{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
+#hangar.wt .tright>*{flex:none}
+#hangar.wt .coins{padding:4px 10px;border-radius:4px;background:rgba(255,255,255,.04);border-color:var(--wtEdge);white-space:nowrap;cursor:pointer}
+#hangar.wt .coins b{font-size:15px}
+#hangar.wt .tright .pass{padding:7px 12px;white-space:nowrap}
+#wtMenuBtn{display:grid;place-items:center;width:40px;height:36px;margin:0;padding:0;font-size:20px;color:#e9eef2;border:1px solid var(--wtEdge);background:rgba(255,255,255,.04);border-radius:4px;cursor:pointer}
+#wtMenu{position:absolute;right:10px;top:calc(var(--wtTop) - 2px);display:none;flex-direction:column;gap:4px;min-width:200px;padding:8px;background:var(--wtPanel2);border:1px solid var(--wtEdge);border-radius:6px;box-shadow:0 12px 36px rgba(0,0,0,.5);z-index:9}
+#hangar.wt.wtMenuOpen #wtMenu{display:flex}
+#wtMenu>button{display:block;width:100%;margin:0;padding:9px 12px;text-align:left;font-size:13px;color:#e9eef2;background:rgba(255,255,255,.03);border:1px solid transparent;border-radius:4px;white-space:nowrap}
+#wtMenu>button:hover{background:rgba(255,255,255,.08);border-color:var(--wtEdge)}
+#wtMenu hr{width:100%;border:0;border-top:1px solid var(--wtEdge);margin:3px 0}
+/* --- left icon strip --- */
+.wtLeft{position:absolute;left:0;top:calc(var(--wtTop) + 18px);display:grid;gap:2px;padding:4px 3px;background:var(--wtPanel);border:1px solid var(--wtEdge);border-left:0;border-radius:0 5px 5px 0;z-index:2}
+.wtLeft button{display:grid;place-items:center;width:34px;height:34px;margin:0;padding:0;font-size:16px;line-height:1;background:none;border:0;border-radius:4px;color:#dfe6ec;cursor:pointer;position:relative}
+.wtLeft button:hover{background:rgba(255,255,255,.09)}
+.wtLeft button[data-tip]:hover::after{content:attr(data-tip);position:absolute;left:40px;top:50%;transform:translateY(-50%);white-space:nowrap;padding:5px 9px;background:#0c0f13;border:1px solid var(--wtEdge);border-radius:4px;font:500 12px var(--f-kr);color:#e9eef2;pointer-events:none}
+.wtLeft .dot{position:absolute;right:4px;top:4px;width:7px;height:7px;border-radius:50%;background:#ffd23a;box-shadow:0 0 6px #ffd23a}
+/* --- right panels (War Thunder "Pages of History" / "Battlepass" style) --- */
+#hangar.wt>.spec{position:absolute;right:10px;top:calc(var(--wtTop) + 14px);width:300px;max-height:calc(100% - var(--wtTop) - var(--wtBot) - 40px);overflow:auto;display:flex;flex-direction:column;gap:6px;
+  background:none;border:0;border-radius:0;padding:0;z-index:2;scrollbar-width:thin}
+#hangar.wt>.spec>h3{display:none}
+.wtSec{background:var(--wtPanel);border:1px solid var(--wtEdge);border-radius:4px;overflow:hidden;flex:none}
+.wtHd{display:flex;align-items:center;gap:9px;margin:0;width:100%;padding:8px 12px;border:0;border-radius:0;background:linear-gradient(90deg,rgba(255,255,255,.07),rgba(255,255,255,.02));color:#eef2f5;font:600 13.5px var(--f-ui);letter-spacing:.04em;cursor:pointer;text-align:left}
+.wtHd::before{content:'';flex:none;width:7px;height:7px;border-right:2px solid #c9d2da;border-bottom:2px solid #c9d2da;transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
+.wtSec.col .wtHd::before{transform:rotate(-45deg)}
+.wtHd em{margin-left:auto;font-style:normal;font-size:11px;font-weight:600;padding:2px 7px;border-radius:3px;background:#2f7d43;color:#eaffef}
+.wtHd em.red{background:#a32428;color:#fff}
+.wtBd{padding:8px 12px 11px}
+.wtSec.col .wtBd{display:none}
+.wtSec.link .wtHd::before{transform:rotate(-45deg)}
+#hangar.wt .bars{display:grid;gap:7px}
+#hangar.wt .bar{display:grid;grid-template-columns:62px 1fr 46px;gap:8px;align-items:center;font-size:12px}
+#hangar.wt .wpn{margin-top:9px;font-size:11.5px;line-height:1.6;color:var(--dim)}
+#hangar.wt .wpn b{color:#e9eef2;font-weight:600}
+#hangar.wt .tabs{margin:0 0 8px}
+#hangar.wt .heliSpec{padding:2px 0}
+/* --- bottom: research row, nation tabs, aircraft cards, presets --- */
+.wtBottom{position:absolute;left:0;right:0;bottom:0;height:var(--wtBot);display:grid;grid-template-rows:38px 1fr 30px;
+  background:linear-gradient(180deg,rgba(8,11,14,0) 0,rgba(8,11,14,.72) 26px,rgba(8,11,14,.93) 60px);z-index:2}
+.wtNat{display:flex;align-items:flex-end;gap:2px;padding:0 10px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.wtNat::-webkit-scrollbar{display:none}
+.wtRes{flex:none;display:flex;align-items:center;gap:8px;margin:0 10px 0 0;padding:4px 12px 5px 6px;background:rgba(10,13,17,.78);border:1px solid var(--wtEdge);border-bottom:0;border-radius:4px 4px 0 0;
+  color:#f3f6f8;font:800 17px var(--f-ui);font-style:italic;letter-spacing:.06em;cursor:pointer}
+.wtRes i{font-style:normal;display:inline-block;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:8px solid #d9e0e6;transform:translateY(-1px)}
+#hangar.wt.showRoster .wtRes i{transform:rotate(180deg)}
+.wtTab{flex:none;display:flex;align-items:center;gap:7px;margin:0;padding:6px 10px 7px;background:rgba(14,18,23,.66);border:1px solid transparent;border-bottom:0;border-radius:4px 4px 0 0;color:#cfd8df;font:600 12.5px var(--f-ui);letter-spacing:.05em;cursor:pointer;white-space:nowrap}
+.wtTab svg{flex:none;width:30px;height:20px;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
+.wtTab small{font-size:10.5px;color:var(--dim);font-weight:500}
+.wtTab:hover{background:rgba(30,37,45,.85);color:#fff}
+.wtTab.on{background:rgba(32,40,50,.97);border-color:rgba(227,167,60,.55);color:#fff;box-shadow:inset 0 2px 0 #e3a73c}
+.wtSearch{flex:none;margin:0 0 0 12px;width:190px;height:22px;padding:2px 10px;box-sizing:border-box;border-radius:3px;border:1px solid var(--wtEdge);background:rgba(255,255,255,.06);color:#e9eef2;font:inherit;font-size:12px}
+.wtCards{position:relative;display:flex;align-items:stretch;gap:6px;padding:8px 10px;overflow-x:auto;overflow-y:hidden;background:rgba(22,27,34,.97);border-top:1px solid rgba(227,167,60,.35);scrollbar-width:thin;scroll-behavior:smooth}
+.wtTier{flex:none;writing-mode:vertical-rl;transform:rotate(180deg);display:grid;place-items:center;padding:0 3px;font:700 11px var(--f-ui);letter-spacing:.3em;color:#e3a73c;background:rgba(227,167,60,.08);border-radius:3px}
+.wtTier.lk{color:#77818a;background:rgba(255,255,255,.03)}
+.wtCard{flex:none;position:relative;width:184px;margin:0;padding:0;border:1px solid rgba(255,255,255,.1);border-radius:3px;overflow:hidden;cursor:pointer;display:block;text-align:left;
+  background:radial-gradient(120% 90% at 50% 30%,#3a4654 0,#1d242c 70%);transition:border-color .12s,transform .12s}
+.wtCard:hover{border-color:rgba(255,255,255,.35)}
+.wtCard img{position:absolute;inset:4px 4px 22px;width:calc(100% - 8px);height:calc(100% - 26px);object-fit:contain;filter:drop-shadow(0 4px 5px rgba(0,0,0,.55))}
+.wtCard .ph{position:absolute;inset:0 0 22px;display:grid;place-items:center;font-size:34px;opacity:.25}
+.wtCard .nm{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:6px;padding:3px 7px;background:rgba(5,7,9,.78);font:600 12.5px var(--f-ui);color:#f1f4f6;white-space:nowrap}
+.wtCard .nm span{overflow:hidden;text-overflow:ellipsis}
+.wtCard .nm b{margin-left:auto;font:600 11px var(--f-ui);color:#e3a73c}
+.wtCard .br{position:absolute;right:5px;top:4px;padding:1px 6px;border-radius:3px;background:rgba(0,0,0,.6);font:700 11px var(--f-mono,monospace);color:#ffd27a}
+.wtCard .st{position:absolute;left:5px;top:4px;padding:1px 6px;border-radius:3px;font:600 10.5px var(--f-ui);background:rgba(0,0,0,.55);color:#cfd8df}
+.wtCard.own .st{color:#8dffa9}
+.wtCard.lock{filter:grayscale(.7) brightness(.7)}
+.wtCard.lock .st{color:#ff9d8f}
+.wtCard.view{border-color:#e3a73c;box-shadow:0 0 0 1px #e3a73c,0 0 18px rgba(227,167,60,.35)}
+.wtCard.ride .st{background:#2f7d43;color:#eaffef}
+.wtEmpty{align-self:center;padding:0 20px;color:var(--dim);font-size:13px}
+.wtPre{display:flex;align-items:center;gap:4px;padding:0 10px;background:rgba(6,8,10,.98);border-top:1px solid var(--wtEdge);min-width:0}
+.wtPre>span{font:700 11px var(--f-ui);letter-spacing:.14em;color:var(--dim);margin-right:6px;text-transform:uppercase}
+.wtPre button{margin:0;padding:3px 18px;border:1px solid transparent;border-radius:3px;background:rgba(255,255,255,.05);color:#cfd8df;font:600 12.5px var(--f-ui)}
+.wtPre button.on{background:#2c3a52;border-color:#4d6a93;color:#fff}
+.wtPre .wtRide{margin-left:auto;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wtPre .wtRide b{color:#e9eef2}
+#hangar.wt .hpick{display:flex;gap:6px;align-items:stretch}
+#hangar.wt.heli .wtNat>.wtTab,#hangar.wt.heli .wtNat>.wtSearch,#hangar.wt.heli .wtCards>:not(.hpick){display:none!important}
+#hangar.wt:not(.heli) .wtCards>.hpick{display:none!important}
+#hangar.wt .hpick button{min-width:170px}
+/* --- vehicle title over the scene --- */
+#hangar.wt>.stage{position:absolute;left:58px;bottom:calc(var(--wtBot) + 10px);min-height:0;align-items:flex-start;gap:2px;pointer-events:none;z-index:1}
+#hangar.wt .stage .nm{font-size:30px;line-height:1.05;text-align:left}
+#hangar.wt .stage .sub{font-size:12.5px;max-width:min(70vw,760px);text-align:left}
+/* --- research list (full roster) as a drawer above the cards --- */
+#hangar.wt>.roster{display:none}
+#hangar.wt.showRoster>.roster{display:flex;position:absolute;left:10px;bottom:calc(var(--wtBot) + 4px);width:min(420px,calc(100% - 20px));max-height:calc(100% - var(--wtTop) - var(--wtBot) - 18px);z-index:5;
+  background:var(--wtPanel2);border:1px solid var(--wtEdge);box-shadow:0 -10px 40px rgba(0,0,0,.45)}
+#hangar.wt.showRoster>.roster #pSearch{display:none}
+/* --- briefing (helicopter) --- */
+#hangar.wt>.hbrief{position:absolute;left:52px;top:calc(var(--wtTop) + 14px);width:300px;max-height:calc(100% - var(--wtTop) - var(--wtBot) - 120px);height:auto;z-index:2;background:var(--wtPanel)}
+/* --- game-mode picker: the old dock becomes a modal --- */
+#hangar.wt>.foot.dock{display:none}
+#hangar.wt.wtModesOpen>.foot.dock{display:block;position:fixed;inset:0;z-index:8;padding:calc(var(--wtTop) + 14px) 24px 24px;box-sizing:border-box;overflow:auto;
+  columns:270px;column-gap:12px;background:rgba(5,7,9,.84);backdrop-filter:blur(3px)}
+#hangar.wt.wtModesOpen>.foot.dock::before{content:attr(data-title);display:block;column-span:all;font:800 22px var(--f-ui);letter-spacing:.08em;color:#f1f4f6;padding:2px 2px 12px}
+#hangar.wt .dock .grp{display:flex;flex-direction:column;align-items:stretch;gap:5px;margin:0 0 12px;padding:30px 8px 8px;break-inside:avoid;background:var(--wtPanel2);border-color:var(--wtEdge);border-radius:5px}
+#hangar.wt .dock .gl{top:9px;left:12px;font-size:11px;color:#e3a73c}
+#hangar.wt .dock .tile{flex:none;width:100%;min-width:0;padding:9px 12px;border-radius:3px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+#hangar.wt .dock .tile:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22)}
+#hangar.wt .dock .tile.wtCur{border-color:#e3a73c;box-shadow:inset 3px 0 0 #e3a73c}
+#hangar.wt .dock .tile.primary{background:rgba(216,40,42,.16);color:inherit}
+#hangar.wt .dock .tile.primary small{color:var(--dim)}
+#wtModesX{position:fixed;right:22px;top:calc(var(--wtTop) + 12px);z-index:9;display:none;margin:0;width:38px;height:38px;padding:0;place-items:center;font-size:18px;background:var(--wtPanel2);border:1px solid var(--wtEdge);border-radius:4px;color:#e9eef2;cursor:pointer}
+#hangar.wt.wtModesOpen #wtModesX{display:grid}
+#hangar.wt .dock .egg{position:fixed;right:10px;bottom:6px}
+/* --- language picker (also used from the menu) --- */
+#paLang{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;background:radial-gradient(120% 120% at 50% 0,#1b2633 0,#07090c 70%);color:#e9eef2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif}
+#paLang .box{width:min(880px,100%);max-height:100%;display:grid;grid-template-rows:auto auto 1fr;gap:14px;overflow:hidden}
+#paLang h1{margin:0;font:800 30px system-ui,sans-serif;letter-spacing:.12em;text-align:center}
+#paLang h1 small{display:block;margin-top:6px;font-size:13px;font-weight:500;letter-spacing:.04em;color:#8c9aa6}
+#paLang .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;overflow:auto;padding:2px}
+#paLang .grid button{display:block;margin:0;padding:12px 12px;text-align:left;border-radius:6px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#e9eef2;font:600 15px system-ui,sans-serif;cursor:pointer}
+#paLang .grid button small{display:block;margin-top:3px;font-size:11px;font-weight:500;color:#8c9aa6}
+#paLang .grid button:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+#paLang .grid button.on{border-color:#e3a73c;box-shadow:inset 0 0 0 1px #e3a73c}
+#paLang .wait{text-align:center;color:#8c9aa6;font-size:13px;min-height:18px}
+@media (max-height:720px){#hangar.wt{--wtBot:188px}.wtCard{width:150px}#hangar.wt .stage .nm{font-size:24px}}
+@media (max-width:1180px){.wtTab small{display:none}#hangar.wt .tright .pass{padding:6px 8px;font-size:12px}#hangar.wt .coins span{display:none}.wtProf{max-width:200px}}
+@media (max-width:980px){.wtTab span{display:none}.wtTab{padding:6px 7px}#wtGoBtn{min-width:170px;padding:0 30px;font-size:20px}.wtProf .wtLv{display:none}#hangar.wt>.spec{width:250px}.wtSearch{width:120px}}
+@media (max-width:760px){#hangar.wt .brand{display:none}#hangar.wt{--wtBot:176px}.wtCard{width:132px}#hangar.wt>.spec{display:none}#hangar.wt .tright .pass{display:none}.wtLeft{display:none}#hangar.wt>.stage{left:12px}}
+
+.wtRow{display:block;width:100%;margin:0 0 5px;padding:8px 11px;border-radius:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#e9eef2;font:600 13px var(--f-ui);text-align:left;cursor:pointer}
+.wtRow:hover{background:rgba(255,255,255,.1)}
+.wtRow:last-child{margin-bottom:0}
+@media (max-width:1180px){.wtSearch{width:130px}}
+#hangar.wt .heliSpec{background:var(--wtPanel);border:1px solid var(--wtEdge);border-radius:4px;padding:10px 12px}
+#hangar.wt .hpick button{display:grid;align-content:space-between;width:200px;min-height:96px;margin:0;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:3px;background:radial-gradient(120% 90% at 50% 30%,#3a4654 0,#1d242c 70%);color:#f1f4f6;cursor:pointer}
+#hangar.wt .hpick button b{font:600 14px var(--f-ui)}
+#hangar.wt .hpick button small{color:var(--dim);font-size:11px}
+#hangar.wt .hpick button.on{border-color:#e3a73c;box-shadow:0 0 0 1px #e3a73c,0 0 18px rgba(227,167,60,.35)}
 </style>
 </head>
 <body>
@@ -5859,7 +6136,7 @@ function mfdUpdate(dt){const P=player;const on=P&&P.alive&&st.view==='ck'&&!st.r
 function proj(p){const v=_v.copy(p).project(camera);const behind=_v2.subVectors(p,camera.position).dot(camera.getWorldDirection(_v3))<0;return{x:(v.x*.5+.5)*W,y:(-v.y*.5+.5)*Hh,behind}}
 const UI='"Saira Semi Condensed","Noto Sans KR",sans-serif';
 function txt(s,x,y,size=14,col='#e9eef2',align='left',w=600){hx.font=`${w} ${size}px ${UI}`;hx.textAlign=align;hx.fillStyle='rgba(0,0,0,.55)';hx.fillText(s,x+1,y+1);hx.fillStyle=col;hx.fillText(s,x,y)}
-function wrapTxt(s,x,y,maxW,size,col){hx.font=`500 ${size}px ${UI}`;const words=s.split(' ');let line='',yy=y;const lines=[];for(const w of words){const t=line?line+' '+w:w;if(hx.measureText(t).width>maxW&&line){lines.push(line);line=w}else line=t}lines.push(line);
+function wrapTxt(s,x,y,maxW,size,col){if(globalThis.PA_T)s=PA_T(s);hx.font=`500 ${size}px ${UI}`;const words=s.split(' ');let line='',yy=y;const lines=[];for(const w of words){const t=line?line+' '+w:w;if(hx.measureText(t).width>maxW&&line){lines.push(line);line=w}else line=t}lines.push(line);
   lines.forEach((l,i)=>txt(l,x,yy+i*(size+6),size,col,'center',500));return lines.length}
 // multiplayer name tags: a dark pill behind the name so it reads over sky, sea and city alike
 function nameTag(name,sub,x,y,col){hx.save();hx.font=`800 15px ${UI}`;const w=Math.max(hx.measureText(name).width,40)+16,h=sub?36:22;hx.fillStyle='rgba(6,10,14,.72)';hx.strokeStyle=col;hx.lineWidth=1.5;
@@ -6041,9 +6318,9 @@ let viewId=S.sel,tab='paint',hangarLoad=0;
 const shortName=P=>{if(P.short)return P.short;const w=P.name.split(' ');return(w.length>1&&/^\d/.test(w[1])?w[0]+' '+w[1]:w[0]).replace(/^Eurofighter$/,'Typhoon')};
 const brTxt=P=>P.brS||(P.br||0).toFixed(1);
 // tech tree like a real game: one tree per nation; rank N of a nation opens once you own 2 of its rank N-1 jets (or all of them if it has fewer)
-const NGRP=n=>({URS:'RUS',UKR:'RUS',RUS:'RUS',USA:'USA',CHN:'CHN',GER:'GER',GBR:'GBR',FRA:'FRA',JPN:'JPN',SWE:'SWE'})[n]||'ETC';
-const NGRP_NAME={USA:'미국',RUS:'소련 · 러시아',CHN:'중국',GER:'독일',GBR:'영국',FRA:'프랑스',JPN:'일본',SWE:'스웨덴',ETC:'기타 국가'};
-const NGRP_ORDER=['USA','RUS','CHN','GER','GBR','FRA','JPN','SWE','ETC'],ROMAN=['','I','II','III','IV','V','VI','VII','VIII'];
+const NGRP=n=>({URS:'RUS',UKR:'RUS',RUS:'RUS',USA:'USA',CHN:'CHN',GER:'GER',GBR:'GBR',FRA:'FRA',JPN:'JPN',SWE:'SWE',KOR:'KOR',CAN:'CAN'})[n]||'ETC';
+const NGRP_NAME={USA:'미국',RUS:'소련 · 러시아',CHN:'중국',GER:'독일',GBR:'영국',FRA:'프랑스',JPN:'일본',SWE:'스웨덴',KOR:'대한민국',CAN:'캐나다',ETC:'기타 국가'};
+const NGRP_ORDER=['USA','RUS','GBR','GER','FRA','JPN','CHN','SWE','KOR','CAN','ETC'],ROMAN=['','I','II','III','IV','V','VI','VII','VIII'];
 const natList=(g,t)=>PLANES.filter(p=>p.tier===t&&NGRP(p.nation)===g&&!p.pack);
 const natHave=(g,t)=>PLANES.filter(p=>p.tier===t&&NGRP(p.nation)===g&&S.owned[p.id]).length;
 function natNeed(g,t){for(let k=t-1;k>=1;k--){const L=natList(g,k);if(L.length)return{k,n:Math.min(2,L.length)}}return null}
@@ -9261,6 +9538,128 @@ const BOOT_LINES=['All systems online. Welcome back, pilot.','Avionics online. W
 addEventListener('pointerdown',lobbyMusic);addEventListener('keydown',lobbyMusic);
 $('btnMus').textContent=S.music===false?'소리 켜기':'소리 끄기';
 $('btnMus').onclick=()=>{S.music=S.music===false;save();$('btnMus').textContent=S.music===false?'소리 켜기':'소리 끄기';if(S.music===false){sfx.music(false);sfx.hum(0)}else{st.ambOn=false;lobbyMusic()}};requestAnimationFrame(frame);
+/*PA_UI*/{   // PROJECT ACE 격납고: 워썬더식 배치 — 위 출격 버튼(아래 모드 선택), 오른쪽 접는 패널, 아래 국가 탭 + 기체 카드, 맨 아래 기체 종류
+ try{
+ const H=$('hangar');H.classList.add('wt');
+ const top=H.querySelector('.top'),tr=H.querySelector('.tright'),spec=H.querySelector('.spec'),dock=H.querySelector('.foot.dock');
+ const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+ let LS={};try{LS=JSON.parse(localStorage.getItem('pa-ui')||'{}')||{}}catch(e){}
+ const keep=()=>{try{localStorage.setItem('pa-ui',JSON.stringify(LS))}catch(e){}};
+ const isHeli=()=>H.classList.contains('heli');
+ let kit=null;
+ // ---------- 위: 조종사 · 레벨 ----------
+ const prof=el('div','wtProf','<div class="wtAv" id="wtAv">✈</div><div class="wtWho"><b id="wtName">조종사</b><div class="wtLv"><span class="num" id="wtLvN">Lv 1</span><span class="prog"><i id="wtProg"></i></span><span id="wtProgT"></span></div></div>');
+ prof.title='계정 바꾸기';top.querySelector('.brand').after(prof);prof.onclick=()=>{try{acctShow()}catch(e){}};
+ // ---------- 위 가운데: 출격 + 모드 ----------
+ const go=el('div','wtGo','<button id="wtGoBtn"><span id="wtGoT">출격!</span></button><button id="wtModeBtn" title="게임 모드 고르기"><i>▼</i><span id="wtModeT"></span></button>');top.appendChild(go);
+ // ---------- 위 오른쪽: ☰ 메뉴 (자잘한 설정 버튼은 전부 여기로) ----------
+ const mb=el('button');mb.id='wtMenuBtn';mb.title='메뉴';mb.textContent='☰';tr.appendChild(mb);
+ const menu=el('div');menu.id='wtMenu';H.appendChild(menu);
+ const toMenu=()=>{for(const id of['btnTod','btnMus','btnDev','btnSetH','btnHot']){const b=$(id);if(b&&b.parentElement!==menu)menu.appendChild(b)}
+   const a=$('acctChip');if(a)a.style.display='none';
+   if(kit){const kb=kit.querySelector('.wtBd');for(const id of['btnPaint','btnLoad']){const b=$(id);if(b&&b.parentElement!==kb){b.classList.add('wtRow');b.style.cssText='';kb.appendChild(b)}}
+    for(const b of [...spec.children])if(b.tagName==='BUTTON'){b.classList.add('wtRow');b.style.cssText='';kb.appendChild(b)}kit.hidden=!kb.children.length}};
+ toMenu();menu.appendChild(el('hr'));
+ for(const [ic,t,f] of [['🌐','언어 · Language',()=>{try{globalThis.PA_LANG_PICK&&globalThis.PA_LANG_PICK()}catch(e){}}],['⌨️','조작법',()=>$('btnKeys')&&$('btnKeys').click()],['🏅','랭킹',()=>$('btnRank')&&$('btnRank').click()],['🏆','업적',()=>$('btnAch')&&$('btnAch').click()],['✏️','미션 만들기',()=>$('btnEditor')&&$('btnEditor').click()]]){
+   const b=el('button');b.textContent=ic+' '+t;b.onclick=()=>{H.classList.remove('wtMenuOpen');f()};menu.appendChild(b)}
+ mb.onclick=e=>{e.stopPropagation();H.classList.toggle('wtMenuOpen')};
+ document.addEventListener('click',e=>{if(!menu.contains(e.target)&&e.target!==mb)H.classList.remove('wtMenuOpen')});
+ // ---------- 게임 모드 창 (예전 아래 버튼 묶음) ----------
+ const PLAY=new Set(['btnGo','btnWaves','btnBFM','btnBFMS','btnSead','btnConvoy','btnGulf91','btnGulf03','btnGulfFree','btnTut','btnFree','btnTrap','btnRamen','btnSeoul','btnSeoulWar','btnBombRun','btnBossF','btnBossA','btnSurv','btnWar','btnHeliGo','btnHeliIns','btnHeliRes','btnHeliFree']);
+ const HELI=new Set(['btnHeliGo','btnHeliIns','btnHeliRes','btnHeliFree']);
+ const usable=id=>{const b=$(id);return !!b&&!b.hidden&&b.style.display!=='none'};
+ const curMode=()=>{const id=isHeli()?(LS.mh||'btnHeliGo'):(LS.mj||'btnGo');return usable(id)?id:(isHeli()?'btnHeliGo':'btnGo')};
+ const modeLabel=id=>{const b=$(id);if(!b)return'';if(id==='btnGo')return'5대5 데스매치';return((b.querySelector('b')||b).textContent||'').trim()};
+ dock.dataset.title='게임 모드';
+ const mx=el('button');mx.id='wtModesX';mx.textContent='✕';mx.title='닫기';H.appendChild(mx);
+ const openModes=()=>{paSync();H.classList.add('wtModesOpen')},closeModes=()=>H.classList.remove('wtModesOpen');
+ mx.onclick=closeModes;$('wtModeBtn').onclick=e=>{e.stopPropagation();H.classList.contains('wtModesOpen')?closeModes():openModes()};
+ let bypass=false;
+ dock.addEventListener('click',e=>{if(bypass)return;if(e.target===dock){closeModes();return}const t=e.target.closest('button.tile');if(!t)return;
+   if(PLAY.has(t.id)&&!(t.id==='btnGo'&&$('btnGo').dataset.act!=='go')){e.stopPropagation();e.preventDefault();if(HELI.has(t.id))LS.mh=t.id;else LS.mj=t.id;keep();closeModes();paSync()}
+   else setTimeout(closeModes,0)},true);
+ const fire=id=>{const b=$(id);if(!b||b.disabled)return;bypass=true;try{b.click()}finally{bypass=false}};
+ $('wtGoBtn').onclick=()=>{if(isHeli())return fire(curMode());const a=$('btnGo').dataset.act;if(a!=='go')return fire('btnGo');fire(curMode())};
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!H.hidden)H.classList.remove('wtModesOpen','wtMenuOpen','showRoster')});
+ // ---------- 왼쪽 아이콘 줄 ----------
+ const left=el('div','wtLeft');
+ for(const [ic,t,id] of [['🏅','랭킹','btnRank'],['🏆','업적','btnAch'],['📅','일일 미션','btnDaily'],['🎖','캠페인','btnCamp'],['✏️','미션 만들기','btnEditor'],['⌨️','조작법','btnKeys']]){
+   const b=el('button');b.textContent=ic;b.dataset.tip=t;b.dataset.id=id;b.onclick=()=>{const x=$(id);x&&x.click()};left.appendChild(b)}
+ H.appendChild(left);
+ // ---------- 오른쪽 접는 패널 ----------
+ const sec=(k,title,nodes,col)=>{const s=el('div','wtSec'+(col?' col':''));const h=el('button','wtHd','<span>'+title+'</span>');const b=el('div','wtBd');for(const n of nodes)if(n)b.appendChild(n);s.append(h,b);
+   if(LS['c_'+k]!=null)s.classList.toggle('col',!!LS['c_'+k]);h.onclick=()=>{s.classList.toggle('col');LS['c_'+k]=s.classList.contains('col');keep()};return s};
+ const perf=sec('perf','성능',[$('bars'),$('wpn')]),paint=sec('paint','도색 · 업그레이드',[spec.querySelector('.tabs'),$('panePaint'),$('paneUp')],true);
+ spec.prepend(paint);spec.prepend(perf);
+ const link=(title,id)=>{const s=el('div','wtSec link');const h=el('button','wtHd','<span>'+title+'</span><em hidden></em>');h.onclick=()=>{const b=$(id);b&&b.click()};s.dataset.id=id;s.appendChild(h);return s};
+ kit=sec('kit','정비 · 무장',[]);spec.insertBefore(kit,paint.nextSibling);
+ const lDaily=link('📅 일일 미션','btnDaily'),lPrem=link('👑 프리미엄 패스','btnPrem'),lAch=link('🏆 업적','btnAch');spec.append(lDaily,lPrem,lAch);
+ // ---------- 아래: 연구 · 국가 탭 · 기체 카드 · 기체 종류 ----------
+ const bot=el('div','wtBottom','<div class="wtNat"><button class="wtRes" title="전체 기체 목록"><i></i>연구</button></div><div class="wtCards"></div><div class="wtPre"><span>기체 종류</span></div>');H.appendChild(bot);
+ const nat=bot.querySelector('.wtNat'),cards=bot.querySelector('.wtCards'),pre=bot.querySelector('.wtPre');
+ nat.querySelector('.wtRes').onclick=()=>H.classList.toggle('showRoster');
+ const F={   // 단순화한 국기 (30×20)
+  USA:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#b22234"/>'+[1,3,5,7,9,11].map(i=>`<rect y="${i*20/13}" width="30" height="${20/13}" fill="#fff"/>`).join('')+'<rect width="13" height="10.8" fill="#3c3b6e"/>'+[[2,2],[5,2],[8,2],[11,2],[3.5,4.6],[6.5,4.6],[9.5,4.6],[2,7.2],[5,7.2],[8,7.2],[11,7.2],[3.5,9.4],[6.5,9.4],[9.5,9.4]].filter(p=>p[1]<10.5).map(([x,y])=>`<circle cx="${x}" cy="${y}" r=".7" fill="#fff"/>`).join('')+'</svg>',
+  RUS:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><rect y="6.67" width="30" height="6.67" fill="#0039a6"/><rect y="13.33" width="30" height="6.67" fill="#d52b1e"/></svg>',
+  GBR:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#012169"/><path d="M0 0L30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0L30 20M30 0L0 20" stroke="#c8102e" stroke-width="1.4"/><path d="M15 0V20M0 10H30" stroke="#fff" stroke-width="6"/><path d="M15 0V20M0 10H30" stroke="#c8102e" stroke-width="3.4"/></svg>',
+  GER:'<svg viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#000"/><rect y="6.67" width="30" height="6.67" fill="#dd0000"/><rect y="13.33" width="30" height="6.67" fill="#ffce00"/></svg>',
+  FRA:'<svg viewBox="0 0 30 20"><rect width="10" height="20" fill="#0055a4"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#ef4135"/></svg>',
+  JPN:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>',
+  CHN:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5 2.2l1.2 3.6H10L6.9 8l1.2 3.6L5 9.4 1.9 11.6 3.1 8 0 5.8h3.8z" fill="#ffde00"/>'+[[10,2],[12,4],[12,7],[10,9]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r=".9" fill="#ffde00"/>`).join('')+'</svg>',
+  SWE:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#006aa7"/><rect x="9" width="4" height="20" fill="#fecc00"/><rect y="8" width="30" height="4" fill="#fecc00"/></svg>',
+  KOR:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="5" fill="#0047a0"/><path d="M10 10a5 5 0 0 1 10 0a2.5 2.5 0 0 1-5 0a2.5 2.5 0 0 0-5 0z" fill="#cd2e3a"/>'+[[5.5,4.2,-33.7],[24.5,15.8,-33.7],[24.5,4.2,33.7],[5.5,15.8,33.7]].map(([x,y,a])=>`<g transform="translate(${x} ${y}) rotate(${a})"><rect x="-2.6" y="-1.6" width="5.2" height=".8" fill="#000"/><rect x="-2.6" y="-.4" width="5.2" height=".8" fill="#000"/><rect x="-2.6" y=".8" width="5.2" height=".8" fill="#000"/></g>`).join('')+'</svg>',
+  CAN:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><rect width="7.5" height="20" fill="#d52b1e"/><rect x="22.5" width="7.5" height="20" fill="#d52b1e"/><path d="M15 4.2l1.1 2.2 1.6-.6-.5 3 1.9-1.3.4 1.2 1.7-.3-.8 1.9.8.5-3.2 2.4.3 1.3-2.8-.3V16h-1v-1.8l-2.8.3.3-1.3-3.2-2.4.8-.5-.8-1.9 1.7.3.4-1.2 1.9 1.3-.5-3 1.6.6z" fill="#d52b1e"/></svg>',
+  ETC:'<svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#3a4552"/><circle cx="15" cy="10" r="5.5" fill="none" stroke="#c9d2da" stroke-width="1.4"/><path d="M9.5 10h11M15 4.5c-2.5 3-2.5 8 0 11M15 4.5c2.5 3 2.5 8 0 11" stroke="#c9d2da" stroke-width="1" fill="none"/></svg>'};
+ const groups=NGRP_ORDER.filter(g=>Array.prototype.some.call(PLANES,p=>NGRP(p.nation)===g));   // (PLANES.some also answers for stand-ins, so ask the plain array)
+ for(const g of groups){const t=el('button','wtTab',F[g]||F.ETC);t.dataset.g=g;t.insertAdjacentHTML('beforeend',`<span>${esc(NGRP_NAME[g]||g)}</span>`);t.title=NGRP_NAME[g]||g;
+   t.onclick=()=>{LS.nat=g;keep();const ps=$('pSearch');if(ps&&ps.value){ps.value='';}
+     const L=PLANES.filter(p=>NGRP(p.nation)===g);const pick=L.find(p=>p.id===S.sel)||L.find(p=>S.owned[p.id])||L[0];if(pick){viewId=pick.id;renderHangar();showHangarModel()}else paSync()};nat.appendChild(t)}
+ const ps=$('pSearch');
+ for(const id of['mJet','mHeli']){const b=$(id);if(b)pre.appendChild(b)}
+ const ride=el('div','wtRide');pre.appendChild(ride);if(ps){ps.classList.add('wtSearch');ps.removeAttribute('style');ps.placeholder='🔍 기체 검색';pre.appendChild(ps)}
+ const hp=$('hPick');if(hp)cards.appendChild(hp);
+ // ---------- 카드 그리기 ----------
+ function renderCards(){
+  const q=ps?ps.value.trim():'';const vP=PLANES.find(p=>p.id===viewId)||PLANES[0];
+  let g=LS.nat&&groups.includes(LS.nat)?LS.nat:NGRP(vP.nation);if(NGRP(vP.nation)!==g&&!q){g=NGRP(vP.nation);LS.nat=g;keep()}
+  nat.querySelectorAll('.wtTab').forEach(t=>{const G=t.dataset.g,L=PLANES.filter(p=>NGRP(p.nation)===G);t.classList.toggle('on',!q&&G===g);t.title=(NGRP_NAME[G]||G)+' · '+L.filter(p=>S.owned[p.id]).length+'/'+L.length});
+  const T=globalThis.PA_THUMBS||{};let h='',lt=-1;
+  for(const b of $('list').querySelectorAll('.ac')){const id=b.dataset.id,P=PLANES.find(p=>p.id===id);if(!P)continue;if(!q&&NGRP(P.nation)!==g)continue;
+    const s=b.classList.contains('own')?'own':b.classList.contains('lock')?'lock':b.classList.contains('pack')?'pack':'buy';
+    if(P.tier!==lt){lt=P.tier;h+=`<div class="wtTier${s==='lock'?' lk':''}">${ROMAN[lt]||lt}</div>`}
+    const lab=((b.querySelector('.s')||{}).textContent||'').trim();
+    h+=`<button class="wtCard ${s}${viewId===id?' view':''}${S.sel===id?' ride':''}" data-id="${esc(id)}" title="${esc(P.name)}">${T[id]?`<img src="${T[id]}" alt="" decoding="async">`:'<span class="ph">✈</span>'}<span class="st">${s==='lock'?'🔒 ':''}${esc(lab)}</span><span class="br">${esc(brTxt(P))}</span><span class="nm"><span>${esc(P.name)}</span></span></button>`}
+  cards.querySelectorAll('.wtCard,.wtTier,.wtEmpty').forEach(n=>n.remove());
+  if(hp&&hp.parentElement===cards)hp.insertAdjacentHTML('beforebegin',h||'<div class="wtEmpty">검색 결과 없음</div>');else cards.insertAdjacentHTML('beforeend',h||'<div class="wtEmpty">검색 결과 없음</div>');
+  cards.querySelectorAll('.wtCard').forEach(c=>c.onclick=()=>{const b=$('list').querySelector(`.ac[data-id="${c.dataset.id}"]`);b&&b.click()});
+  const v=cards.querySelector('.wtCard.view');if(v){const r=v.getBoundingClientRect(),R=cards.getBoundingClientRect();if(r.left<R.left||r.right>R.right)cards.scrollLeft+=r.left-R.left-R.width/2+r.width/2}}
+ // ---------- 상태 맞추기 ----------
+ function paSync(){
+  toMenu();
+  try{renderCards()}catch(e){console.warn('pa cards',e)}
+  const sp=PLANES.find(p=>p.id===S.sel);ride.innerHTML=isHeli()?'':(sp?`탑승 중 <b>${esc(sp.name)}</b>`:'');
+  let nm='';try{nm=ACTIVE||''}catch(e){}$('wtName').textContent=(nm||'조종사')+(S.premium?' 👑':'');$('wtAv').textContent=nm?nm.trim().charAt(0):'✈';
+  $('wtLvN').textContent=$('hLvl').textContent;$('wtProg').style.width=$('hProg').style.width;$('wtProgT').textContent=$('hProgT').textContent;prof.title=$('hProgT').textContent;
+  const id=curMode();$('wtModeT').textContent=modeLabel(id);dock.querySelectorAll('.tile').forEach(t=>t.classList.toggle('wtCur',t.id===id));
+  const gb=$('btnGo'),a=gb&&gb.dataset.act,gt=$('wtGoT'),GB=$('wtGoBtn');
+  if(isHeli()||a==='go'){gt.textContent='출격!';GB.disabled=false;GB.style.opacity=''}
+  else{const sm=(gb.querySelector('small')||{}).textContent||'',bb=(gb.querySelector('b')||{}).textContent||'';gt.textContent=a==='buy'?`구매 · ${sm}`:a==='tut'?bb:a==='pack'?bb:'잠김';GB.disabled=!!gb.disabled;GB.style.opacity=gb.disabled?'.55':''}
+  GB.style.fontSize=gt.textContent.length>9?'18px':'';
+  const d=$('btnDaily');if(d){const sm=(d.querySelector('small')||{}).textContent||'',ready=/\d/.test(sm)&&/!/.test(sm);const em=lDaily.querySelector('em');em.hidden=!ready;em.textContent=sm.replace(/!$/,'');
+    const ic=left.querySelector('[data-id="btnDaily"]');if(ic){let dot=ic.querySelector('.dot');if(ready&&!dot)ic.appendChild(el('i','dot'));if(!ready&&dot)dot.remove()}}
+  lPrem.hidden=!$('btnPrem');const pe=lPrem.querySelector('em');if(pe){pe.hidden=!S.premium;pe.textContent='사용 중'}
+  const ac=$('btnAch');if(ac){const em=lAch.querySelector('em');const sm=(ac.querySelector('small')||{}).textContent||'';em.hidden=!sm;em.className='';em.textContent=sm;em.style.background='rgba(255,255,255,.12)'}
+ }
+ globalThis.PA_SYNC=paSync;
+ const _rh=renderHangar;renderHangar=function(){const r=_rh.apply(this,arguments);try{paSync()}catch(e){console.warn('pa ui',e)}return r};
+ // 카드 사진: 따로 받는 작은 파일 (없어도 동작)
+ {const s=document.createElement('script');s.src='ui/thumbs.js';s.onload=()=>{try{renderCards()}catch(e){}};document.head.appendChild(s)}
+ new MutationObserver(()=>toMenu()).observe(tr,{childList:true});
+ setTimeout(()=>{try{paSync()}catch(e){}},0);setTimeout(()=>{try{paSync()}catch(e){}},1500);
+ }catch(e){console.warn('PA UI',e)}
+}
+
 window.__game={getModel,withLoading,NET,H,hModel:()=>hModel,st,S,units:()=>units,player:()=>player,update,THREE,aimDir,startMatch,startTutorial,toHangar,save,quality:()=>({GQ,auto:qAuto(),lvl:QA.cur,slow:+QA.slow.toFixed(2),qms:+QA.ms.toFixed(1),dyn:+DYN.s.toFixed(2),pr:+renderer.getPixelRatio().toFixed(2),sh:renderer.shadowMap.enabled,frameMs:+rafAvg.toFixed(1)})};
 </script>
 
