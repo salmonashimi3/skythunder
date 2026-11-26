@@ -279,6 +279,6 @@ All 3D models are by their Sketchfab creators. All but one are used under **CC B
 | Terrain · sea textures | Babylon.js Assets · three.js example textures | CC BY 4.0 · MIT |
 | 3D engine | [three.js](https://threejs.org/) | MIT |
 | Multiplayer | [PeerJS](https://peerjs.com/) (`lib/peerjs.min.js`) | MIT |
-| Lobby music vocal shouts | Synthesized with MBROLA voice br3 (FPMs · Denis Costa) | MBROLA voice licence — see note below |
+| Lobby music vocal shouts (original pt-BR lyrics) | Synthesized with [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) TTS by hexgrad (voices pm_alex / pm_santa), pitched down and saturated | [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) — commercial use allowed |
 
-> Note for selling: the MBROLA br3 voice licence says the voice database may not be sold or put in a sold product without the author's permission. The game only contains short audio clips made with it, but check this before a paid release (or replace the clips).
+> The lobby music shouts used to be made with the MBROLA br3 voice, whose licence does not allow selling; they were re-made with Kokoro-82M (Apache 2.0), so no MBROLA audio is left in the game.
