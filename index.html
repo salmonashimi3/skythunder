@@ -4322,7 +4322,7 @@ function cvSinkUpdate(dt){if(!CV.dead||!CV.g)return;CV.sinkT+=dt;const g=CV.g;if
 function cvReset(){if(!CV.g)return;CV.dead=false;CV.hp=CV.maxHp;CV.g.position.y=0;CV.g.rotation.x=0;CV.g.rotation.z=0}
 /* ================= ships steam on patrol circles and leave real wakes: a turbulent white wash behind the stern that spreads and breaks up,
    and the Kelvin V (two thin feathered foam lines at ±19.5° from the bow). The foam rides the same Gerstner swell as the sea ================= */
-const WAKE={ships:new Map(),mat:null,N:140,STEP:6};
+const WAKE={ships:new Map(),mat:null,N:220,STEP:8};
 function wakeMaterial(){if(WAKE.mat)return WAKE.mat;const m=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.88,metalness:0,transparent:true,depthWrite:false});
   m.onBeforeCompile=sh=>{sh.uniforms.uT=waterMat.userData.t;sh.uniforms.tM={value:macroTex};
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec4 wk;attribute vec3 wk2;varying vec4 vWk;varying vec3 vWk2;varying vec3 vWq;uniform float uT;uniform sampler2D tM;')
@@ -4338,22 +4338,44 @@ function wakeMaterial(){if(WAKE.mat)return WAKE.mat;const m=new THREE.MeshStanda
       varying vec4 vWk;varying vec3 vWk2;varying vec3 vWq;uniform float uT;
       float wh(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
       float wvn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(wh(i),wh(i+vec2(1.,0.)),f.x),mix(wh(i+vec2(0.,1.)),wh(i+vec2(1.,1.)),f.x),f.y);}
-      float wfbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*wvn(p);p=p*2.03+vec2(17.1,9.2);a*=.5;}return s;}`)
+      float wfbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*wvn(p);p=p*2.03+vec2(17.1,9.2);a*=.5;}return s;}
+      float wcell(vec2 p){vec2 i=floor(p),f=fract(p);float d1=8.,d2=8.;for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 g=vec2(float(x),float(y)),o=vec2(wh(i+g),wh(i+g+17.3));o=.5+.45*sin(uT*.15+6.2831*o);float dd=length(g+o-f);if(dd<d1){d2=d1;d1=dd;}else if(dd<d2)d2=dd;}return 1.-smoothstep(0.,.22,d2-d1);}`)
       .replace('#include <color_fragment>',`#include <color_fragment>
-      {float v=vWk.x,d=vWk.y,L=vWk.z,B=vWk.w,kind=vWk2.x,sp=clamp(vWk2.y/9.,.35,1.4),age=vWk2.z;vec2 q=vWq.xz;
-       float n1=wfbm(q*.085+vec2(uT*.012,0.)),n2=wfbm(q*.34-vec2(0.,uT*.028)),n3=wvn(q*1.55+uT*.09);float a=0.;vec3 col=vec3(.96,.975,.99);
-       if(kind<.5){float x=d-L*.9,e=abs(v);float core=1.-smoothstep(.55,1.,e);float fade=exp(-max(x,0.)/(260.+300.*sp))*smoothstep(-8.,10.,x);
-         float dens=fade*core*1.65;float pat=n1*.56+n2*.32+n3*.12+(1.-e)*.1;float foam=smoothstep(1.-dens,1.-dens+.2,pat);
-         float aer=core*exp(-max(x,0.)/140.)*smoothstep(-8.,6.,x)*.45+core*fade*.12;col=mix(vec3(.5,.84,.82),vec3(.97,.98,1.),clamp(foam*1.4,0.,1.));a=clamp(foam*.92+aer,0.,.93);}
-       else{float e=abs(v),w=.045+.06*smoothstep(0.,320.,d);float line=exp(-pow((e-.95)/w,2.));float fe=.5+.5*sin(d*.42+e*9.+n3*2.);
-         float fade=exp(-d/(300.+300.*sp));float foam=smoothstep(.22,.66,line*(.6+.4*fe)*(.6+.6*n2));float bow=exp(-d/(L*.3+12.))*smoothstep(.72,1.,e)*1.3;
-         a=clamp((foam+bow)*fade*.85,0.,.9);}
-       diffuseColor.rgb=col;diffuseColor.a*=a*exp(-age/240.);}`)};
+      {float v=vWk.x,d=vWk.y,L=vWk.z,B=vWk.w,kind=vWk2.x,V=max(vWk2.y,1.5),sp=clamp(vWk2.y/9.,.35,1.4),age=vWk2.z;vec2 q=vWq.xz;
+       float n2=wfbm(q*.34-vec2(0.,uT*.028)),n3=wvn(q*1.55+uT*.09);float a=0.;vec3 col=vec3(.96,.975,.99);
+       if(kind<.5){   // turbulent wake: propeller boil at the stern, white streaky foam over turquoise aerated water, then a long smooth darker slick
+         float x=d-L*.92,e=abs(v),hwm=B*.62+max(0.,d-L)*.075,y=v*hwm,ag=max(x,0.),Lf=320.+300.*sp;
+         float core=1.-smoothstep(.5,1.,e+.2*(wvn(vec2(d*.03,v*3.)+7.)-.5));
+         vec2 wq=vec2(d*.045,y*.2)+vec2(n2*.9,n3*.35);float strk=wfbm(vec2(d*.028-uT*.06,y*.42)),lace=(wcell(wq)*.55+wcell(wq*2.15+vec2(3.7,1.3))*.45)*smoothstep(.2,.7,wfbm(vec2(d*.018,y*.28)+3.1));
+         float boil=exp(-ag/(B*1.6+18.))*smoothstep(-6.,4.,x);
+         float dens=clamp(boil*1.4+exp(-ag/Lf)*smoothstep(-8.,10.,x)*1.25,0.,1.)*core;
+         float pat=strk*.55+lace*.35+n3*.1+(1.-e)*.12;
+         float foam=max(smoothstep(1.-dens,1.-dens+.16,pat),boil*core*smoothstep(.15,.6,n2+.25));
+         float aer=core*(boil*.7+exp(-ag/(Lf*.7))*smoothstep(-8.,6.,x)*.5);
+         float hull=(1.-step(L*.92,d))*smoothstep(.74,.84,e)*(1.-smoothstep(.95,1.,e))*smoothstep(L*.05,L*.5,d)*smoothstep(.35,.7,n2+.2*n3)*.9;   // white water hugging the hull sides
+         float slick=(1.-smoothstep(.62,1.,e))*smoothstep(-5.,80.,x)*exp(-ag/(Lf*4.))*.2;
+         float fA=clamp(foam*.95+hull,0.,1.);
+         col=mix(mix(vec3(.02,.07,.09),vec3(.36,.76,.74),clamp(aer*2.,0.,1.)),vec3(.97,.985,1.),fA);
+         a=clamp(max(fA*.95,max(aer*.62,slick)),0.,.97);}
+       else{   // Kelvin pattern by stationary phase: transverse + divergent waves inside the 19.47 deg wedge, brightest on the cusp lines, whitecaps near the bow
+         float e=abs(v),hk=B*.5+d*.354,y=e*hk,x=max(d-L*.1,1.);
+         float k0=9.81/(V*V),r=min(y/x,.3535),r4=max(r,1e-3)*4.,sq=sqrt(max(1.-8.*r*r,0.));
+         float t1=(1.-sq)/r4,t2=(1.+sq)/r4;
+         float p1=k0*x*sqrt(1.+t1*t1)*(1.+r*t1),p2=k0*x*sqrt(1.+t2*t2)*(1.+r*t2);
+         float rr=y/x/.3535,amp=1./sqrt(1.+k0*x*.35);
+         float wt=(1.-smoothstep(.55,1.,rr))*.55+.12,wd=smoothstep(.3,.9,rr)*1.25,cusp=1.+1.6*exp(-pow((rr-.97)/.07,2.)),outw=1.-smoothstep(1.,1.09,rr);
+         float aa1=1.-smoothstep(.6,2.2,fwidth(p1)),aa2=1.-smoothstep(.6,2.2,fwidth(p2));
+         float h=(wt*cos(p1)*aa1+wd*cos(p2)*aa2*cusp)*amp*outw,far=exp(-x/(700.+700.*sp));
+         float cap=smoothstep(.45,.95,wd*cos(p2)*cusp*amp*aa2)*exp(-x/(L*1.2+60.))*smoothstep(.3,.75,n2+.15*n3)*outw;
+         float bow=exp(-d/(L*.25+10.))*smoothstep(.55,1.,e)*(1.-smoothstep(1.,1.08,e))*smoothstep(.25,.7,n2+.2);
+         float sh=clamp(h*1.6,-1.,1.),fz=clamp(cap*1.1+bow*1.3,0.,1.);
+         col=mix(sh>0.?vec3(.55,.68,.76):vec3(.0,.03,.05),vec3(.97,.985,1.),fz);a=clamp(max(abs(sh)*(sh>0.?.16:.24)*far,fz*.9),0.,.9);}
+       diffuseColor.rgb=col;diffuseColor.a*=a*exp(-age/420.);}`)};
   WAKE.mat=m;return m}
-function wakeNew(L,B){const N=WAKE.N,C=13;const pos=new Float32Array(N*C*3),wk=new Float32Array(N*C*4),wk2=new Float32Array(N*C*3),nrm=new Float32Array(N*C*3);for(let i=0;i<N*C;i++)nrm[i*3+1]=1;
+function wakeNew(L,B){const N=WAKE.N,C=17;const pos=new Float32Array(N*C*3),wk=new Float32Array(N*C*4),wk2=new Float32Array(N*C*3),nrm=new Float32Array(N*C*3);for(let i=0;i<N*C;i++)nrm[i*3+1]=1;
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3).setUsage(THREE.DynamicDrawUsage));g.setAttribute('normal',new THREE.BufferAttribute(nrm,3));
   g.setAttribute('wk',new THREE.BufferAttribute(wk,4).setUsage(THREE.DynamicDrawUsage));g.setAttribute('wk2',new THREE.BufferAttribute(wk2,3).setUsage(THREE.DynamicDrawUsage));
-  const idx=[];const grp=[[0,7],[7,10],[10,13]];for(let r=0;r<N-1;r++)for(const[a0,a1]of grp)for(let c=a0;c<a1-1;c++){const p=r*C+c,q=p+C;idx.push(p,q,p+1,p+1,q,q+1)}g.setIndex(idx);g.setDrawRange(0,0);
+  const idx=[];const grp=[[0,7],[7,12],[12,17]];for(let r=0;r<N-1;r++)for(const[a0,a1]of grp)for(let c=a0;c<a1-1;c++){const p=r*C+c,q=p+C;idx.push(p,q,p+1,p+1,q,q+1)}g.setIndex(idx);g.setDrawRange(0,0);
   const m=new THREE.Mesh(g,wakeMaterial());m.frustumCulled=false;m.renderOrder=2;m.castShadow=m.receiveShadow=false;scene.add(m);return{L,B,od:0,trail:[],mesh:m,g,pos,wk,wk2,C,spd:0,pat:null,t:0}}
 function wakeFree(W){scene.remove(W.mesh);W.g.dispose()}
 // a patrol circle through the ship's position, tangent to its heading, that stays in deep water all the way round (null = stays put)
@@ -4372,14 +4394,14 @@ function patrolSearch(x,z,yaw,L,B,radii,minDepth,maxShift){for(const R of radii)
 function patrolStep(P,spd,dt){P.a+=P.s*spd/P.R*dt;const a=P.a;return{x:P.cx+P.R*Math.sin(a),z:P.cz+P.R*Math.cos(a),hx:P.s*Math.cos(a),hz:-P.s*Math.sin(a)}}
 function wakeTick(W,x,z,yaw,spd,dt,vis){W.t+=dt;const hx=Math.sin(yaw),hz=Math.cos(yaw),bx=x+hx*W.L*.5,bz=z+hz*W.L*.5;W.od+=spd*dt;
   const tr=W.trail;if(spd>.5&&(!tr.length||W.od-tr[0].od>=WAKE.STEP))tr.unshift({x:bx,z:bz,hx,hz,od:W.od,t:W.t});
-  while(tr.length>WAKE.N-1||(tr.length&&(W.od-tr[tr.length-1].od>860||W.t-tr[tr.length-1].t>300)))tr.pop();
+  while(tr.length>WAKE.N-1||(tr.length&&(W.od-tr[tr.length-1].od>1750||W.t-tr[tr.length-1].t>420)))tr.pop();
   const camD=Math.hypot(camera.position.x-x,camera.position.z-z);W.mesh.visible=!!vis&&tr.length>1&&camD<26000;if(!W.mesh.visible)return;
   const rows=[{x:bx,z:bz,hx,hz,od:W.od,t:W.t},...tr];const n=Math.min(rows.length,WAKE.N),C=W.C,{pos,wk,wk2}=W,L=W.L,B=W.B;
   for(let r=0;r<n;r++){const R=rows[r],d=W.od-R.od,age=W.t-R.t,px=-R.hz,pz=R.hx;   // px,pz = the ship's right at that point of its track
     const hw=B*.62+Math.max(0,d-L)*.075,hk=B*.5+d*.354;let c=0;
     const put=(v,w,kind)=>{const i=r*C+c++;pos[i*3]=R.x+px*v*w;pos[i*3+1]=0;pos[i*3+2]=R.z+pz*v*w;wk[i*4]=v;wk[i*4+1]=d;wk[i*4+2]=L;wk[i*4+3]=B;wk2[i*3]=kind;wk2[i*3+1]=spd||W.spd;wk2[i*3+2]=age};
-    for(let k=0;k<7;k++)put(-1+k/3,hw,0);for(const e of[.88,.95,1.02])put(e,hk,1);for(const e of[.88,.95,1.02])put(-e,hk,1)}
-  const a=W.g.attributes;a.position.needsUpdate=a.wk.needsUpdate=a.wk2.needsUpdate=true;W.g.setDrawRange(0,Math.max(0,n-1)*60)}
+    for(let k=0;k<7;k++)put(-1+k/3,hw,0);for(const e of[.2,.45,.7,.9,1.1])put(e,hk,1);for(const e of[.2,.45,.7,.9,1.1])put(-e,hk,1)}
+  const a=W.g.attributes;a.position.needsUpdate=a.wk.needsUpdate=a.wk2.needsUpdate=true;W.g.setDrawRange(0,Math.max(0,n-1)*84)}
 // ships: GT/war ships patrol at 7–10 m/s; the carrier steams slowly (6 m/s) on a wide circle when the sea around her is deep enough
 function shipsUpdate(dt){if(st.paused||st.mode==='hangar')return;const seen=new Set();
   for(const g of GTS){if(g.kind!=='ship'||!g.mesh)continue;seen.add(g);let W=WAKE.ships.get(g);
