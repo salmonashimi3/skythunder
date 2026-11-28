@@ -804,6 +804,16 @@ import {PLANES,MSL,PAINTS,prepModel,SURF,BRAKE,BOMBS,TIER_NAMES} from './planes.
  Object.assign(BOMBS,{"f105": [["mk82", 6]], "mig27": [["fab500", 4]], "su7": [["fab500", 2]], "su17": [["fab500", 4]], "yak28": [["fab500", 2]], "jaguar": [["mk82", 4]], "harrgr3": [["mk82", 4]], "seaharr": [["mk82", 2]], "vautour": [["mk82", 8]], "alphajet": [["mk82", 2]], "mirage5": [["mk82", 4]], "mf1": [["mk82", 2]], "f84": [["mk82", 2]]});
  for(const [id,[n,r]] of Object.entries({"a4": [[[0, -0.799, -0.8797]], 0.285], "a7": [[[0, -1.087, -0.9121]], 0.353], "f117": [[[0.6, 0.2, -0.85], [-0.6, 0.2, -0.85]], 0.3], "b52": [[[11.926, -3.553, 0.2504], [-11.925, -3.563, 0.2503]], 0.308], "b2": [[[1.5, 0.4, -0.6], [-1.5, 0.4, -0.6]], 0.35], "vulcan": [[[2.19, -1.521, -0.7489], [-2.19, -1.521, -0.7489]], 0.386], "ho229": [[[0.6, 0.1, -0.4], [-0.6, 0.1, -0.4]], 0.3]})){const p=PLANES.find(q=>q.id===id);if(p&&!(p.noz&&p.noz.length)){p.noz=n;p.nozR=r}}
  const NOAB=[];for(const p of PLANES){if(p.prop||p.heli)continue;if(!(p.ab>0)){p.ab=.5;NOAB.push(p.id)}}globalThis.__NOAB=NOAB}   // token afterburner: the flame shows, no real extra thrust
+/*GUNSHIP*/{const a=PLANES.find(q=>q.id==='ac130');if(a)a.gunners=[
+  {n:'25mm GAU-12 이퀄라이저',p:[1.7,'mid',.42],arc:'left',ground:true,rate:15,dmg:12,blast:2.5,spd:1040},
+  {n:'40mm L/60 보포스',p:[1.7,'mid',-.02],arc:'left',ground:true,rate:1.7,dmg:34,blast:6,spd:880},
+  {n:'105mm M102 곡사포',p:[1.7,'mid',-.24],arc:'left',ground:true,rate:.16,dmg:150,blast:18,spd:490}];
+ const b=PLANES.find(q=>q.id==='p108');if(b&&!b.gunners)b.gunners=[
+  {n:'좌측 나셀 원격 포탑 (12.7mm ×2)',p:[8.6,'top',.08],arc:'top',rate:20,dmg:4,spd:765},
+  {n:'우측 나셀 원격 포탑 (12.7mm ×2)',p:[-8.6,'top',.08],arc:'top',rate:20,dmg:4,spd:765},
+  {n:'하부 사수 (12.7mm)',p:[0,'bot',-.1],arc:'bot',rate:10,dmg:4,spd:765},
+  {n:'좌측 허리 사수 (12.7mm)',p:[1,'mid',-.38],arc:'left',rate:10,dmg:4,spd:765},
+  {n:'우측 허리 사수 (12.7mm)',p:[-1,'mid',-.38],arc:'right',rate:10,dmg:4,spd:765}]}
 const V3=THREE.Vector3, Q=THREE.Quaternion;
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
@@ -3121,9 +3131,9 @@ const FMDB={_:[420,.6,1,1.5,26,8,220,1],
   av8b:[480,.82,0,1.6,25,8,170,0],typhoon:[312,.7,1.18,1.8,35,9,270,1],me262:[290,.26,0,1.25,18,7,110,0],mig23:[480,.55,.85,1.25,22,8.5,160,0],tornado:[530,.45,.77,1.35,21,7.5,160,1],su25:[520,.48,0,1.3,20,6.5,140,0],yf23:[340,.75,1.1,1.6,30,9,230,1],sr71:[450,.4,.62,1.0,15,3.5,90,0],a6:[500,.33,0,1.4,22,6.5,120,0],a4:[400,.42,0,1.45,24,8,220,0],a7:[520,.38,0,1.3,22,7,160,0],
   p51:[190,.3,0,1.45,18,8,110,0],hurricane:[130,.28,0,1.5,18,7,85,0],bf109:[180,.33,0,1.4,18,7.5,95,0],f6f:[190,.33,0,1.5,18,7,85,0],fw190:[240,.35,0,1.35,17,8,160,0],f4u:[215,.33,0,1.45,18,7.5,120,0],p47:[230,.29,0,1.35,17,8,100,0],jf17:[340,.65,1.0,1.6,26,8.5,250,1],spitfire:[150,.32,0,1.5,18,7.5,95,0]};Object.assign(FMDB,{"f105": [640, 0.42, 0.62, 1.15, 20, 7.3, 150, 0], "f84": [430, 0.36, 0, 1.25, 20, 7.3, 140, 0], "f11f": [380, 0.48, 0.72, 1.35, 24, 7.5, 200, 0], "mig27": [560, 0.52, 0.78, 1.2, 22, 7, 150, 0], "su7": [520, 0.5, 0.72, 1.15, 20, 7, 160, 0], "su17": [500, 0.53, 0.8, 1.25, 22, 7, 170, 0], "yak28": [420, 0.42, 0.62, 1.1, 18, 5, 110, 0], "jaguar": [480, 0.45, 0.66, 1.25, 22, 8.6, 180, 0], "seaharr": [430, 0.78, 0.78, 1.45, 24, 7.8, 200, 0], "harrgr3": [420, 0.74, 0.74, 1.4, 22, 7.8, 190, 0], "vixen": [380, 0.45, 0, 1.25, 20, 6, 140, 0], "tornf3": [620, 0.55, 0.92, 1.3, 22, 7.5, 180, 0], "mirage5": [390, 0.42, 0.62, 1.25, 24, 7, 190, 0], "mf1": [470, 0.47, 0.75, 1.3, 24, 7, 190, 0], "vautour": [400, 0.38, 0, 1.1, 18, 5, 110, 0], "alphajet": [300, 0.45, 0, 1.4, 24, 8, 220, 0]});FMDB.j11=FMDB.su27||FMDB._;FMDB.f15j=FMDB.f15||FMDB._;for(const id of (globalThis.__NOAB||[])){const F=(FMDB[id]||FMDB._).slice();F[2]=F[1];FMDB[id]=F}
 let massR=u=>(.7+.3*clamp(u.fuel??.5,0,1))/.85;
-const COBRA=new Set(['su27','su30','su35','su57','mig29','f22','su33','su47','mig35','mig144']);
+const COBRA=new Set(['su27','su30','su35','su57','mig29','f22','su33','su47','mig35','mig144','su27s','su30sm','su35s','su57f','su37','j11','j15','f15smtd']);
 // cobra (Pugachev): limiter off, nose snaps up past 90° AoA, the jet nearly stops, then the nose comes back down
-function startCobra(u){if(!u||!u.alive||u.ground||u.cobra||!COBRA.has(u.P.id))return false;const v=u.speed;if(v>185||v<85){if(u===player)callout(v>185?'코브라: 너무 빠름 (670km/h 이하)':'코브라: 너무 느림','#ffb547',1.2,true);return false}u.cobra={t:0};if(u===player)callout('코브라','#7dffa0',1,true);return true}
+function startCobra(u){if(!u||!u.alive||u.ground||u.cobra)return false;if(!(COBRA.has(u.P.id)||u.P.tvc)){if(u===player)callout('코브라: 이 기체는 못 해요 (Su-27 계열 · MiG-29 · F-22 · 추력편향 기체만)','#ffb547',1.8,true);return false}const v=u.speed;if(v>185||v<85){if(u===player)callout(v>185?'코브라: 너무 빠름 (670km/h 이하)':'코브라: 너무 느림','#ffb547',1.2,true);return false}u.cobra={t:0};if(u===player)callout('코브라','#7dffa0',1,true);return true}
 const _fm1=new V3(),_fm2=new V3(),_fm3=new V3(),_fm4=new V3(),_fm5=new V3(),_fm6=new V3(),_fm7=new V3();
 // first person: hide the model's own pilot figure (and anything else small wrapped around the eye) so the 3D cockpit shows
 const FP_BOX=new Set(['ja37','f2']);   // only these models sit the eye inside a head/canopy mesh; the rest keep every cockpit part
@@ -3166,7 +3176,7 @@ class Aircraft{
     this.sweep=this.sweep+clamp(want-this.sweep,-.17*dt,.17*dt);this.L.rotation.y=this.sweep;this.R.rotation.y=-this.sweep}
   setGear(v,now,force){if(FIXED_GEAR.has(this.P.id))v=true;if(v&&!this.gear&&!now&&!force&&this.hydOut&&!FIXED_GEAR.has(this.P.id)){if(this===player)feed('유압 상실 · 랜딩기어가 안 내려와요 · 동체착륙 해야 해요','#ff4a3d');return}   // hydraulics gone: the gear stays up (belly landing)
   if(this.gearBroken&&!force){v=true;if(this===player&&!now)feed('랜딩기어 파손 · 접을 수 없어요','#ff4a3d')}this.gear=v;if(now){this.gearK=v?1:0;this.gearSet?this.gearSet(this.gearK):this.gearNodes.forEach(n=>n.visible=v)}}
-  animSurf(dt){const u=this.surfU;if(!u||this.hydOut)return;const c=this.ctl||{},cs=this.cs,k=1-Math.exp(-dt*7);
+  animSurf(dt){const u=this.surfU||(this.P.tvc&&this.flames&&this.flames.length?(this._tvU||(this._tvU={value:[0,0,0,0,0,0,0]})):null);if(!u||this.hydOut)return;const c=this.ctl||{},cs=this.cs,k=1-Math.exp(-dt*7);
     const flap=(this.gear?.42:0)+(this.ground?0:clamp((95-this.speed)/60,0,1)*.25);cs.f+=(flap-cs.f)*(1-Math.exp(-dt*1.5));cs.r+=(clamp(c.roll||0,-1,1)*.32-cs.r)*k;cs.y+=(clamp(c.yaw||0,-1,1)*.38-cs.y)*k;
     u.value[0]=cs.f+cs.r;u.value[1]=cs.f-cs.r;u.value[2]=cs.y;u.value[3]=cs.y;
     const B=BRAKE[this.P.id],bk=this.bk||0;if(B&&bk>0){if(B.x||isTom(this.P.id))u.value[6]=bk*B.a;if(B.toe){u.value[2]+=B.toe*bk;u.value[3]-=B.toe*bk}if(B.f){u.value[0]+=B.f*bk;u.value[1]+=B.f*bk}}else u.value[6]=0;
@@ -3216,7 +3226,7 @@ class Aircraft{
   //      fly-by-wire G / AoA limiter, energy bleeds in hard turns, stalls and departures past the AoA limit, roll authority from dynamic pressure
   flyReal(dt,c){
     this.ctl=c;const F=FMDB[this.P.id]||FMDB._,[WL0,TWm0,TWa0,CLm,aLimD,gLim,rollD,FBW]=F,mr=massR(this),WL=WL0*mr,TWm=TWm0/mr,TWa=TWa0/mr;
-    const cb=this.cobra;if(cb){cb.t+=dt;c={pitch:cb.t<1.3?1:cb.t<2.8?-.35:0,roll:0,yaw:0};if(cb.t>2.8)this.cobra=null}
+    const cb=this.cobra;if(cb){cb.t+=dt;c={pitch:cb.t<1.3?1:cb.t<2.8?-.35:0,roll:0,yaw:0};if(cb.t>2.8)this.cobra=null;this.ctl=c}
     const cr=this.crip;let pz=0,px=0,py=0;
     if(cr){cr.t+=dt;cr.w+=dt*rnd(4,9);pz=-cr.s*.6+rnd(-1,1)*.3;px=Math.sin(cr.w*1.7)*.25+rnd(-1,1)*.2;py=Math.sin(cr.w*1.3)*.2;if(this.isPlayer)st.shake=Math.max(st.shake,.55+.25*Math.sin(cr.w*3));
       this.hp-=dt*(cr.burn||1.1);if(this.selfWreck)this.hp=Math.max(this.hp,1);if(this.hp<=0){kill(this,cr.by);return}}
@@ -7641,7 +7651,7 @@ function frame(now){
   else if(st.mode==='build')buildUpdate(dt);
   else if(player){if(!st.paused||NET.on)update(dt);updateCamera(dt);gFilter();player.grp.visible=player.alive||player.dead>0}
   if(st.cine&&!st.paused)cineUpdate(dt);terrainLOD(camera.position);if(st.mode!=='hangar'&&st.mode!=='heli')cityUpdate(dt);if(WORLD==='seoul'&&player&&(st.locT=(st.locT||0)-dt)<0){st.locT=.5;st.seoulLoc=seoulNear(player.pos.x,player.pos.z)}updCarrier(dt);waterMat.userData.t.value+=dt;if(waterMesh)waterMesh.position.set(Math.round(camera.position.x/8)*8,-.5,Math.round(camera.position.z/8)*8);if(cirrus)cirrus.position.set(camera.position.x,9500,camera.position.z);if(overcast.visible)overcast.position.set(camera.position.x,2000,camera.position.z);updRain(dt,camera.position,player&&player.alive?player.vel:null);st.fdt=dt;
-  const gq=GQ;if(composer&&(gq==='high'||gq==='ultra')){updPostFx(dt);updHaze(dt);fshRender();composer.render()}else renderer.render(scene,camera);if(player&&!tgpActive(player))TGP.on=false;renderPod();renderFace();try{renderXray()}catch(e){XR.rect=null;console.warn('xray',e)}drawHUD();drawFaceFrame();try{drawXrayFrame()}catch(e){}try{mfdUpdate(dt)}catch(e){console.warn('mfd',e)}try{bettyTick(dt)}catch(e){}if(st.tour)try{drawTourHUD()}catch(e){}
+  try{mirrorTick()}catch(e){console.warn('mirror',e)}const gq=GQ;if(composer&&(gq==='high'||gq==='ultra')){updPostFx(dt);updHaze(dt);fshRender();composer.render()}else renderer.render(scene,camera);if(player&&!tgpActive(player))TGP.on=false;renderPod();renderFace();try{renderXray()}catch(e){XR.rect=null;console.warn('xray',e)}drawHUD();drawFaceFrame();try{drawXrayFrame()}catch(e){}try{mfdUpdate(dt)}catch(e){console.warn('mfd',e)}try{bettyTick(dt)}catch(e){}if(st.tour)try{drawTourHUD()}catch(e){}
 }
 /* ================= JUICE · 손맛(멀티킬·연사 반동·진동) · 연출(속도선·저체력 경고·킬 마커) · 일일 미션/출석 · 대회 VS 카드·카운트다운·우승 축포 ================= */
 const J={streak:[],life:0,lastHp:null,killFlash:0,heartT:0,lines:[],flyT:0,cdK:0,champSeen:'',vsKey:''};
@@ -7752,6 +7762,50 @@ function jConfetti(me){let cv=document.getElementById('confCv');if(!cv){cv=docum
     if(t<11)requestAnimationFrame(step);else cv.style.display='none'})()}
 {const _dt=drawTourHUD;drawTourHUD=function(){const r=_dt.apply(this,arguments);try{jTourCard()}catch(e){console.warn('tourcard',e)}return r}}
 
+/* ================= MIRRORS: in first person, the mirrors that are part of the plane's own cockpit model show a live view behind the plane
+   (no mirror is ever added to a cockpit that has none). A mirror near the top centre is turned a little toward the pilot's helmet. ================= */
+const MIR={i:0,f:0,u:null,_a:new V3(),_b:new V3(),RE:/mirror|zerkal|spiegel|miroir|espejo|rear.?view/i};
+function mirClusters(pos,idx){const nt=idx.length/3,map=new Map(),par=[];const f=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x]}return x};
+  const vid=i=>{const k=Math.round(pos.getX(i)*400)+','+Math.round(pos.getY(i)*400)+','+Math.round(pos.getZ(i)*400);let v=map.get(k);if(v===undefined){v=par.length;par.push(v);map.set(k,v)}return v};
+  const tv=new Int32Array(nt);for(let t=0;t<nt;t++){const a=vid(idx[t*3]),b=vid(idx[t*3+1]),c=vid(idx[t*3+2]);tv[t]=a;par[f(a)]=f(b);par[f(b)]=f(c)}
+  const cl=new Map();for(let t=0;t<nt;t++){const r=f(tv[t]);if(!cl.has(r))cl.set(r,[]);cl.get(r).push(t)}return [...cl.values()].sort((a,b)=>b.length-a.length)}
+function mirBuild(u){const eye=u.M&&u.M.pts&&u.M.pts.eye;if(!eye||!u.grp)return null;
+  const found=[];u.grp.traverse(o=>{if(!o.isMesh||o.userData.frame||o.userData.seatPilot||Array.isArray(o.material))return;if(MIR.RE.test((o.material&&o.material.name||'')+' '+(o.name||'')))found.push(o)});
+  if(!found.length)return null;   // this cockpit has no mirror
+  const lo=isMobile()||GQ==='low',W=lo?200:320,H=lo?80:128;u.grp.updateMatrixWorld(true);const inv=u.grp.matrixWorld.clone().invert(),E=new V3().copy(eye),items=[],meshes=[];
+  for(const o of found){let geo=o.geometry.clone();const pos=geo.attributes.position,n=pos.count;if(!geo.index){const a=new Uint32Array(n);for(let k=0;k<n;k++)a[k]=k;geo.setIndex(new THREE.BufferAttribute(a,1))}
+    const idx=geo.index.array,rel=new THREE.Matrix4().multiplyMatrices(inv,o.matrixWorld),cls=mirClusters(pos,idx),uv=new Float32Array(n*2),out=[],mats=[];geo.clearGroups();
+    const P=k=>new V3().fromBufferAttribute(pos,k).applyMatrix4(rel);
+    cls.forEach((tris,ci)=>{const start=out.length;for(const t of tris)out.push(idx[t*3],idx[t*3+1],idx[t*3+2]);
+      let c=new V3(),nn=new V3(),area=0;if(ci<4)for(const t of tris){const a=P(idx[t*3]),b=P(idx[t*3+1]),d=P(idx[t*3+2]);const cr=new V3().subVectors(b,a).cross(new V3().subVectors(d,a)),ar=cr.length()/2;nn.add(cr);c.addScaledVector(a.add(b).add(d),ar/3);area+=ar}
+      if(ci>=4||area<2e-5){geo.addGroup(start,tris.length*3,mats.length);mats.push(o.material);return}   // left as it was
+      c.divideScalar(area);nn.normalize();
+      if(!(c.y>E.y-.02&&c.z>E.z+.1&&c.distanceTo(E)<1.3)){geo.addGroup(start,tris.length*3,mats.length);mats.push(o.material);return}   // only a mirror up on the canopy bow in front of the pilotif(nn.dot(E.clone().sub(c))<0)nn.negate();
+      let v=new V3(0,1,0).addScaledVector(nn,-nn.y);if(v.lengthSq()<1e-4)v.set(0,0,1).addScaledVector(nn,-nn.z);v.normalize();const uA=new V3().crossVectors(v,nn);
+      let s0=1e9,s1=-1e9,t0=1e9,t1=-1e9;const vs=new Set();for(const t of tris)for(let q=0;q<3;q++)vs.add(idx[t*3+q]);
+      for(const k of vs){const p=P(k).sub(c),s=p.dot(uA),tt=p.dot(v);s0=Math.min(s0,s);s1=Math.max(s1,s);t0=Math.min(t0,tt);t1=Math.max(t1,tt)}
+      const sw=Math.max(s1-s0,1e-4),th=Math.max(t1-t0,1e-4);for(const k of vs){const p=P(k).sub(c);uv[k*2]=1-(p.dot(uA)-s0)/sw;uv[k*2+1]=(p.dot(v)-t0)/th}   // a mirror flips left and right
+      const dist=c.distanceTo(E),d=c.clone().sub(E).normalize(),r=d.clone().addScaledVector(nn,-2*d.dot(nn)).normalize();
+      if(Math.abs(c.x-E.x)<.14&&c.y>E.y)r.lerp(new V3(E.x,E.y+.04,E.z-.06).sub(c).normalize(),.35).normalize();   // the top mirror also shows your helmet
+      const rt=new THREE.WebGLRenderTarget(W,H,{type:THREE.HalfFloatType});rt.texture.generateMipmaps=false;rt.texture.minFilter=THREE.LinearFilter;
+      const cam=new THREE.PerspectiveCamera(Math.min(60,Math.max(20,2*Math.atan(th/2/dist)*57.3*1.5)),sw/th,.03,6000);
+      geo.addGroup(start,tris.length*3,mats.length);mats.push(new THREE.MeshBasicMaterial({map:rt.texture,color:0xdde3e6,fog:false}));
+      items.push({rt,cam,V:c,T:c.clone().addScaledVector(r,10),up:v})});
+    geo.setIndex(out);geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+    meshes.push({o,orig:[o.geometry,o.material],mine:[geo,mats]})}
+  if(!items.length)return null;return{items,meshes,on:false}}
+function mirSet(R,on){if(R.on===on)return;R.on=on;for(const m of R.meshes){const s=on?m.mine:m.orig;m.o.geometry=s[0];m.o.material=s[1]}}
+function mirrorTick(){const P=player;const on=!!(P&&P.alive&&P.grp&&P.P&&st.view==='ck'&&st.mode!=='hangar'&&!st.cine&&!st.killCam);
+  if(MIR.u&&MIR.u!==P&&MIR.u._mir)mirSet(MIR.u._mir,false);
+  if(!on){if(P&&P._mir)mirSet(P._mir,false);return}
+  if(P._mir===undefined)P._mir=mirBuild(P);MIR.u=P;const R=P._mir;if(!R)return;mirSet(R,true);
+  MIR.f++;if((isMobile()||GQ==='low')&&MIR.f%2)return;   // one mirror per frame (every other frame on low settings)
+  const it=R.items[MIR.i++%R.items.length];P.grp.updateMatrixWorld(true);const mw=P.grp.matrixWorld;
+  it.cam.position.copy(it.V).applyMatrix4(mw);it.cam.up.copy(it.up).transformDirection(mw);it.cam.lookAt(MIR._a.copy(it.T).applyMatrix4(mw));it.cam.updateMatrixWorld();
+  for(const m of R.meshes)m.o.visible=false;const fh=P.fpHide||[];for(const o of fh)o.visible=true;   // the mirror sees the pilot's own head and helmet
+  const au=renderer.shadowMap.autoUpdate,prt=renderer.getRenderTarget();renderer.shadowMap.autoUpdate=false;
+  try{renderer.setRenderTarget(it.rt);renderer.clear();renderer.render(scene,it.cam)}
+  finally{renderer.setRenderTarget(prt);renderer.shadowMap.autoUpdate=au;for(const o of fh)o.visible=!P._fpH;for(const m of R.meshes)m.o.visible=true}}
 /* ================= GUNNERS: crewed / remote turrets that pick their own targets; a hit near a gunner kills him and that gun goes quiet ================= */
 const GUNPTS=new Map(),_gq=new THREE.Quaternion(),_gv=new V3(),_gw=new V3(),_gd=new V3();
 function gunnerPts(M){if(GUNPTS.has(M.id))return GUNPTS.get(M.id);const G=M.P.gunners||[],h=M.len/2,ms=[];M.root.updateMatrixWorld(true);
