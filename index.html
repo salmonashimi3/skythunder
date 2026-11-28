@@ -3336,7 +3336,7 @@ function ditchWater(u){if(H(u.pos.x,u.pos.z)>.5)return false;const f=u.fwd(new V
   // the water rips the airframe apart: real pieces of the model fly off and sink beside it
   const brk=(ms,reg)=>setTimeout(()=>{if(u.alive&&u.ground&&u.ground.phase==='ditch')try{breakPart(u,reg)}catch(e){}},ms);
   brk(160,{k:'wing',s:1});brk(380,{k:'wing',s:-1});if(u.ground.hard>.35)brk(700,{k:'tail'});
-  if(u===player){feed('바다에 불시착! 기체가 부서지면서 가라앉는다 · E×3 탈출','#ff4a3d');alertMsg('해상 불시착')}return true}
+  if(u===player){st.ko={t:0,out:1.4+u.ground.hard*3.4,woke:false};feed('바다에 불시착! 충격으로 조종사가 정신을 잃었다…','#ff4a3d');alertMsg('해상 불시착')}return true}
 function ditchUpdate(u,g,dt){g.t+=dt;u.speed=Math.max(0,u.speed-(26+u.speed*1.1)*dt);   // water stops a jet within a few hundred metres
   const fx=Math.sin(g.yaw),fz=Math.cos(g.yaw);u.pos.x+=fx*u.speed*dt;u.pos.z+=fz*u.speed*dt;g.yaw+=g.spin*dt*Math.min(u.speed/50,1);
   const fl=3.5+(1-g.hard)*3;   // seconds afloat
@@ -3348,7 +3348,7 @@ function ditchUpdate(u,g,dt){g.t+=dt;u.speed=Math.max(0,u.speed-(26+u.speed*1.1)
   if(u.speed>4){st.shake=Math.max(st.shake,.35*Math.min(u.speed/80,1));for(let i=0;i<3;i++){const p=_v3.set(rnd(-1,1)*u.M.span*.3,0,rnd(-.6,.6)*u.M.len*.5).applyQuaternion(u.q).add(u.pos);p.y=.4;
       smoke.emit(p,_v2.set(rnd(-5,5),rnd(3,10)*Math.min(u.speed/60,1),rnd(-5,5)).addScaledVector(u.vel,.25),rnd(1,2.2),rnd(5,10),rnd(1,2),.94,.96,.98,.6,1,0)}}
   else if(g.sink<12&&Math.random()<dt*14){const p=_v3.set(rnd(-1,1)*u.M.span*.25,0,rnd(-.5,.5)*u.M.len*.5).applyQuaternion(u.q).add(u.pos);p.y=.25;smoke.emit(p,_v2.set(rnd(-.6,.6),rnd(.3,1.2),rnd(-.6,.6)),rnd(.6,1.4),rnd(2.5,5),rnd(1.5,3),.96,.97,.99,.5,1.2,0)}
-  if(u===player&&g.t>fl&&!g.said){g.said=true;feed('기체가 가라앉는다 · 지금 탈출 (E×3)','#ffb547')}
+  if(u===player&&g.t>fl&&!g.said&&!(st.ko&&st.ko.t<st.ko.out)){g.said=true;feed('기체가 가라앉는다 · 지금 탈출 (E×3)','#ffb547')}
   if(g.sink>16){u.ground=null;u.hp=0;kill(u,null,true);u.dead=0;u.grp.visible=false;waterSplash(_v4.copy(u.pos).setY(.3),.5)}}
 // a wreck piece in the sea: it splashes, floats a little, then sinks slowly while tumbling
 function seaWreck(w,dt){const p=w.g.position;if(!w.sea){w.sea=1;w.ft=rnd(2,7);waterSplash(p,.7);w.v.multiplyScalar(.25);w.v.y=0;w.av.multiplyScalar(.3)}
@@ -5122,7 +5122,7 @@ async function startTutorial(){if(NET.code)NET.leave();NET.on=false;
   st.tut={step:0,t:0,turned:0,lastYaw:st.aimYaw,views:0,drone:null,M:Ms.su27};peterStart(player);
   enterFlight();
 }
-function resetPlayerState(){radReset();RAD.off=false;st.kills=0;st.killCam=null;st.noGunMsg=false;TGP.on=false;TGP.lock=null;FACE.ev=null;FACE.showT=0;st.nuke=null;nukeBomb.visible=false;st.burst=0;st.egg=false;for(const b of BASES)b.occupant=null;Object.assign(st,{gEff:1,gNeg:0,gloc:0,tanker:null,tankerCd:0,refuel:false,rwyMsgT:0,view:'tp',lockT:0,lockTarget:null,locked:false,feed:[],hitT:0,dmgT:0,shake:0,fireHeld:false,flareCd:0,mslCd:0,warn:false,rwr:0,slot:0});camera.near=.5;camera.fov=68;camera.updateProjectionMatrix()}
+function resetPlayerState(){radReset();RAD.off=false;st.kills=0;st.killCam=null;st.noGunMsg=false;TGP.on=false;TGP.lock=null;FACE.ev=null;FACE.showT=0;st.nuke=null;nukeBomb.visible=false;st.burst=0;st.egg=false;for(const b of BASES)b.occupant=null;Object.assign(st,{ko:null,gEff:1,gNeg:0,gloc:0,tanker:null,tankerCd:0,refuel:false,rwyMsgT:0,view:'tp',lockT:0,lockTarget:null,locked:false,feed:[],hitT:0,dmgT:0,shake:0,fireHeld:false,flareCd:0,mslCd:0,warn:false,rwr:0,slot:0});camera.near=.5;camera.fov=68;camera.updateProjectionMatrix()}
 
 /* ================= boarding: start on foot, walk to the jet, climb the ladder, canopy down, ladder up ================= */
 const BOARD={k:{}};
@@ -5551,7 +5551,8 @@ function ejMorphSet(m,s,h){const o=[0,0,0];for(const it of m.items){const b=it.b
   for(let i=0;i<n;i++){pilotPoseAt(b[i*3],b[i*3+1],b[i*3+2],s,h,o);const x=o[0],y=o[1],z=o[2];a[i*3]=e[0]*x+e[4]*y+e[8]*z+e[12];a[i*3+1]=e[1]*x+e[5]*y+e[9]*z+e[13];a[i*3+2]=e[2]*x+e[6]*y+e[10]*z+e[14]}it.P.needsUpdate=true}}
 const EJ_EYE_HANG=new V3(0,.876,.16);   // eyes of the hanging pilot, in the chute group frame
 function ejHeads(g,hide){if(!g||g.userData._hh===hide)return;g.userData._hh=hide;g.traverse(o=>{if(o.isMesh&&o.userData.head)o.visible=!hide})}
-function eject(auto){const P=player;if(!P||st.ej||st.mode==='hangar'||st.over)return;if(PETER.sab&&!PETER.sab.out){feed('사출 손잡이가 안 당겨진다! 안전핀이 꽂혀 있어!','#ff4a3d');return}if(P.pilotDead){if(!auto)feed('조종사 사망 · 사출 불가','#ff4a3d');return}if(!P.alive&&!(P.dead>0))return;
+function eject(auto){const P=player;if(!P||st.ej||st.mode==='hangar'||st.over)return;if(st.ko&&st.ko.t<st.ko.out&&!auto)return;   // out cold: no hand on the handle
+if(PETER.sab&&!PETER.sab.out){feed('사출 손잡이가 안 당겨진다! 안전핀이 꽂혀 있어!','#ff4a3d');return}if(P.pilotDead){if(!auto)feed('조종사 사망 · 사출 불가','#ff4a3d');return}if(!P.alive&&!(P.dead>0))return;
   const up=P.up(new V3());
   const prop=!hasSeat(P.P);   // no ejection seat (prop planes, Me 262, Me 163, MiG-9): the pilot throws the canopy off, climbs out and jumps over the side
   const inv=!prop&&up.y<-.25;   // upside down: the seat fires toward the ground
@@ -7135,7 +7136,7 @@ async function deleteShared(id){const D=await dbGet();if(!D)return;try{await D.d
 let lastFilter='';
 function gFilter(){const ge=st.mode==='hangar'?1:st.gEff;const gray=clamp((ge-7)/2,0,.85),dark=st.gloc>0?.95:clamp((ge-9)/3.5,0,.75);
   let f=gray>.01||dark>.01?`grayscale(${gray.toFixed(2)}) brightness(${(1-dark).toFixed(2)})`:'';
-if(st.nuke&&st.nuke.phase==='boom'&&st.nuke.t<5){const k=Math.max(0,1-st.nuke.t/5);f=`brightness(${(1+k*3).toFixed(2)}) contrast(${(1+k*.6).toFixed(2)}) saturate(${(1-k*.7).toFixed(2)})`}if(f!==lastFilter){glc.style.filter=f;lastFilter=f}}
+if(st.nuke&&st.nuke.phase==='boom'&&st.nuke.t<5){const k=Math.max(0,1-st.nuke.t/5);f=`brightness(${(1+k*3).toFixed(2)}) contrast(${(1+k*.6).toFixed(2)}) saturate(${(1-k*.7).toFixed(2)})`}if(st.ko&&!st.ej){const kf=koFilter();if(kf)f=kf}else koOv(0,0);if(f!==lastFilter){glc.style.filter=f;lastFilter=f}}
 /* ================= helicopter mode: UH-1C "Huey" gunship over Vietnam ================= */
 // switching worlds rebuilds the terrain, its macro maps, the trees and the towns from the other height function
 function setWorld(w){if(w===WORLD)return;cityClearAll();WORLD=w;VNU.value=w==='vn'?1:0;GFU.value=w==='gulf'?1:0;SEU.on.value=w==='seoul'?1:0;if(w==='seoul')seoulTex();CITY.rng=isMobile()?12500:21000;CITY.rngS=w==='seoul'?(isMobile()?5500:14000):(isMobile()?6500:11000);buildFar();NEAR.gen++;NEAR.busy=false;NEAR.c.set(1e9,0,1e9);NEAR.mesh.visible=false;nearU.value.set(1e9,1e9,0);
@@ -7666,7 +7667,7 @@ function frame(now){
   else if(st.mode==='build')buildUpdate(dt);
   else if(player){if(!st.paused||NET.on)update(dt);updateCamera(dt);gFilter();player.grp.visible=player.alive||player.dead>0}
   if(st.cine&&!st.paused)cineUpdate(dt);terrainLOD(camera.position);if(st.mode!=='hangar'&&st.mode!=='heli')cityUpdate(dt);if(WORLD==='seoul'&&player&&(st.locT=(st.locT||0)-dt)<0){st.locT=.5;st.seoulLoc=seoulNear(player.pos.x,player.pos.z)}updCarrier(dt);waterMat.userData.t.value+=dt;if(waterMesh)waterMesh.position.set(Math.round(camera.position.x/8)*8,-.5,Math.round(camera.position.z/8)*8);if(cirrus)cirrus.position.set(camera.position.x,9500,camera.position.z);if(overcast.visible)overcast.position.set(camera.position.x,2000,camera.position.z);updRain(dt,camera.position,player&&player.alive?player.vel:null);st.fdt=dt;
-  try{mirrorTick()}catch(e){console.warn('mirror',e)}try{scrubTick()}catch(e){console.warn('scrub',e)}try{ckLight()}catch(e){console.warn('cklight',e)}const gq=GQ;if(composer&&(gq==='high'||gq==='ultra')){updPostFx(dt);updHaze(dt);fshRender();composer.render()}else renderer.render(scene,camera);if(player&&!tgpActive(player))TGP.on=false;renderPod();renderFace();try{renderXray()}catch(e){XR.rect=null;console.warn('xray',e)}drawHUD();drawFaceFrame();try{drawXrayFrame()}catch(e){}try{mfdUpdate(dt)}catch(e){console.warn('mfd',e)}try{bettyTick(dt)}catch(e){}if(st.tour)try{drawTourHUD()}catch(e){}
+  try{mirrorTick()}catch(e){console.warn('mirror',e)}try{scrubTick()}catch(e){console.warn('scrub',e)}try{koTick(dt)}catch(e){console.warn('ko',e)}try{ckLight()}catch(e){console.warn('cklight',e)}const gq=GQ;if(composer&&(gq==='high'||gq==='ultra')){updPostFx(dt);updHaze(dt);fshRender();composer.render()}else renderer.render(scene,camera);if(player&&!tgpActive(player))TGP.on=false;renderPod();renderFace();try{renderXray()}catch(e){XR.rect=null;console.warn('xray',e)}drawHUD();drawFaceFrame();try{drawXrayFrame()}catch(e){}try{mfdUpdate(dt)}catch(e){console.warn('mfd',e)}try{bettyTick(dt)}catch(e){}if(st.tour)try{drawTourHUD()}catch(e){}
 }
 /* ================= JUICE · 손맛(멀티킬·연사 반동·진동) · 연출(속도선·저체력 경고·킬 마커) · 일일 미션/출석 · 대회 VS 카드·카운트다운·우승 축포 ================= */
 const J={streak:[],life:0,lastHp:null,killFlash:0,heartT:0,lines:[],flyT:0,cdK:0,champSeen:'',vsKey:''};
@@ -7828,6 +7829,16 @@ function ckLight(){const P=player;if(!P||!P.grp||st.view!=='ck'||P._ckl)return;c
   P.grp.traverse(o=>{if(!o.isMesh||o.userData.frame||o.userData.seatPilot||o.userData.canopy)return;const m=o.material;if(!m||Array.isArray(m)||m.transparent||!m.isMeshStandardMaterial||!m.map)return;
     bb.setFromObject(o,true);if(bb.isEmpty())return;bb.getCenter(c).applyMatrix4(inv);const s=bb.getSize(new V3()).length();if(c.distanceTo(eye)>1.6||s>4)return;
     const n=m.clone();n.emissiveMap=m.map;n.emissive=new THREE.Color(.2,.2,.2);o.material=n})}
+function koOv(a,sk){let o=document.getElementById('koOv');if(!o){if(!(a>0))return;o=document.createElement('div');o.id='koOv';o.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:30;background:#000;opacity:0';document.body.appendChild(o)}
+  o.style.background=sk>.04?`rgb(4,${Math.round(18+22*(1-sk))},${Math.round(16+14*(1-sk))})`:'#000';o.style.opacity=(a>0?a:0).toFixed(2)}
+function koTick(dt){const k=st.ko;if(!k){koOv(0,0);return}if(!player||st.mode==='hangar'){st.ko=null;return}k.t+=dt;
+  if(!k.woke&&k.t>=k.out){k.woke=true;const g=player.ground;if(player.alive&&g&&g.phase==='ditch'){g.said=true;feed('정신이 든다… 기체가 가라앉는다 · 지금 탈출 (E×3)','#ffb547')}}
+  if(k.t>k.out+12&&player.alive&&!(player.ground&&player.ground.phase==='ditch'))st.ko=null}
+function koFilter(){const k=st.ko;if(!k)return'';const g=player&&player.ground&&player.ground.phase==='ditch'?player.ground:null;
+  const out=k.t<k.out,dz=out?1:clamp(1-(k.t-k.out)/5,0,1),fl=k.t<.18?1-k.t/.18:0;
+  const black=out?Math.min(1,k.t/.4)*.97:.97*clamp(1-(k.t-k.out)/2.2,0,1),sk=g?clamp((g.sink-.6)/11,0,1):(player&&!player.alive?1:0);   // the cockpit goes under: murky green, then dark
+  const br=Math.max(.02,(1-black)*(1-.88*sk))*(1+fl*2.5);koOv(Math.max(black,sk*.86),sk);   // the HUD goes dark with him
+  return`blur(${(dz*5+sk*2.5).toFixed(1)}px) grayscale(${(dz*.55).toFixed(2)}) sepia(${(sk*.7).toFixed(2)}) hue-rotate(${(sk*140).toFixed(0)}deg) saturate(${(1+sk*.8).toFixed(2)}) brightness(${br.toFixed(2)})`}
 /* ================= DESERT SCRUB: low shrubs and stones over the Gulf plains around the camera ================= */
 const SCRUB={im:null,M:96,CELL:6,ox:1e9,oz:1e9,cx:null,cz:null,pending:false};
 function scrubTick(){if(WORLD!=='gulf'||st.mode==='hangar'){if(SCRUB.im)SCRUB.im.visible=false;return}
