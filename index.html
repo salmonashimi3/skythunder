@@ -2983,7 +2983,7 @@ const CK_OF={
   mig9:'sov',mig15:'sov',mig19:'sov',mig21:'sov',mig23:'sov',mig25:'sov',mig31:'sov',su24:'sov',yak141:'sov',t4:'sov',j8f:'sov',
   su57:'rus',su57f:'rus',su47:'rus',su37:'rus',mig41:'rus',su33:'rus',mig29:'rus',mig144:'rus',
   f22:'glass',f47:'glass',j20:'glass',j31:'glass',f35:'glass',jf17:'glass',
-  p108:'bomber',vulcan:'bomber',tu95:'bomber',b52:'bomber',ac130:'bomber',b1:'bomber',b2:'bomber',b29:'b29'};Object.assign(CK_OF,{"f105": "jet", "f84": "jet", "f11f": "jet", "mig27": "sov", "su7": "sov", "su17": "sov", "yak28": "sov", "jaguar": "jet", "seaharr": "jet", "harrgr3": "jet", "vixen": "jet", "tornf3": "jet", "mirage5": "jet", "mf1": "jet", "vautour": "jet", "alphajet": "jet", "j11": "rus", "f15j": "jet", "gripen": "glass", "mig29": "rus", "mig21": "sov", "mig23": "sov", "mig19": "sov", "su24": "sov", "camel": "ww2", "dr1": "ww2", "hurricane": "ww2", "bf109": "ww2", "hs129": "ww2", "a6m": "ww2", "yak3": "ww2", "il2": "ww2", "p51": "ww2", "spitfire": "ww2", "f4u": "ww2", "me163": "ww2", "me262": "ww2", "ho229": "ww2", "b17": "bomber", "tu22": "bomber", "mig17": "sov", "su15": "sov", "su25": "sov", "su27s": "rus", "su30sm": "rus", "su35s": "rus", "su27": "rus", "su34": "rus", "mig35": "rus", "su35": "rus", "j35": "jet", "f8": "jet", "f86": "jet", "f100": "jet", "a6": "jet", "a4": "jet", "a5": "jet", "f104": "jet", "f5": "jet", "f111": "jet", "f106": "jet", "cf105": "jet", "a10": "jet", "av8b": "jet", "f4": "jet", "f4e": "jet", "f117": "jet", "kfir": "jet", "tornado": "jet", "mirage": "jet", "f15": "jet", "fa18c": "glass", "f18": "glass", "f15e": "glass", "fa18e": "glass", "f2": "glass", "j10": "glass", "typhoon": "glass", "rafale": "glass", "f35b": "glass", "yf23": "glass"});
+  p108:'bomber',vulcan:'bomber',tu95:'bomber',b52:'bomber',ac130:'bomber',b1:'bomber',b2:'bomber',b29:'b29'};for(const k of Object.keys(CK_OF))delete CK_OF[k];
 const CK_HIDE={b29:'^(FUZ_B29|NOS_B29|BASH1|PUSH1_|Sphere02|SH1|Object01)-',mig31:'^Cockpit$',a4:'^(cb3cf00b|f8e8c339|288a81db|42882897|521aa88e|b6968d91)',j31:'^(screen|Glowing_green|Darkness)$',f35:'^(screen|PaletteMaterial002)$',mig144:'^mat_(1|3)-'};   // airframe materials to hide in first person (own cockpit tub, glare-painted canopy)
 const CK_SCAN=Object.fromEntries(Object.entries(CK_OF).map(([id,k])=>[id,{f:CK_FILES[k],s:1,eye:[0,0,0],kind:k,hide:CK_HIDE[id]}]));
 const ckScanCache={};
@@ -3144,7 +3144,7 @@ class Aircraft{
     if(o.player&&isTom(M.id)){const f=new THREE.PointLight('#dfe8ff',1.4,4,2);f.position.set(0,1.75,6.9);this.grp.add(f)}
     if(o.player)this.fpHide=fpHideList(this);
     seatPilots(this,!!o.player);
-    if(o.player&&this.P.pitFile)loadPitScan(this);if(o.player&&CK_SCAN[this.P.id])loadCkScan(this);
+    if(o.player&&CK_SCAN[this.P.id])loadCkScan(this);
     if(this.P.glass&&(o.player||!this.P.glassHide)){const re=new RegExp(this.P.glass),gr=this.P.glassR,ey=M.pts.eye,_gb=new THREE.Box3(),_gc=new V3();this.grp.updateMatrixWorld(true);this.grp.traverse(x=>{if(x.isMesh&&re.test(x.material?.name||'')&&(!gr||_gb.setFromObject(x).getCenter(_gc).distanceTo(ey)<gr)){if(this.P.glassHide){(this.fpHide=this.fpHide||[]).push(x);return}x.material=x.material.clone();x.material.transparent=true;x.material.opacity=this.P.glassO??.28;x.material.depthWrite=false;x.castShadow=false}})}   // see-through canopy glass from inside
     if(o.player)try{canopyGlass(this.grp,M,this.P)}catch(e){console.warn('canopy',e)}
     this.st=o.stats||statsFor(this.P,this.id,false);
