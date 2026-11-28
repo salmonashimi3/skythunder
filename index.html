@@ -814,6 +814,10 @@ import {PLANES,MSL,PAINTS,prepModel,SURF,BRAKE,BOMBS,TIER_NAMES} from './planes.
   {n:'하부 사수 (12.7mm)',p:[0,'bot',-.1],arc:'bot',rate:10,dmg:4,spd:765},
   {n:'좌측 허리 사수 (12.7mm)',p:[1,'mid',-.38],arc:'left',rate:10,dmg:4,spd:765},
   {n:'우측 허리 사수 (12.7mm)',p:[-1,'mid',-.38],arc:'right',rate:10,dmg:4,spd:765}]}
+const EYEFIX={"su7": [0, 0.04, -0.42], "tu95": [0, 0.07, -0.26], "mig21": [0, 0.03, -0.36], "mig23": [0, 0.04, -0.4], "mig27": [0, 0.04, -0.38], "su17": [0, 0.03, -0.26], "seaharr": [0, 0.03, -0.36], "tornf3": [0, 0.23, -0.56], "yak141": [0, 0.03, -0.3], "mig29": [0, 0.07, -0.48], "j11": [0, 0.1, -0.56], "gripen": [0, 0.03, -0.15], "su37": [0, 0.03, -0.82], "mf1": [0, 0.1, -0.15], "su35": [0, 0.15, 0.15], "su35s": [0, 0.15, 0.15], "su57": [0, 0.1, 0.04], "su57f": [0, 0.1, 0.04], "mig144": [0, -0.2, -0.3], "j31": [0, 0, -0.32], "f35": [0, 0, -0.26], "su24": [0, 0, -0.8], "vixen": [0.3, 0, -0.35], "f86": [0, -0.1, 0.45], "mig15": [0, -0.1, 0.3], "f100": [0, -0.1, 0.4], "f105": [0, 0.05, -0.85], "mig25": [0, 0, -0.3], "f20": [0, -0.2, -0.4], "jf17": [0, 0, -0.8], "f22": [0, -0.25, 0.4], "mig9": [0, 0, -0.4], "su33": [0, -0.05, 0.45], "f18": [0, 0, 0.35]};
+{const j=PLANES.find(q=>q.id==='j20');if(j&&!j.glass){j.glass='^Body_black$';j.glassR=2.6;j.glassHide=true}   // J-20: the black canopy tint hides the cockpit (as on the J-15)
+ const b=PLANES.find(q=>q.id==='b29');if(b&&!b.glass){b.glass='^NOS_B29';b.glassO=.22;b.glassR=7}   // B-29: see out of the glazed nose
+ for(const [id,re] of [['j31','^Glowing_green$'],['f22','^Glowing_green\\.001$']]){const p=PLANES.find(q=>q.id===id);if(p)p.glass=p.glass?'('+p.glass+')|'+re:re}}   // see-through HUD glass
 const V3=THREE.Vector3, Q=THREE.Quaternion;
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
 const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
@@ -989,7 +993,13 @@ function H0gulf(x,z){
   // 와디 알바틴: 서쪽 경계를 따라 북동쪽으로 뻗은 마른 계곡
   {const ax=-26500,az=30000,dx=15500,dz=-62000,L=Math.hypot(dx,dz);const d=Math.abs((wx-ax)*dz-(wz-az)*dx)/L;h-=34*Math.exp(-(d*d)/(1100*1100))+10*Math.exp(-(d*d)/(3400*3400))}
   // 모래언덕 (남서쪽): 북서–남동으로 늘어선 바르한
-  {const m=smooth(-5000,-11000,x)*smooth(-2000,5000,z)+smooth(-14000,-20000,x)*smooth(-2000,-9000,z)*smooth(-24000,-16000,z)*.7;if(m>.01){const u=wx*.8+wz*.6,v=-wx*.6+wz*.8;const r=Math.abs(Math.sin(u/310+fbm(u/2600,v/2600,2)*3));h+=m*(Math.pow(r,3)*13+fbm(u/900,v/900,2)*4)}}
+  {const m=clamp(smooth(-4500,-10500,x)*smooth(-2500,4500,z)+smooth(-14000,-20000,x)*smooth(-2000,-9000,z)*smooth(-24000,-16000,z)*.7,0,1),u=(wx+wz)*.7071,v=(wx-wz)*.7071;   // u: down the shamal (NW → SE), v: across it
+   if(m>.01){const w1=fbm(v/1900,u/2700,3)*1.3,w2=fbm(v/520+3.1,u/800-1.7,2)*.35;let d=0;
+     for(const [L,A,o] of [[310,1,0],[190,.45,.37],[540,.7,.71]]){let t=u/L+w1*(1+o*.6)+w2+o*3.7;t-=Math.floor(t);const c=.8;
+       const p=t<c?Math.pow(t/c,1.7):Math.pow(1-(t-c)/(1-c),.8);   // a long gentle back up to the crest, then the steep slip face
+       d+=A*p*(.3+.7*smooth(-.2,.32,fbm(v/1100+o*5,u/1500-o*2,2)))}   // crests come and go: barchans and broken ridges, not endless walls
+     h+=m*(d*19+fbm(u/600,v/600,2)*2.5)}
+   h+=smooth(14,40,h)*(1-m)*(Math.pow(Math.abs(Math.sin(u/190+fbm(v/1400,u/1900,2)*2.2)),2.5)*1.3+fbm(u/340,v/340,2)*.8)}   // a low sand sheet and gravel swells on the rest of the plateau
   // 바다·만·강
   const n=fbm(x/5200+4.4,z/5200-2.2,3),rd=gulfRiverD(x+n*120,z),s=gulfSeaI(x,z,n,rd);
   if(rd<2600&&s<0)h=lerp(h,5.5+fbm(x/900,z/900,2)*1.8,smooth(2600,900,rd));   // 강변 범람원: 대추야자 숲이 있는 낮은 평지
@@ -997,7 +1007,7 @@ function H0gulf(x,z){
     if(s>=0)h=rd<300&&z<-18000?-6-clamp((300-rd)/40,0,6):-1.5-26*smooth(0,3.5,s)}
   return h}
 // macro masks for the terrain shader: R = dunes, G = sabkha (salt flats), plus where palms grow
-function gulfDune(x,z){return clamp(smooth(-5000,-11000,x)*smooth(-2000,5000,z)+smooth(-14000,-20000,x)*smooth(-2000,-9000,z)*smooth(-24000,-16000,z)*.7,0,1)}
+function gulfDune(x,z){return clamp(smooth(-4500,-10500,x)*smooth(-2500,4500,z)+smooth(-14000,-20000,x)*smooth(-2000,-9000,z)*smooth(-24000,-16000,z)*.7,0,1)}
 function gulfSabkha(x,z,h){const s=gulfSea(x,z);if(s>=0)return 0;return smooth(-2.6,-.4,s)*smooth(10,4,h)*(.6+.4*smooth(-.2,.3,fbm(x/1800+5,z/1800-1,2)))}
 function gulfPalm(x,z,h){if(h<1.2||h>26)return 0;const rd=gulfRiverD(x,z);let p=smooth(2400,500,rd)*(z<-17000?1:0);
   for(const c of GULF_TOWNS){const d=Math.hypot(x-c[0],z-c[1]);if(d<c[2]*1.25)p=Math.max(p,.35*smooth(c[2]*1.25,c[2]*.4,d))}return p}
@@ -1061,7 +1071,7 @@ uniform sampler2D tG,tR,tD,tS,tSa,tN,tM,tH,tCW,tSE,tGP,tRH;uniform vec4 uVil[14]
 float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 vec3 tri(sampler2D t,vec3 p,vec3 n,float s){vec3 w=pow(abs(n),vec3(4.));w/=w.x+w.y+w.z;return texture2D(t,p.zy*s).rgb*w.x+texture2D(t,p.xz*s).rgb*w.y+texture2D(t,p.xy*s).rgb*w.z;}
 vec3 two(sampler2D t,vec2 p,float s){return mix(texture2D(t,p*s).rgb,texture2D(t,p*s*.237+.31).rgb,.5);}
-float gRock=0.,gFor=0.,gSnow=0.,gFarm=0.,gCrown=0.,gHedge=0.;
+float gRock=0.,gFor=0.,gSnow=0.,gFarm=0.,gCrown=0.,gHedge=0.,gDes=0.;
 vec3 bumpN(vec3 pos,vec3 nrm,float h){vec3 dpx=dFdx(pos),dpy=dFdy(pos);vec3 r1=cross(dpy,nrm),r2=cross(nrm,dpx);float det=dot(dpx,r1);vec2 dh=vec2(dFdx(h),dFdy(h));vec3 g=sign(det)*(dh.x*r1+dh.y*r2);return normalize(abs(det)*nrm-g);}`)
       .replace('#include <map_fragment>',`#include <map_fragment>
 { ${isNear?'':'if(abs(vW.x-uNear.x)<uNear.z&&abs(vW.z-uNear.y)<uNear.z)discard;'}
@@ -1104,6 +1114,10 @@ vec3 bumpN(vec3 pos,vec3 nrm,float h){vec3 dpx=dFdx(pos),dpy=dFdy(pos);vec3 r1=c
     vec3 salt=mix(vec3(.76,.74,.68),vec3(.9,.88,.82),fine)*mix(.9,1.06,mid);dc=mix(dc,salt,M.g*.9);
     float wR=smoothstep(.2,.42,slope+(mid-.5)*.1);c=mix(dc,rock*vec3(1.12,1.,.84),wR);
     c=mix(c,sd*vec3(1.06,.99,.88),smoothstep(5.,1.2,y)*smoothstep(.2,.05,slope)*(1.-M.g));
+    {vec2 Wd=vec2(.7071,.7071),Wp=vec2(-.7071,.7071);float stk=texture2D(tN,vec2(dot(vW.xz,Wd)/3400.,dot(vW.xz,Wp)/260.)).r*.55+texture2D(tN,vec2(dot(vW.xz,Wd)/5300.+.31,dot(vW.xz,Wp)/613.+.77)).g*.45;c*=mix(.955,1.045,stk);   // wind streaks along the shamal
+     vec2 nh=n.xz/max(length(n.xz),1e-3);float rl=clamp(dot(n,normalize(vec3(-.61,.5,-.61)))/.5,0.,1.3);c*=mix(1.,.5+.5*rl,M.r*.9+.3*(1.-M.r));   // relief light from a low north-west sun: sunlit windward backs, dark slip faces, as dunes look from the air
+     float pbl=texture2D(tN,vW.xz/1.7).g*texture2D(tN,vW.xz/.63+.21).r;c*=1.-.22*smoothstep(.3,.5,pbl)*(1.-M.r*.8)*(1.-smoothstep(40.,220.,dist));   // pebbles of the desert pavement
+     gDes=(1.-wR)*(1.-M.g*.85);}
     wRock=wR;wFor=0.;wFarm=0.;wSnow=0.;wSand=1.;}
   gRock=clamp(wRock,0.,1.);gFor=clamp(wFor,0.,1.);gSnow=wSnow;gFarm=wFarm;gCrown=crown;
   {float pf=1.-smoothstep(120.,2200.,dist);if(pf>0.){float gp=texture2D(tGP,vW.xz/6.5).r*.55+texture2D(tGP,vW.xz/23.+.37).r*.45;   // real grass blades and clumps up close
@@ -1131,6 +1145,7 @@ vec3 bumpN(vec3 pos,vec3 nrm,float h){vec3 dpx=dFdx(pos),dpy=dFdy(pos);vec3 r1=c
   vec3 nw=normalize(vNw);vec3 tw=pow(abs(nw),vec3(4.));tw/=tw.x+tw.y+tw.z;float rh=texture2D(tRH,vW.zy/14.).r*tw.x+texture2D(tRH,vW.xz/14.).r*tw.y+texture2D(tRH,vW.xy/14.).r*tw.z;
   float rk=(rh-.5)*4.5+(texture2D(tN,p/31.+vW.y/57.).r-.5)*2.+(texture2D(tN,vec2(p.x+p.y,vW.y*2.6)/19.).g-.5)*2.2+(texture2D(tN,p/6.).r-.5)*.6;   // boulders and strata
   float h=mix(mix(gr,cn,gFor),rk,gRock)*(1.-gSnow*.7)+gFarm*sin(p.x*.9+p.y*.4)*.06*smoothstep(400.,80.,dB)+gFarm*gHedge*(1.6+(texture2D(tN,p/5.).r-.5)*1.2);
+  h+=gDes*(.035*sin(dot(p,vec2(.7071,.7071))*7.4+(texture2D(tN,p/7.).r-.5)*7.)*smoothstep(280.,25.,dB)+(texture2D(tN,p/47.).r-.5)*.5);   // sand ripples across the wind, and soft hummocks
   normal=normalize(mix(normal,bumpN(-vViewPosition,normal,h),fb));}}`)
       .replace('#include <fog_fragment>','gl_FragColor.rgb*=mix(.4,1.,rtSh);\n#include <fog_fragment>')};
   m.customProgramCacheKey=()=>'terrain'+(isNear?1:0);terrainMats.push(m);return m}
@@ -2907,7 +2922,7 @@ function getModel(id,onp){
   cache[id]=(async()=>{const P=ALLP.find(p=>p.id===id);{const NZ2={"a5":[[[1.003,-1.113,-0.7631],[-1.004,-1.112,-0.7631]],0.506],"b1":[[[4.5,-3.398,-0.5096],[2.878,-3.394,-0.5085],[-2.878,-3.394,-0.5086],[-4.5,-3.398,-0.5096]],0.506],"cf105":[[[0.74,-0.455,-0.8736],[-0.74,-0.455,-0.8736]],0.462],"f14":[[[1.434,-0.597,-0.9316],[-1.412,-0.597,-0.9321]],0.444],"f14x":[[[1.434,-0.597,-0.9316],[-1.412,-0.597,-0.9321]],0.444],"f16":[[[-0.003,-0.823,-0.941]],0.403],"f16d":[[[0.016,-0.155,-0.9174]],0.456],"f18":[[[0.495,-0.958,-0.9072],[-0.495,-0.958,-0.9072]],0.229],"f20":[[[-0.109,-0.975,-0.9982]],0.277],"f35":[[[0,-0.297,-0.7882]],0.331],"f35b":[[[0,-0.079,-0.7858]],0.411],"f4":[[[0.645,-0.534,-0.5877],[-0.645,-0.534,-0.5877]],0.406],"kf21":[[[0.582,-0.404,-0.8254],[-0.583,-0.405,-0.8244]],0.304],"mig15":[[[0.013,-0.476,-0.5818]],0.289],"mig25":[[[0.675,-0.624,-0.8286],[-0.671,-0.624,-0.8308]],0.587],"mig31":[[[0.716,-0.587,-0.9716],[-0.716,-0.587,-0.9716]],0.606],"sr71":[[[4.371,-0.366,-0.8091],[-4.376,-0.364,-0.8069]],0.672],"su15":[[[0.543,-0.821,-0.8493],[-0.543,-0.821,-0.8493]],0.447],"su30":[[[1.132,-0.919,-0.8532],[-1.132,-0.919,-0.8533]],0.452],"su33":[[[1.279,-1.638,-0.8882],[-1.279,-1.638,-0.8882]],0.538],"su35":[[[1.216,-1.387,-0.8287],[-1.208,-1.387,-0.8287]],0.427],"su35s":[[[1.216,-1.387,-0.8287],[-1.208,-1.387,-0.8287]],0.427],"su47":[[[0.68,-0.329,-0.9384],[-0.68,-0.329,-0.9384]],0.369],"su57":[[[1.37,-0.657,-0.8255],[-1.37,-0.657,-0.8255]],0.365],"su57f":[[[1.37,-0.657,-0.8255],[-1.37,-0.657,-0.8255]],0.365],"t4":[[[0.701,-3.219,-0.7213],[-0.693,-3.22,-0.7213],[2.075,-3.219,-0.7213],[-2.088,-3.219,-0.7213]],0.601],"tu22":[[[0.871,-2.406,-0.8651],[-0.868,-2.407,-0.8673]],0.749],"x29":[[[-0.009,-0.798,-1.0]],0.321]};const z=P&&NZ2[id];if(z){P.noz=z[0];P.nozR=z[1]}}
     const buf=await fetchBin(isTom(id)?['models/f14.part0','models/f14.part1','models/f14.part2']:[P.file],onp);
     const gltf=await loader.parseAsync(buf,'');bakeSkins(gltf.scene);fixMaterials(gltf.scene);
-    const M=prepModel(THREE,gltf.scene,P);
+    const M=prepModel(THREE,gltf.scene,P);{const f=EYEFIX[id];if(f&&M.eye){M.eye.x+=f[0];M.eye.y+=f[1];M.eye.z+=f[2]}}
     M.root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});if(P.wing)splitSwing(M.root,P.wing);const propHub=P.prop&&!P.prop.multi?splitProp(M.root,P.prop.z,P.prop.hub):null;
     let props=null;if(id==='c400'){M.root.updateMatrixWorld(true);const rm=[];M.root.traverse(o=>{if(/^Gear(Nose|LeftAssembly|RightAssembly)$/.test(o.name))rm.push(o)});rm.forEach(o=>o.parent.remove(o));   // gear stays up in flight
       const hubs=[];M.root.traverse(o=>{if(/^Propeller\d$/.test(o.name)){const b=new THREE.Box3().setFromObject(o,true);if(!b.isEmpty())hubs.push({o,c:M.root.worldToLocal(b.getCenter(new V3()))})}});
@@ -7651,7 +7666,7 @@ function frame(now){
   else if(st.mode==='build')buildUpdate(dt);
   else if(player){if(!st.paused||NET.on)update(dt);updateCamera(dt);gFilter();player.grp.visible=player.alive||player.dead>0}
   if(st.cine&&!st.paused)cineUpdate(dt);terrainLOD(camera.position);if(st.mode!=='hangar'&&st.mode!=='heli')cityUpdate(dt);if(WORLD==='seoul'&&player&&(st.locT=(st.locT||0)-dt)<0){st.locT=.5;st.seoulLoc=seoulNear(player.pos.x,player.pos.z)}updCarrier(dt);waterMat.userData.t.value+=dt;if(waterMesh)waterMesh.position.set(Math.round(camera.position.x/8)*8,-.5,Math.round(camera.position.z/8)*8);if(cirrus)cirrus.position.set(camera.position.x,9500,camera.position.z);if(overcast.visible)overcast.position.set(camera.position.x,2000,camera.position.z);updRain(dt,camera.position,player&&player.alive?player.vel:null);st.fdt=dt;
-  try{mirrorTick()}catch(e){console.warn('mirror',e)}const gq=GQ;if(composer&&(gq==='high'||gq==='ultra')){updPostFx(dt);updHaze(dt);fshRender();composer.render()}else renderer.render(scene,camera);if(player&&!tgpActive(player))TGP.on=false;renderPod();renderFace();try{renderXray()}catch(e){XR.rect=null;console.warn('xray',e)}drawHUD();drawFaceFrame();try{drawXrayFrame()}catch(e){}try{mfdUpdate(dt)}catch(e){console.warn('mfd',e)}try{bettyTick(dt)}catch(e){}if(st.tour)try{drawTourHUD()}catch(e){}
+  try{mirrorTick()}catch(e){console.warn('mirror',e)}try{scrubTick()}catch(e){console.warn('scrub',e)}try{ckLight()}catch(e){console.warn('cklight',e)}const gq=GQ;if(composer&&(gq==='high'||gq==='ultra')){updPostFx(dt);updHaze(dt);fshRender();composer.render()}else renderer.render(scene,camera);if(player&&!tgpActive(player))TGP.on=false;renderPod();renderFace();try{renderXray()}catch(e){XR.rect=null;console.warn('xray',e)}drawHUD();drawFaceFrame();try{drawXrayFrame()}catch(e){}try{mfdUpdate(dt)}catch(e){console.warn('mfd',e)}try{bettyTick(dt)}catch(e){}if(st.tour)try{drawTourHUD()}catch(e){}
 }
 /* ================= JUICE · 손맛(멀티킬·연사 반동·진동) · 연출(속도선·저체력 경고·킬 마커) · 일일 미션/출석 · 대회 VS 카드·카운트다운·우승 축포 ================= */
 const J={streak:[],life:0,lastHp:null,killFlash:0,heartT:0,lines:[],flyT:0,cdK:0,champSeen:'',vsKey:''};
@@ -7764,37 +7779,39 @@ function jConfetti(me){let cv=document.getElementById('confCv');if(!cv){cv=docum
 
 /* ================= MIRRORS: in first person, the mirrors that are part of the plane's own cockpit model show a live view behind the plane
    (no mirror is ever added to a cockpit that has none). A mirror near the top centre is turned a little toward the pilot's helmet. ================= */
-const MIR={i:0,f:0,u:null,_a:new V3(),_b:new V3(),RE:/mirror|zerkal|spiegel|miroir|espejo|rear.?view/i};
-function mirClusters(pos,idx){const nt=idx.length/3,map=new Map(),par=[];const f=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x]}return x};
-  const vid=i=>{const k=Math.round(pos.getX(i)*400)+','+Math.round(pos.getY(i)*400)+','+Math.round(pos.getZ(i)*400);let v=map.get(k);if(v===undefined){v=par.length;par.push(v);map.set(k,v)}return v};
-  const tv=new Int32Array(nt);for(let t=0;t<nt;t++){const a=vid(idx[t*3]),b=vid(idx[t*3+1]),c=vid(idx[t*3+2]);tv[t]=a;par[f(a)]=f(b);par[f(b)]=f(c)}
-  const cl=new Map();for(let t=0;t<nt;t++){const r=f(tv[t]);if(!cl.has(r))cl.set(r,[]);cl.get(r).push(t)}return [...cl.values()].sort((a,b)=>b.length-a.length)}
-function mirBuild(u){const eye=u.M&&u.M.pts&&u.M.pts.eye;if(!eye||!u.grp)return null;
-  const found=[];u.grp.traverse(o=>{if(!o.isMesh||o.userData.frame||o.userData.seatPilot||Array.isArray(o.material))return;if(MIR.RE.test((o.material&&o.material.name||'')+' '+(o.name||'')))found.push(o)});
-  if(!found.length)return null;   // this cockpit has no mirror
-  const lo=isMobile()||GQ==='low',W=lo?200:320,H=lo?80:128;u.grp.updateMatrixWorld(true);const inv=u.grp.matrixWorld.clone().invert(),E=new V3().copy(eye),items=[],meshes=[];
-  for(const o of found){let geo=o.geometry.clone();const pos=geo.attributes.position,n=pos.count;if(!geo.index){const a=new Uint32Array(n);for(let k=0;k<n;k++)a[k]=k;geo.setIndex(new THREE.BufferAttribute(a,1))}
-    const idx=geo.index.array,rel=new THREE.Matrix4().multiplyMatrices(inv,o.matrixWorld),cls=mirClusters(pos,idx),uv=new Float32Array(n*2),out=[],mats=[];geo.clearGroups();
-    const P=k=>new V3().fromBufferAttribute(pos,k).applyMatrix4(rel);
-    cls.forEach((tris,ci)=>{const start=out.length;for(const t of tris)out.push(idx[t*3],idx[t*3+1],idx[t*3+2]);
-      let c=new V3(),nn=new V3(),area=0;if(ci<4)for(const t of tris){const a=P(idx[t*3]),b=P(idx[t*3+1]),d=P(idx[t*3+2]);const cr=new V3().subVectors(b,a).cross(new V3().subVectors(d,a)),ar=cr.length()/2;nn.add(cr);c.addScaledVector(a.add(b).add(d),ar/3);area+=ar}
-      if(ci>=4||area<2e-5){geo.addGroup(start,tris.length*3,mats.length);mats.push(o.material);return}   // left as it was
-      c.divideScalar(area);nn.normalize();
-      if(!(c.y>E.y-.02&&c.z>E.z+.1&&c.distanceTo(E)<1.3)){geo.addGroup(start,tris.length*3,mats.length);mats.push(o.material);return}   // only a mirror up on the canopy bow in front of the pilotif(nn.dot(E.clone().sub(c))<0)nn.negate();
-      let v=new V3(0,1,0).addScaledVector(nn,-nn.y);if(v.lengthSq()<1e-4)v.set(0,0,1).addScaledVector(nn,-nn.z);v.normalize();const uA=new V3().crossVectors(v,nn);
-      let s0=1e9,s1=-1e9,t0=1e9,t1=-1e9;const vs=new Set();for(const t of tris)for(let q=0;q<3;q++)vs.add(idx[t*3+q]);
-      for(const k of vs){const p=P(k).sub(c),s=p.dot(uA),tt=p.dot(v);s0=Math.min(s0,s);s1=Math.max(s1,s);t0=Math.min(t0,tt);t1=Math.max(t1,tt)}
-      const sw=Math.max(s1-s0,1e-4),th=Math.max(t1-t0,1e-4);for(const k of vs){const p=P(k).sub(c);uv[k*2]=1-(p.dot(uA)-s0)/sw;uv[k*2+1]=(p.dot(v)-t0)/th}   // a mirror flips left and right
-      const dist=c.distanceTo(E),d=c.clone().sub(E).normalize(),r=d.clone().addScaledVector(nn,-2*d.dot(nn)).normalize();
-      if(Math.abs(c.x-E.x)<.14&&c.y>E.y)r.lerp(new V3(E.x,E.y+.04,E.z-.06).sub(c).normalize(),.35).normalize();   // the top mirror also shows your helmet
-      const rt=new THREE.WebGLRenderTarget(W,H,{type:THREE.HalfFloatType});rt.texture.generateMipmaps=false;rt.texture.minFilter=THREE.LinearFilter;
-      const cam=new THREE.PerspectiveCamera(Math.min(60,Math.max(20,2*Math.atan(th/2/dist)*57.3*1.5)),sw/th,.03,6000);
-      geo.addGroup(start,tris.length*3,mats.length);mats.push(new THREE.MeshBasicMaterial({map:rt.texture,color:0xdde3e6,fog:false}));
-      items.push({rt,cam,V:c,T:c.clone().addScaledVector(r,10),up:v})});
-    geo.setIndex(out);geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));
-    meshes.push({o,orig:[o.geometry,o.material],mine:[geo,mats]})}
-  if(!items.length)return null;return{items,meshes,on:false}}
-function mirSet(R,on){if(R.on===on)return;R.on=on;for(const m of R.meshes){const s=on?m.mine:m.orig;m.o.geometry=s[0];m.o.material=s[1]}}
+const MIR={i:0,f:0,u:null,_a:new V3()};const MIRP={"su27s":[[-0.327,0.012,0.44,0.275,0.331,-0.903,0.123,0.176],[0.327,0.011,0.432,-0.293,0.333,-0.896,0.123,0.176],[-0.007,0.191,0.514,-0.001,0.534,-0.845,0.235,0.024]],"su30sm":[[-0.016,0.086,0.686,-0.003,0.113,-0.994,0.104,0.044]],"spitfire":[[0,0.22,0.468,0,-0.341,-0.94,0.051,0.05]],"mf1":[[0.145,-0.011,0.184,-0.107,0.284,-0.953,0.086,0.056],[-0.145,-0.011,0.184,0.107,0.284,-0.953,0.086,0.056]],"f4u":[[0.003,0.191,0.542,0.001,-0.527,-0.85,0.156,0.031],[-0.259,0.092,0.541,0.432,-0.279,-0.858,0.077,0.157],[0.259,0.092,0.541,-0.433,-0.279,-0.857,0.078,0.157]],"tornado":[[-0.252,0.009,0.296,0.163,0.26,-0.952,0.125,0.132],[0.006,0.089,0.347,-0.001,0.008,-1,0.169,0.038],[0.254,0.008,0.295,-0.17,0.251,-0.953,0.132,0.127]],"tornf3":[[0.267,0.002,0.207,-0.175,0.247,-0.953,0.16,0.138],[-0.267,0.002,0.207,0.175,0.247,-0.953,0.16,0.138],[0.002,0.09,0.261,-0.002,-0.001,-1,0.194,0.04]],"jf17":[[-0.001,0.199,0.623,0,0,-1,0.107,0.026]],"mirage":[[-0.018,0.094,0.289,0.024,0.075,-0.997,0.177,0.033]],"mig29":[[0,0.113,0.439,0,0.151,-0.988,0.176,0.059],[-0.258,-0.008,0.413,0.207,0.123,-0.971,0.115,0.092]],"su27":[[-0.327,0.012,0.44,0.275,0.331,-0.903,0.123,0.176],[0.327,0.011,0.432,-0.293,0.333,-0.896,0.123,0.176],[-0.007,0.191,0.514,-0.001,0.534,-0.845,0.235,0.024]],"f15e":[[-0.002,0.12,0.455,-0.001,0.237,-0.971,0.16,0.02]],"j11":[[-0.007,0.104,0.468,-0.001,0.534,-0.845,0.244,0.021]],"gripen":[[0,0.108,0.21,0,-0.292,-0.957,0.187,0.025],[-0.278,-0.01,0.146,0.401,0.178,-0.899,0.109,0.126],[0.272,-0.003,0.15,-0.405,0.181,-0.896,0.098,0.115]]};
+function mirBuild(u){const eye=u.M&&u.M.pts&&u.M.pts.eye,PN=MIRP[u.P.id];if(!eye||!u.grp||!PN||!PN.length)return null;   // only cockpits that have mirror panes of their own
+  const lo=isMobile()||GQ==='low',W=lo?200:320,H=lo?80:128;u.grp.updateMatrixWorld(true);const inv=u.grp.matrixWorld.clone().invert(),E=new V3().copy(eye);
+  const panes=PN.map(p=>{const c=new V3(E.x+p[0],E.y+p[1],E.z+p[2]),n=new V3(p[3],p[4],p[5]).normalize();if(n.dot(E.clone().sub(c))<0)n.negate();
+    const v=new V3(0,1,0).addScaledVector(n,-n.y);if(v.lengthSq()<1e-4)v.set(0,0,1).addScaledVector(n,-n.z);v.normalize();return{c,n,v,u:new V3().crossVectors(v,n),w:p[6],h:p[7],P:[]}});
+  const A=new V3(),B=new V3(),C=new V3(),cen=new V3(),nr=new V3(),q=new V3(),e1=new V3(),meshes=[];
+  u.grp.traverse(o=>{if(!o.isMesh||o.userData.frame||o.userData.seatPilot||Array.isArray(o.material))return;const g=o.geometry,pos=g&&g.attributes.position;if(!pos)return;
+    const idx=g.index?g.index.array:null,nt=(idx?idx.length:pos.count)/3;if(nt>400000)return;const rel=new THREE.Matrix4().multiplyMatrices(inv,o.matrixWorld);
+    if(!g.boundingBox)g.computeBoundingBox();const bb=g.boundingBox.clone().applyMatrix4(rel);if(!panes.some(p=>bb.distanceToPoint(p.c)<.06))return;
+    const used=new Uint8Array(nt);let any=false;
+    for(let t=0;t<nt;t++){const i0=idx?idx[t*3]:t*3,i1=idx?idx[t*3+1]:t*3+1,i2=idx?idx[t*3+2]:t*3+2;A.fromBufferAttribute(pos,i0).applyMatrix4(rel);B.fromBufferAttribute(pos,i1).applyMatrix4(rel);C.fromBufferAttribute(pos,i2).applyMatrix4(rel);
+      cen.copy(A).add(B).add(C).divideScalar(3);
+      for(const p of panes){q.subVectors(cen,p.c);if(Math.abs(q.dot(p.n))>.025||Math.abs(q.dot(p.u))>p.w/2+.012||Math.abs(q.dot(p.v))>p.h/2+.012)continue;
+        nr.subVectors(B,A).cross(e1.subVectors(C,A));if(nr.lengthSq()<1e-14)continue;nr.normalize();if(Math.abs(nr.dot(p.n))<.6)continue;
+        p.P.push(A.x,A.y,A.z,B.x,B.y,B.z,C.x,C.y,C.z);used[t]=1;any=true;break}}
+    if(!any)return;
+    // the mesh without its mirror triangles (they are drawn by the mirror panes below, same surface, so nothing overlaps)
+    const keep=[];for(let t=0;t<nt;t++)if(!used[t])keep.push(idx?idx[t*3]:t*3,idx?idx[t*3+1]:t*3+1,idx?idx[t*3+2]:t*3+2);
+    const rg=g.clone();rg.setIndex(keep);meshes.push({o,orig:g,cut:rg})});
+  const items=[],glass=[];
+  for(const p of panes){if(!p.P.length)continue;const n=p.P.length/3,pa=new Float32Array(p.P),uv=new Float32Array(n*2),nm=new Float32Array(n*3);let s0=1e9,s1=-1e9,t0=1e9,t1=-1e9;
+    for(let k=0;k<n;k++){q.set(pa[k*3],pa[k*3+1],pa[k*3+2]).sub(p.c);const s=q.dot(p.u),t=q.dot(p.v);s0=Math.min(s0,s);s1=Math.max(s1,s);t0=Math.min(t0,t);t1=Math.max(t1,t)}
+    const sw=Math.max(s1-s0,1e-3),th=Math.max(t1-t0,1e-3);
+    for(let k=0;k<n;k++){q.set(pa[k*3],pa[k*3+1],pa[k*3+2]).sub(p.c);uv[k*2]=1-(q.dot(p.u)-s0)/sw;uv[k*2+1]=(q.dot(p.v)-t0)/th;nm[k*3]=p.n.x;nm[k*3+1]=p.n.y;nm[k*3+2]=p.n.z}   // a mirror flips left and right
+    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pa,3));geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));geo.setAttribute('normal',new THREE.BufferAttribute(nm,3));
+    const rt=new THREE.WebGLRenderTarget(W,H,{type:THREE.HalfFloatType});rt.texture.generateMipmaps=false;rt.texture.minFilter=THREE.LinearFilter;
+    const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({map:rt.texture,color:0xdde3e6,fog:false,side:THREE.DoubleSide}));m.userData.frame=true;m.raycast=()=>{};m.castShadow=m.receiveShadow=false;m.visible=false;u.grp.add(m);glass.push(m);
+    const dist=p.c.distanceTo(E),d=p.c.clone().sub(E).normalize(),r=d.clone().addScaledVector(p.n,-2*d.dot(p.n)).normalize();
+    if(Math.abs(p.c.x-E.x)<.15&&p.c.y>E.y)r.lerp(new V3(E.x,E.y+.04,E.z-.06).sub(p.c).normalize(),.35).normalize();   // the top mirror also shows your helmet
+    const cam=new THREE.PerspectiveCamera(Math.min(62,Math.max(22,2*Math.atan(th/2/dist)*57.3*1.6)),sw/th,.03,6000);
+    items.push({rt,cam,V:p.c.clone(),T:p.c.clone().addScaledVector(r,10),up:p.v.clone()})}
+  if(!items.length)return null;return{items,meshes,glass,on:false}}
+function mirSet(R,on){if(R.on===on)return;R.on=on;for(const m of R.meshes)m.o.geometry=on?m.cut:m.orig;for(const g of R.glass)g.visible=on}
 function mirrorTick(){const P=player;const on=!!(P&&P.alive&&P.grp&&P.P&&st.view==='ck'&&st.mode!=='hangar'&&!st.cine&&!st.killCam);
   if(MIR.u&&MIR.u!==P&&MIR.u._mir)mirSet(MIR.u._mir,false);
   if(!on){if(P&&P._mir)mirSet(P._mir,false);return}
@@ -7802,10 +7819,37 @@ function mirrorTick(){const P=player;const on=!!(P&&P.alive&&P.grp&&P.P&&st.view
   MIR.f++;if((isMobile()||GQ==='low')&&MIR.f%2)return;   // one mirror per frame (every other frame on low settings)
   const it=R.items[MIR.i++%R.items.length];P.grp.updateMatrixWorld(true);const mw=P.grp.matrixWorld;
   it.cam.position.copy(it.V).applyMatrix4(mw);it.cam.up.copy(it.up).transformDirection(mw);it.cam.lookAt(MIR._a.copy(it.T).applyMatrix4(mw));it.cam.updateMatrixWorld();
-  for(const m of R.meshes)m.o.visible=false;const fh=P.fpHide||[];for(const o of fh)o.visible=true;   // the mirror sees the pilot's own head and helmet
+  for(const g of R.glass)g.visible=false;const fh=P.fpHide||[];for(const o of fh)o.visible=true;   // the mirror sees the pilot's own head and helmet
   const au=renderer.shadowMap.autoUpdate,prt=renderer.getRenderTarget();renderer.shadowMap.autoUpdate=false;
   try{renderer.setRenderTarget(it.rt);renderer.clear();renderer.render(scene,it.cam)}
-  finally{renderer.setRenderTarget(prt);renderer.shadowMap.autoUpdate=au;for(const o of fh)o.visible=!P._fpH;for(const m of R.meshes)m.o.visible=true}}
+  finally{renderer.setRenderTarget(prt);renderer.shadowMap.autoUpdate=au;for(const o of fh)o.visible=!P._fpH;for(const g of R.glass)g.visible=true}}
+function ckLight(){const P=player;if(!P||!P.grp||st.view!=='ck'||P._ckl)return;const eye=P.M&&P.M.pts&&P.M.pts.eye;if(!eye)return;P._ckl=true;
+  P.grp.updateMatrixWorld(true);const inv=P.grp.matrixWorld.clone().invert(),bb=new THREE.Box3(),c=new V3();
+  P.grp.traverse(o=>{if(!o.isMesh||o.userData.frame||o.userData.seatPilot||o.userData.canopy)return;const m=o.material;if(!m||Array.isArray(m)||m.transparent||!m.isMeshStandardMaterial||!m.map)return;
+    bb.setFromObject(o,true);if(bb.isEmpty())return;bb.getCenter(c).applyMatrix4(inv);const s=bb.getSize(new V3()).length();if(c.distanceTo(eye)>1.6||s>4)return;
+    const n=m.clone();n.emissiveMap=m.map;n.emissive=new THREE.Color(.2,.2,.2);o.material=n})}
+/* ================= DESERT SCRUB: low shrubs and stones over the Gulf plains around the camera ================= */
+const SCRUB={im:null,M:96,CELL:6,ox:1e9,oz:1e9,cx:null,cz:null,pending:false};
+function scrubTick(){if(WORLD!=='gulf'||st.mode==='hangar'){if(SCRUB.im)SCRUB.im.visible=false;return}
+  if(!SCRUB.im){const g=new THREE.IcosahedronGeometry(1,1);g.scale(1,.55,1);g.translate(0,.3,0);
+    const m=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.97,metalness:0,flatShading:true});const N=SCRUB.M*SCRUB.M;
+    const im=new THREE.InstancedMesh(g,m,N);im.frustumCulled=false;im.castShadow=false;im.receiveShadow=true;im.instanceMatrix.setUsage(THREE.DynamicDrawUsage).array.fill(0);
+    im.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(N*3),3).setUsage(THREE.DynamicDrawUsage);scene.add(im);SCRUB.im=im;SCRUB.cx=new Int32Array(N).fill(2147483647);SCRUB.cz=new Int32Array(N).fill(2147483647)}
+  const {im,M,CELL}=SCRUB;im.visible=camera.position.y-ground(camera.position.x,camera.position.z)<1100;if(!im.visible)return;
+  const cx=Math.floor(camera.position.x/CELL),cz=Math.floor(camera.position.z/CELL),ox=cx-(M>>1),oz=cz-(M>>1);
+  if(!SCRUB.pending&&ox===SCRUB.ox&&oz===SCRUB.oz)return;SCRUB.ox=ox;SCRUB.oz=oz;
+  const Mx=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new V3(),p=new V3(),c=new THREE.Color(),Y=new V3(0,1,0);
+  const hs=(a,b,s)=>{let h=Math.imul(a|0,374761393)^Math.imul(b|0,668265263)^Math.imul((s|0)+1,1274126177);h=Math.imul(h^(h>>>13),1103515245);h^=h>>>16;return (h>>>0)/4294967296};
+  let budget=1400,done=true,ch=0;
+  for(let ix=0;ix<M;ix++)for(let iz=0;iz<M;iz++){const gx=ox+ix,gz=oz+iz,s=(((gx%M)+M)%M)*M+(((gz%M)+M)%M);
+    if(SCRUB.cx[s]===gx&&SCRUB.cz[s]===gz)continue;if(budget<=0){done=false;continue}budget--;SCRUB.cx[s]=gx;SCRUB.cz[s]=gz;ch++;
+    const x=(gx+hs(gx,gz,1))*CELL,z=(gz+hs(gx,gz,2))*CELL,y=H(x,z);let on=false;
+    if(y>3.5&&cityD(x,z)<.04&&!nearBase(x,z,700)){const dn=gulfDune(x,z),sb=gulfSabkha(x,z,y);on=hs(gx,gz,3)<(.5-.42*dn)*(1-sb)*smooth(-.25,.3,fbm(x/900+3,z/900-8,2))}
+    const stone=hs(gx,gz,10)<.22;
+    if(on){const r=(stone?.18:.32)+hs(gx,gz,4)*(stone?.35:.8);p.set(x,y-(stone?.12:.06),z);q.setFromAxisAngle(Y,hs(gx,gz,5)*6.283);sc.set(r*(.8+hs(gx,gz,6)*.5),r*(stone?.5:.7+hs(gx,gz,7)*.6),r*(.8+hs(gx,gz,8)*.5))}else{p.set(0,-9999,0);sc.set(0,0,0)}
+    Mx.compose(p,q,sc);im.setMatrixAt(s,Mx);const k=hs(gx,gz,9);
+    if(stone)c.setRGB(.42+k*.12,.37+k*.1,.3+k*.08);else c.setRGB(.33+k*.2,.34+k*.13,.22+k*.06);im.setColorAt(s,c)}
+  SCRUB.pending=!done;if(ch){im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true}}
 /* ================= GUNNERS: crewed / remote turrets that pick their own targets; a hit near a gunner kills him and that gun goes quiet ================= */
 const GUNPTS=new Map(),_gq=new THREE.Quaternion(),_gv=new V3(),_gw=new V3(),_gd=new V3();
 function gunnerPts(M){if(GUNPTS.has(M.id))return GUNPTS.get(M.id);const G=M.P.gunners||[],h=M.len/2,ms=[];M.root.updateMatrixWorld(true);
